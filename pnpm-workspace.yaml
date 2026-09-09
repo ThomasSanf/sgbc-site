@@ -1,0 +1,6 @@
+# These starter transitive tools are unused by the static Next.js build.
+# Keep their optional install scripts disabled.
+allowBuilds:
+  esbuild: false
+  sharp: false
+  workerd: false
