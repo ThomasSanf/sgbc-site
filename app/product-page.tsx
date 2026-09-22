@@ -1,101 +1,107 @@
 'use client';
+
 import dynamic from 'next/dynamic';
-import { ArrowDown, ArrowUpRight, MoveUpRight, RotateCcw, ArrowRight } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, ArrowUp, Download, Plus, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import type { ConsoleView } from './console-scene';
-const ConsoleScene = dynamic(() => import('./console-scene'), { ssr: false });
 
-const views: { id: ConsoleView; label: string; number: string; title: string; description: string }[] = [
-  { id: 'hero', label: 'Overview', number: '01', title: 'A little nostalgia.\nA lot of character.', description: 'Softly rounded edges. A warm beige top. A quiet black base. And rich Bordeaux marble accents that make the familiar feel new again.' },
-  { id: 'top', label: 'From above', number: '02', title: 'The ritual\nstarts here.', description: 'An upright cartridge slot sits beside dedicated power and reset buttons. Bordeaux marble gives each detail its own depth and texture.' },
-  { id: 'rear', label: 'Connections', number: '03', title: 'Made for\nyour setup.', description: 'HDMI carries picture and stereo audio to your screen. USB-C supplies power. The original-style controller connection keeps a familiar feel in your hands.' },
-  { id: 'inside', label: 'Under the shell', number: '04', title: 'Every part\nhas a purpose.', description: 'Explore the actual Rev C board beneath the enclosure: an Efinix T85 FPGA, dedicated HDMI transmitter, cartridge carrier, and a separate controls board.' },
+const ConsoleScene = dynamic(() => import('./console-scene'), { ssr: false });
+const modelUrl = '/models/sgbc-revc-it6263.glb';
+const views: { id: ConsoleView; label: string; title: string; description: string }[] = [
+  { id: 'hero', label: 'Overview', title: 'A familiar shape.\nIts own character.', description: 'Warm gray up top. Black underneath. Bordeaux on the details you touch. A compact home for the cartridges you kept.' },
+  { id: 'top', label: 'Top', title: 'The ritual\nstarts here.', description: 'An upright cartridge slot, dedicated power and reset buttons, and a clean top surface. Simple things, given room to breathe.' },
+  { id: 'rear', label: 'Connections', title: 'Meet your\nbig screen.', description: 'Explore the HDMI and USB-C openings in the enclosure study. A familiar controller connection brings the setup together.' },
+  { id: 'inside', label: 'Cutaway', title: 'Take the\nroof off.', description: 'Look through the earlier enclosure assembly: cartridge carrier, controls, and motherboard placement. The latest IT6263 board is shown separately above.' },
+];
+const boardViews: { id: ConsoleView; label: string }[] = [
+  { id: 'hero', label: 'Perspective' }, { id: 'top', label: 'Top' }, { id: 'bottom', label: 'Bottom' },
 ];
 const specs = [
   ['FPGA', 'Efinix T85F324C3'],
-  ['Cartridge interface', 'Game Boy · Game Boy Color · Game Boy Advance'],
-  ['Video & audio', 'HDMI · ADV7513 transmitter'],
-  ['Controller', 'Original-style SNES connector'],
-  ['Storage', 'microSD card slot'],
-  ['Power', 'USB-C · 5 V input'],
-  ['Enclosure', '148 × 105.75 mm · 39.5 mm cartridge crest'],
+  ['Cartridge interface', 'Game Boy / Game Boy Color / Game Boy Advance'],
+  ['HDMI transmitter', 'ITE IT6263FN/BX'],
+  ['Memory', '40 MiB PSRAM'],
+  ['USB-C', '5 V power + FT232H JTAG programming'],
+  ['Controller / storage', 'SNES connector / microSD'],
+  ['Motherboard', '130 × 95 mm / 6 layers'],
+  ['Enclosure study', '148 × 105.75 mm / 39.5 mm cartridge crest'],
 ];
 
+function LazyScene({ view, resetKey, model = 'console' }: { view: ConsoleView; resetKey: number; model?: 'console' | 'pcb' }) {
+  const host = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) { setReady(true); observer.disconnect(); }
+    }, { rootMargin: '250px' });
+    if (host.current) observer.observe(host.current);
+    return () => observer.disconnect();
+  }, []);
+  return <div className="lazy-scene" ref={host}>{ready && <ConsoleScene view={view} resetKey={resetKey} model={model} dark />}</div>;
+}
+
 export default function ProductPage() {
-  const [resetKey, setResetKey] = useState(0);
+  const [heroReset, setHeroReset] = useState(0);
+  const [boardView, setBoardView] = useState<ConsoleView>('hero');
+  const [boardReset, setBoardReset] = useState(0);
   const [detailView, setDetailView] = useState<ConsoleView>('hero');
   const [detailReset, setDetailReset] = useState(0);
-  const [detailReady, setDetailReady] = useState(false);
-  const detailHost = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) { setDetailReady(true); observer.disconnect(); }
-    }, { rootMargin: '500px' });
-    if (detailHost.current) observer.observe(detailHost.current);
-    return () => observer.disconnect();
-  }, []);
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 800, easing: 'cubic-bezier(.2,.65,.2,1)', fill: 'both' });
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+
   return <>
     <a className="skip-link" href="#main">Skip to content</a>
     <header className="site-header">
-      <a className="wordmark" href="#" aria-label="SGBC home">sgbc<span>™</span></a>
-      <nav aria-label="Main navigation"><a href="#console">The console</a><a href="#design">A closer look</a><a href="#specs">Tech specs</a></nav>
-      <a className="nav-action" href="#console">Explore in 3D <ArrowUpRight size={16} /></a>
+      <a className="wordmark" href="#console" aria-label="SGBC home">sgbc<span>™</span></a>
+      <nav aria-label="Main navigation"><a href="#console">Console <sup>01</sup></a><a href="#board">Motherboard <sup>02</sup></a><a href="#design">Design <sup>03</sup></a><a href="#specs">Specs <sup>04</sup></a></nav>
+      <a href="#board" className="nav-status"><span className="status-dot"/> Rev C <ArrowUpRight size={15}/></a>
     </header>
     <main id="main">
       <section className="hero" id="console" aria-labelledby="hero-title">
-        <div className="hero-heading">
-          <div><p className="eyebrow"><span className="status-dot" /> INTRODUCING SGBC</p><h1 id="hero-title">Old soul.<br/><span>New possibilities.</span></h1></div>
-          <div className="hero-intro"><p>Your favorite cartridges.<br/>A whole new way to come home.</p><a className="text-link" href="#story">Meet the console <ArrowDown size={16} /></a></div>
-        </div>
+        <div className="hero-topline mono"><span>INDEPENDENT HARDWARE / FAMILIAR FEELING</span><span>FPGA CONSOLE — REV C</span></div>
         <div className="hero-stage">
-          <div className="stage-wordmark" aria-hidden="true">sgbc</div>
-          <ConsoleScene view="hero" resetKey={resetKey} />
-          <div className="stage-corner"><span className="tiny-cross">+</span><span>SGBC / REV C<br/>BORDEAUX & BEIGE</span></div>
-          <button className="reset-view" onClick={() => setResetKey(k => k + 1)} aria-label="Reset console rotation"><RotateCcw size={17}/></button>
+          <div className="stage-wordmark" aria-hidden="true">sgbc<span>™</span></div>
+          <ConsoleScene view="hero" resetKey={heroReset} dark />
+          <div className="stage-corner mono"><Plus size={18}/><span>THE CONSOLE<br/><span className="muted">ENCLOSURE STUDY / 001</span></span></div>
+          <button className="reset-view" onClick={() => setHeroReset(n => n + 1)} aria-label="Reset console rotation"><RotateCcw size={18}/></button>
+          <a className="hero-board-link mono" href="#board"><span className="status-dot"/> NEW PCB MODEL <ArrowDown size={16}/></a>
         </div>
-        <div className="hero-baseline"><div className="finish-label"><span className="finish-dot"/> Beige. Black. Bordeaux.</div><p>Drag to explore <MoveUpRight size={14}/></p><a href="#story">Rediscover the feeling <ArrowDown size={16}/></a></div>
+        <div className="hero-bottom"><h1 id="hero-title">Old soul.<br/><span>New hardware.</span></h1><div className="hero-intro"><p>Your cartridges. Your big screen.<br/>An FPGA console for the games<br className="desktop-only"/> that never left you.</p><a className="text-link" href="#board">Explore the hardware <ArrowDown size={18}/></a></div><span className="hero-number mono">(01—04)</span></div>
       </section>
-      <section id="story" className="story section-shell">
-        <div data-reveal><p className="eyebrow">THE GAMES STAY WITH YOU</p><h2>A new home<br/>for your classics.</h2><p className="story-copy">Some things never lose their magic. The click of a cartridge. A familiar controller. That first level you still know by heart. SGBC is designed to bring those moments to your big screen, with an FPGA at its heart.</p></div>
-        <div className="system-list" data-reveal><div><span className="system-era">THE ORIGINAL</span><span className="game-boy">Game Boy</span></div><div><span className="system-era">A LITTLE MORE COLOR</span><span className="game-boy">Game Boy <em>Color</em></span></div><div><span className="system-era">THE NEXT CHAPTER</span><span className="game-boy">Game Boy <em>Advance</em></span></div></div>
-        <p className="compatibility-note">Designed around original GB, GBC, and GBA cartridges.</p>
+      <section className="manifesto section-shell" aria-labelledby="story-title">
+        <div className="section-kicker mono"><span><span className="status-dot"/> BUILT AROUND THE RITUAL</span><Plus size={20}/></div>
+        <h2 id="story-title">Keep the cartridges.<br/>Change the <span>possibilities.</span></h2>
+        <div className="manifesto-bottom"><p>The click of a cartridge. A controller you know by heart. SGBC brings programmable hardware to a console designed around three generations of handheld classics.</p><div className="system-list" aria-label="Intended cartridge families"><span>GAME BOY</span><span>GAME BOY COLOR</span><span>GAME BOY ADVANCE</span></div></div>
       </section>
-      <section className="hardware section-shell" aria-labelledby="hardware-title">
-        <div className="hardware-top" data-reveal><p className="eyebrow">HARDWARE, AT HEART</p><span className="hardware-index">001 — THE ARCHITECTURE</span></div>
-        <div className="hardware-content"><div data-reveal><h2 id="hardware-title">The original spirit.<br/><span>Rebuilt in silicon.</span></h2><p>Great games are more than their pixels. They’re timing, sound, and the feeling of being in control. SGBC puts programmable hardware at the center of the experience.</p><a className="text-link" href="#specs">Discover what’s inside <ArrowDown size={16}/></a></div><div className="fpga-type" data-reveal><span>FIELD-PROGRAMMABLE GATE ARRAY</span><strong>FPGA<span>↗</span></strong><div className="signal-path"><span>Cartridge</span><ArrowRight size={18}/><span>Hardware core</span><ArrowRight size={18}/><span>HDMI</span></div></div></div>
-        <div className="hardware-facts" data-reveal><div><strong>T85</strong><span>Efinix FPGA at the core</span></div><div><strong>3<span> generations</span></strong><span>One shared cartridge interface</span></div><div><strong>HDMI</strong><span>Picture and stereo sound, together</span></div></div>
+      <section className="board-section section-shell" id="board" aria-labelledby="board-title">
+        <div className="section-kicker mono"><span>02 / UNDER THE SURFACE</span><span className="revision-tag">LATEST BOARD · IT6263</span></div>
+        <div className="section-heading"><h2 id="board-title">No shell.<br/><span>All substance.</span></h2><p>The current Rev C motherboard.<br/>Turn it over. Follow the connections.<br/>Get closer to the hardware.</p></div>
+        <Tabs value={boardView} onValueChange={value => { setBoardView(value as ConsoleView); setBoardReset(n => n + 1); }} className="board-tabs">
+          <div className="viewer-toolbar"><TabsList className="view-tabs" aria-label="Motherboard viewing angle">{boardViews.map(v => <TabsTrigger key={v.id} value={v.id}>{v.label}</TabsTrigger>)}</TabsList><a className="download-link mono" href={modelUrl} download="SGBC_RevC_IT6263.glb">GET GLB <Download size={16}/></a></div>
+          <div className="board-stage">
+            <span className="board-watermark" aria-hidden="true">REV C</span>
+            <LazyScene view={boardView} resetKey={boardReset} model="pcb"/>
+            <div className="viewer-top mono"><span>IT6263FN/BX</span><span>130 × 95 MM</span></div>
+            <div className="viewer-bottom mono"><span><span className="desktop-hint">DRAG TO ROTATE / ARROW KEYS</span><span className="touch-hint">TWO FINGERS TO ROTATE</span></span><button className="reset-view" onClick={() => setBoardReset(n => n + 1)} aria-label="Reset motherboard rotation"><RotateCcw size={18}/></button></div>
+          </div>
+          {boardViews.map(v => <TabsContent value={v.id} key={v.id} className="view-caption mono">{v.label} / native KiCad board export / 22.95 MB</TabsContent>)}
+        </Tabs>
+        <div className="board-facts"><div><span className="mono">01 / COMPUTE</span><strong>Efinix T85</strong><p>Programmable hardware at the center.</p></div><div><span className="mono">02 / VIDEO</span><strong>ITE IT6263</strong><p>The revised HDMI transmitter.</p></div><div><span className="mono">03 / CONNECT</span><strong>USB-C</strong><p>Power and onboard JTAG programming.</p></div></div>
+        <p className="model-note">Engineering review model. Some component bodies use nominal substitutes; this export does not confirm hardware operation or enclosure fit.</p>
       </section>
-      <section id="design" className="design-section section-shell">
-        <div className="section-heading" data-reveal><div><p className="eyebrow">THE FINER DETAILS</p><h2>Considered.<br/>From every angle.</h2></div><p>A familiar silhouette.<br/>An entirely different finish.</p></div>
+      <section className="design-section section-shell" id="design" aria-labelledby="design-title">
+        <div className="section-kicker mono"><span>03 / THE OBJECT</span><span>CLASSIC GRAY. BLACK. BORDEAUX.</span></div>
+        <div className="section-heading"><h2 id="design-title">Every angle.<br/><span>Every detail.</span></h2><p>A look at the enclosure study.<br/>From the outside, in.</p></div>
         <Tabs value={detailView} onValueChange={value => { setDetailView(value as ConsoleView); setDetailReset(n => n + 1); }} className="design-tabs">
           <TabsList className="view-tabs" aria-label="Console viewing angle">{views.map(v => <TabsTrigger key={v.id} value={v.id}>{v.label}</TabsTrigger>)}</TabsList>
-          <div className="design-grid"><div className="detail-stage" ref={detailHost}>
-            {detailReady && <ConsoleScene view={detailView} resetKey={detailReset}/>}
-            <span className="detail-watermark" aria-hidden="true">C.</span>
-            <div className="detail-stage-bottom"><span><span className="desktop-hint">Drag to rotate</span><span className="touch-hint">Rotate with two fingers</span></span><button className="detail-reset" onClick={() => setDetailReset(n => n + 1)} aria-label="Reset detail view"><RotateCcw size={17}/></button></div>
-          </div><div className="detail-copy">{views.map(v => <TabsContent value={v.id} key={v.id}><span className="detail-number">/ {v.number}</span><h3>{v.title}</h3><p>{v.description}</p></TabsContent>)}<div className="material-strip"><div><span className="material-swatch beige-swatch"/><span>Beige shell</span></div><div><span className="material-swatch black-swatch"/><span>Black base</span></div><div><span className="material-swatch marble-swatch"/><span>Bordeaux marble</span></div></div></div></div>
+          <div className="design-grid"><div className="detail-stage"><LazyScene view={detailView} resetKey={detailReset}/><div className="viewer-bottom mono"><span>ENCLOSURE / ASSEMBLY STUDY</span><button className="reset-view" onClick={() => setDetailReset(n => n + 1)} aria-label="Reset detail view"><RotateCcw size={18}/></button></div></div><div className="detail-copy">{views.map((v, i) => <TabsContent value={v.id} key={v.id}><span className="detail-number mono">[ 0{i + 1} ]</span><h3>{v.title}</h3><p>{v.description}</p></TabsContent>)}<div className="material-strip"><span><i className="shell-swatch"/>Gray</span><span><i className="black-swatch"/>Black</span><span><i className="bordeaux-swatch"/>Bordeaux</span></div></div></div>
         </Tabs>
       </section>
-      <section id="specs" className="section-shell specs">
-        <div className="specs-heading" data-reveal><p className="eyebrow">UNDER THE SURFACE</p><h2>Small console.<br/>Real hardware.</h2><p className="specs-intro">Purposeful on the outside.<br/>Thoughtful on the inside.</p><span className="revision-label"><span className="status-dot"/> REV C · IN DEVELOPMENT</span></div>
-        <div data-reveal><dl className="spec-table">{specs.map(([label, value]) => <div className="spec-row" key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><p className="prototype-note">Shown with a concept finish on the actual Rev C design. This is an engineering prototype; hardware integration, compatibility validation, and final specifications are still in development.</p></div>
+      <section className="specs section-shell" id="specs" aria-labelledby="specs-title">
+        <div className="specs-heading"><p className="mono section-label">04 / THE PARTICULARS</p><h2 id="specs-title">Small footprint.<br/><span>Real hardware.</span></h2><p className="revision-label mono"><span className="status-dot"/> REV C / IN DEVELOPMENT</p></div>
+        <div><dl className="spec-table">{specs.map(([label, value], i) => <div className="spec-row" key={label}><dt><span className="mono">{String(i + 1).padStart(2, '0')}</span>{label}</dt><dd>{value}</dd></div>)}</dl><p className="model-note">An independent engineering prototype. Hardware integration, game compatibility, and final specifications are still being validated. Console renders show the earlier enclosure assembly; the separate PCB viewer shows the current IT6263 revision.</p></div>
       </section>
-      <section className="closing"><div data-reveal><p className="eyebrow">SOME THINGS ARE WORTH COMING BACK TO</p><h2>Press play.<br/>Feel at home.</h2><a href="#console" className="closing-link">Meet SGBC <ArrowUpRight size={21}/></a></div><span className="closing-mark" aria-hidden="true">sgbc</span></section>
+      <section className="closing"><p className="mono">A NEW HOME FOR YOUR CLASSICS.</p><a href="#console" aria-label="Back to the console">Still game.<ArrowUpRight aria-hidden="true"/></a><div className="closing-bottom mono"><span>SGBC / AN INDEPENDENT PROJECT</span><span>BUILT FOR THE GAMES THAT STAY.</span></div></section>
     </main>
-    <footer className="site-footer"><a href="#" className="wordmark" aria-label="SGBC home">sgbc<span>™</span></a><span>Built for the games that stay with us.<small>Game Boy, Game Boy Color, and Game Boy Advance are trademarks of Nintendo. SGBC is an independent project.</small></span><a href="#console">Back to the console <ArrowUpRight size={16}/></a></footer>
+    <footer className="site-footer"><a className="wordmark" href="#console" aria-label="SGBC home">sgbc<span>™</span></a><p>Game Boy, Game Boy Color, and Game Boy Advance are trademarks of Nintendo.<br/>SGBC is an independent project and is not affiliated with Nintendo.</p><a className="mono" href="#console">BACK TO TOP <ArrowUp size={16}/></a></footer>
   </>;
 }

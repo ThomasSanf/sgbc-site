@@ -5,12 +5,18 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { marbleParts, prepareFinishGeometry } from '@/lib/console-materials';
+import { bordeauxParts, prepareFinishGeometry } from '@/lib/console-materials';
+import { setCutawayVisibility } from '@/lib/console-assembly';
+import consoleMetadata from '@/public/models/rear-port-fit.json';
+import pcbMetadata from '@/public/models/pcb-revision.json';
 
-export type ConsoleView = 'hero' | 'front' | 'top' | 'rear' | 'inside';
-type Props = { view: ConsoleView; resetKey?: number; dark?: boolean };
+const modelRevision = consoleMetadata.model_sha256;
+const pcbRevision = pcbMetadata.sha256;
 
-export default function ConsoleScene({ view, resetKey = 0, dark = false }: Props) {
+export type ConsoleView = 'hero' | 'front' | 'top' | 'rear' | 'inside' | 'bottom';
+type Props = { view: ConsoleView; resetKey?: number; dark?: boolean; model?: 'console' | 'pcb' };
+
+export default function ConsoleScene({ view, resetKey = 0, dark = false, model = 'console' }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const controller = useRef<{ setView: (view: ConsoleView) => void } | null>(null);
   const activeView = useRef(view);
@@ -23,12 +29,12 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false }: Props
     let disposed = false;
     let visible = true;
     let frame = 0;
+    let needsRender = true;
     let renderer: THREE.WebGLRenderer | undefined;
     let controls: OrbitControls | undefined;
     let loadedModel: THREE.Group | undefined;
     let environment: THREE.WebGLRenderTarget | undefined;
     let room: RoomEnvironment | undefined;
-    let marbleTexture: THREE.Texture | undefined;
     let resize: ResizeObserver | undefined;
     let observer: IntersectionObserver | undefined;
     const materials = new Set<THREE.Material>();
@@ -46,7 +52,7 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false }: Props
       if (event.key === 'ArrowRight') spherical.theta += 0.15;
       if (event.key === 'ArrowUp') spherical.phi -= 0.12;
       if (event.key === 'ArrowDown') spherical.phi += 0.12;
-      spherical.phi = THREE.MathUtils.clamp(spherical.phi, 0.1, Math.PI / 2.02);
+      spherical.phi = THREE.MathUtils.clamp(spherical.phi, 0.1, model === 'pcb' ? Math.PI - 0.1 : Math.PI / 2.02);
       camera.position.setFromSpherical(spherical).add(controls.target);
       controls.update();
     };
@@ -57,9 +63,10 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false }: Props
       renderer.setClearColor(0x000000, 0);
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = dark ? 1.4 : 1.05;
+      renderer.toneMappingExposure = dark ? 0.8 : 1.05;
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.shadowMap.type = THREE.PCFShadowMap;
+      renderer.shadowMap.autoUpdate = false;
       renderer.domElement.setAttribute('aria-hidden', 'true');
       host.appendChild(renderer.domElement);
 
@@ -93,27 +100,22 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false }: Props
       controls.enableZoom = false;
       controls.enablePan = false;
       controls.minPolarAngle = 0.1;
-      controls.maxPolarAngle = Math.PI / 2.02;
+      controls.maxPolarAngle = model === 'pcb' ? Math.PI - 0.1 : Math.PI / 2.02;
       controls.rotateSpeed = 0.55;
       renderer.domElement.style.touchAction = 'pan-y';
       controls.touches.ONE = null as unknown as THREE.TOUCH;
       controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
       controls.addEventListener('start', () => { tweening = false; });
+      controls.addEventListener('change', () => { needsRender = true; });
 
-      const beige = new THREE.MeshPhysicalMaterial({ color: '#d8cbb4', roughness: 0.49, metalness: 0, clearcoat: 0.1, clearcoatRoughness: 0.6 });
+      const shell = new THREE.MeshPhysicalMaterial({ color: '#98988f', roughness: 0.49, metalness: 0, clearcoat: 0.1, clearcoatRoughness: 0.6 });
       const black = new THREE.MeshPhysicalMaterial({ color: '#141416', roughness: 0.42, metalness: 0.1 });
-      const marble = new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: 0.25, metalness: 0, clearcoat: 0.65, clearcoatRoughness: 0.18 });
-      materials.add(beige); materials.add(black); materials.add(marble);
-      marbleTexture = new THREE.TextureLoader().load('/textures/bordeaux-marble.png', texture => {
-        if (disposed) { texture.dispose(); return; }
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.anisotropy = Math.min(renderer!.capabilities.getMaxAnisotropy(), 8);
-        marble.map = texture;
-        marble.needsUpdate = true;
-      }, undefined, () => { marble.color.set('#581b29'); });
+      const bordeaux = new THREE.MeshPhysicalMaterial({ color: '#592330', roughness: 0.38, metalness: 0, clearcoat: 0.25, clearcoatRoughness: 0.35 });
+      materials.add(shell); materials.add(black); materials.add(bordeaux);
 
       function applyView(nextView: ConsoleView, snap = false) {
+        needsRender = true;
+        if (renderer) renderer.shadowMap.needsUpdate = true;
         const wide = host.clientWidth < 600 ? 1.12 : 1;
         const poses: Record<ConsoleView, [number, number, number]> = {
           hero: [-5.8 * wide, 4.8 * wide, 8.2 * wide],
@@ -121,20 +123,39 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false }: Props
           top: [0.1, 11.3 * wide, 0.3],
           rear: [5.5 * wide, 4.6 * wide, -8 * wide],
           inside: [-4.8 * wide, 7.3 * wide, 7.4 * wide],
+          bottom: [0.1, -11.3 * wide, 0.3],
         };
         goal.set(...poses[nextView]).multiplyScalar(0.76);
+        // Fit the actual model, including narrow phone viewports.
+        if (loadedModel && host.clientHeight && host.clientWidth) {
+          const box = new THREE.Box3().setFromObject(loadedModel);
+          const direction = goal.clone().normalize();
+          const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
+          const up = new THREE.Vector3().crossVectors(direction, right);
+          const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+          const tanH = tanV * host.clientWidth / host.clientHeight;
+          let distance = 0;
+          for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+            const corner = new THREE.Vector3(x, y, z);
+            distance = Math.max(distance, Math.abs(corner.dot(right)) / tanH + corner.dot(direction), Math.abs(corner.dot(up)) / tanV + corner.dot(direction));
+          }
+          goal.copy(direction.multiplyScalar(distance * 1.18));
+        }
+        const constrained = new THREE.Spherical().setFromVector3(goal);
+        constrained.phi = THREE.MathUtils.clamp(constrained.phi, controls!.minPolarAngle, controls!.maxPolarAngle);
+        goal.setFromSpherical(constrained);
         tweening = true;
         if (snap) camera.position.copy(goal);
         if (loadedModel) loadedModel.traverse(object => {
           if (!(object instanceof THREE.Mesh)) return;
-          if (object.name === 'top_shell' || marbleParts.has(object.name) || /button_retainer|contact_tip|LED_spacer|controls_M2|controls_retainer/.test(object.name)) object.visible = nextView !== 'inside';
-          if (object.name === 'FPGA_package_envelope') object.visible = nextView === 'inside';
+          if (model === 'console') setCutawayVisibility(object, nextView === 'inside');
         });
       }
       controller.current = { setView: v => applyView(v) };
       applyView(activeView.current, true);
 
-      new GLTFLoader().load('/models/sgbc-revc.glb', gltf => {
+      const modelUrl = model === 'pcb' ? `/models/sgbc-revc-it6263.glb?v=${pcbRevision}` : `/models/sgbc-revc.glb?v=${modelRevision}`;
+      new GLTFLoader().load(modelUrl, gltf => {
         if (disposed) {
           gltf.scene.traverse(obj => { if (obj instanceof THREE.Mesh) { obj.geometry.dispose(); (Array.isArray(obj.material) ? obj.material : [obj.material]).forEach(m => m.dispose()); } });
           return;
@@ -142,13 +163,13 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false }: Props
         loadedModel = gltf.scene;
         loadedModel.traverse(object => {
           if (!(object instanceof THREE.Mesh)) return;
-          prepareFinishGeometry(object);
+          if (model === 'console') prepareFinishGeometry(object);
           const old = Array.isArray(object.material) ? object.material : [object.material];
           old.forEach(m => materials.add(m));
-          if (object.name === 'top_shell') object.material = beige;
-          else if (object.name === 'bottom_shell' || object.name.startsWith('foot_')) object.material = black;
-          else if (marbleParts.has(object.name)) {
-            object.material = marble;
+          if (model === 'console' && (object.name === 'top_shell' || object.name === 'controls_lid_supports_cutaway' || object.name === 'cartridge_cradle_cutaway' || object.name === 'cartridge_socket_retainer')) object.material = shell;
+          else if (model === 'console' && (object.name === 'bottom_shell' || object.name.startsWith('foot_'))) object.material = black;
+          else if (model === 'console' && bordeauxParts.has(object.name)) {
+            object.material = bordeaux;
           }
           object.castShadow = true;
           object.receiveShadow = true;
@@ -168,9 +189,10 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false }: Props
         const width = host.clientWidth; const height = host.clientHeight;
         if (!width || !height || !renderer) return;
         camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height);
+        applyView(activeView.current, true);
       });
       resize.observe(host);
-      observer = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; }, { rootMargin: '100px' });
+      observer = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; needsRender = true; }, { rootMargin: '100px' });
       observer.observe(host);
       host.addEventListener('keydown', keyboard);
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -179,10 +201,22 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false }: Props
         frame = requestAnimationFrame(animate);
         if (!visible || document.hidden || !renderer || !controls) return;
         if (tweening) {
-          camera.position.lerp(goal, reducedMotion.matches ? 1 : 0.065);
+          needsRender = true;
+          const amount = reducedMotion.matches ? 1 : 0.09;
+          const current = new THREE.Spherical().setFromVector3(camera.position);
+          const target = new THREE.Spherical().setFromVector3(goal);
+          const angle = Math.atan2(Math.sin(target.theta - current.theta), Math.cos(target.theta - current.theta));
+          current.theta += angle * amount;
+          current.phi = THREE.MathUtils.lerp(current.phi, target.phi, amount);
+          current.radius = THREE.MathUtils.lerp(current.radius, target.radius, amount);
+          camera.position.setFromSpherical(current);
           if (camera.position.distanceTo(goal) < 0.005) tweening = false;
         }
-        controls.update(); renderer.render(scene, camera);
+        const changed = controls.update();
+        if (needsRender || changed) {
+          renderer.render(scene, camera);
+          needsRender = false;
+        }
       };
       animate();
     } catch { setStatus('error'); }
@@ -193,14 +227,14 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false }: Props
       controls?.dispose();
       scene.traverse(object => { if (object instanceof THREE.Mesh) object.geometry.dispose(); });
       materials.forEach(material => material.dispose());
-      marbleTexture?.dispose(); environment?.dispose(); room?.dispose();
+      environment?.dispose(); room?.dispose();
       renderer?.dispose(); renderer?.domElement.remove();
     };
-  }, [dark, retry]);
+  }, [dark, retry, model]);
 
   useEffect(() => { activeView.current = view; controller.current?.setView(view); }, [view, resetKey]);
 
-  return <div className={`console-canvas ${status === 'ready' ? 'is-ready' : ''}`} ref={container} tabIndex={0} role="group" aria-label="Interactive SGBC console: beige top, black base, Bordeaux marble buttons and trim. Drag with a mouse, use two fingers on touch, or arrow keys to rotate.">
+  return <div className={`console-canvas ${status === 'ready' ? 'is-ready' : ''}`} ref={container} tabIndex={0} role="group" aria-label={`Interactive SGBC ${model === 'pcb' ? 'Rev C IT6263 motherboard' : 'console'}: drag with a mouse, use two fingers on touch, or arrow keys to rotate.`}>
     {status === 'loading' && <div className="model-status" role="status"><span className="model-spinner"/><span>Bringing the details into view</span></div>}
     {status === 'error' && <div className="model-status model-error"><strong>Meet SGBC.</strong><p>The 3D view couldn’t load. You can explore the console details below.</p><button onClick={() => { setStatus('loading'); setRetry(r => r + 1); }}>Try again</button></div>}
   </div>;

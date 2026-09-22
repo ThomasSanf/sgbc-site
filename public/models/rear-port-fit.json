@@ -1,0 +1,323 @@
+{
+  "scope": "Rear ports are a website presentation variant; cartridge and identical-button controls import routed C2 hardware",
+  "rear_panel_y_mm": 50.5,
+  "radial_clearance_mm": 0.25,
+  "connector_projection_mm": 0.1,
+  "ports": {
+    "J1": {
+      "name": "usb_c",
+      "outward_shift_mm": 3.724999956414102,
+      "face_y_mm": 50.6,
+      "opening_bounds_xz_mm": [
+        -50.72,
+        7.495,
+        -41.28,
+        11.155
+      ],
+      "opening_profile_xz_mm": [
+        [
+          -42.79362026976474,
+          11.155
+        ],
+        [
+          -49.20637973023526,
+          11.155
+        ],
+        [
+          -49.586568604544766,
+          11.104966088379431
+        ],
+        [
+          -49.956082494377256,
+          10.951869792592017
+        ],
+        [
+          -50.27340311925822,
+          10.708403119258236
+        ],
+        [
+          -50.51686979259203,
+          10.391082494377242
+        ],
+        [
+          -50.669966088379425,
+          10.02156860454482
+        ],
+        [
+          -50.72,
+          9.641379730235228
+        ],
+        [
+          -50.72,
+          9.008620269764762
+        ],
+        [
+          -50.66996608837943,
+          8.62843139545521
+        ],
+        [
+          -50.51686979259202,
+          8.25891750562274
+        ],
+        [
+          -50.27340311925823,
+          7.941596880741775
+        ],
+        [
+          -49.95608249437725,
+          7.698130207407979
+        ],
+        [
+          -49.58656860454479,
+          7.545033911620571
+        ],
+        [
+          -49.20637973023526,
+          7.495
+        ],
+        [
+          -42.793620269764745,
+          7.495
+        ],
+        [
+          -42.41343139545521,
+          7.545033911620572
+        ],
+        [
+          -42.043917505622744,
+          7.698130207407979
+        ],
+        [
+          -41.72659688074178,
+          7.941596880741775
+        ],
+        [
+          -41.48313020740798,
+          8.258917505622765
+        ],
+        [
+          -41.330033911620575,
+          8.62843139545521
+        ],
+        [
+          -41.28,
+          9.008620269764762
+        ],
+        [
+          -41.28,
+          9.641379730235228
+        ],
+        [
+          -41.330033911620575,
+          10.021568604544793
+        ],
+        [
+          -41.483130207407996,
+          10.391082494377269
+        ],
+        [
+          -41.726596880741766,
+          10.708403119258225
+        ],
+        [
+          -42.043917505622744,
+          10.95186979259202
+        ],
+        [
+          -42.41343139545521,
+          11.10496608837943
+        ]
+      ]
+    },
+    "J500": {
+      "name": "hdmi",
+      "outward_shift_mm": 1.599999620020391,
+      "face_y_mm": 50.6,
+      "opening_bounds_xz_mm": [
+        34.25,
+        7.984999999999999,
+        49.75,
+        14.035
+      ],
+      "opening_profile_xz_mm": [
+        [
+          48.51639937529143,
+          14.035
+        ],
+        [
+          35.48360062470856,
+          14.035
+        ],
+        [
+          35.175927968891486,
+          13.994460442181753
+        ],
+        [
+          34.87392913893232,
+          13.869378837235978
+        ],
+        [
+          34.614596948045836,
+          13.67040305195417
+        ],
+        [
+          34.41562116276402,
+          13.411070861067675
+        ],
+        [
+          34.29053955781824,
+          13.109072031108502
+        ],
+        [
+          34.25,
+          12.801399375291473
+        ],
+        [
+          34.25,
+          9.234411413278776
+        ],
+        [
+          36.4222069993172,
+          8.085533272240278
+        ],
+        [
+          36.66250071547398,
+          8.009598973876782
+        ],
+        [
+          36.90326168684772,
+          7.984999999999999
+        ],
+        [
+          47.096738313152265,
+          7.984999999999999
+        ],
+        [
+          47.33749928452602,
+          8.009598973876784
+        ],
+        [
+          47.57779300068283,
+          8.085533272240285
+        ],
+        [
+          49.75,
+          9.23441141327877
+        ],
+        [
+          49.75,
+          12.801399375291417
+        ],
+        [
+          49.70946044218176,
+          13.109072031108461
+        ],
+        [
+          49.58437883723597,
+          13.411070861067687
+        ],
+        [
+          49.385403051954164,
+          13.670403051954164
+        ],
+        [
+          49.12607086106767,
+          13.869378837235981
+        ],
+        [
+          48.824072031108514,
+          13.994460442181753
+        ]
+      ]
+    }
+  },
+  "controls": {
+    "revision": "C2",
+    "pcb_sha256": "bafe1a62269f6744e04a3e97271b9ca054fe7209d2cd952e124e5e8021c10ee1",
+    "switch_mpn_both": "KSC623G LFG",
+    "native_switch_geometry_identical": true,
+    "cap_and_tip_symmetric_difference_mm3": {
+      "_button": 0,
+      "_contact_tip_TPU": 0
+    },
+    "motion_check_count": 128,
+    "power_controller": "LTC2950ITS8-1#TRMPBF",
+    "native_switches": {
+      "SW1": {
+        "bounds_mm": [
+          [
+            33.00000011175871,
+            -29.62500004656613,
+            17.994999999999997
+          ],
+          [
+            42.99999988824129,
+            -23.37499995343387,
+            25.694999958276746
+          ]
+        ],
+        "vertices": 2352,
+        "faces": 2590
+      },
+      "SW2": {
+        "bounds_mm": [
+          [
+            11.000000111758709,
+            -29.62500004656613,
+            17.994999999999997
+          ],
+          [
+            20.99999988824129,
+            -23.37499995343387,
+            25.694999958276746
+          ]
+        ],
+        "vertices": 2352,
+        "faces": 2590
+      }
+    }
+  },
+  "cartridge_loader": {
+    "carrier_pcb_sha256": "b8d4851ae0244d9b01d991a768b6198ee1b85dd6f212895d361d98cd481fb460",
+    "board_top_z_mm": 25.2,
+    "shell_bottom_z_mm": 26.2,
+    "board_vertical_clearance_mm": 1.0,
+    "socket_top_z_mm": 34.5,
+    "nominal_shell_overlap_depth_mm": 8.3,
+    "gauge_shell_outer_mm": [
+      60,
+      10,
+      65
+    ],
+    "gauge_recess_mm": [
+      58.8,
+      6.4,
+      12.3
+    ],
+    "internal_pcb_width_thickness_mm": [
+      55,
+      1
+    ],
+    "old_board_overlap_mm3": 785.8800000000009,
+    "check_count": 936,
+    "limits": "Nominal shell and internal PCB gauges. No measured OEM shell, spring-contact engagement, insertion force or prototype bus testing. Ground straps and clamp are mandatory.",
+    "status": "HARDWARE_C2",
+    "scope": "Actual routed C2 carrier, native FFC and capacitors, printed clamp and formed ground straps",
+    "native_carrier_glb_sha256": "8465166b1ad7e5138a2cd916c3e8e6cb4546191ef1edcf06298c4c674253ebdc",
+    "engagement": "Cartridge hollow end descends over the connector; enclosing shell walls and internal PCB clear the carrier and supports",
+    "native_electrical_checks": {
+      "DRC": 0,
+      "unconnected": 0,
+      "ERC": 0
+    },
+    "website_shell_check_count": 144
+  },
+  "checks": [
+    "Lower carrier clears the full wrapping-cartridge design gauge",
+    "Cutaway retains all six actual lid mounting posts",
+    "J1: opening clear; shell encloses all 224 perimeter samples",
+    "J500: opening clear; shell encloses all 176 perimeter samples",
+    "Both shells are valid single solids and watertight meshes"
+  ],
+  "model_sha256": "40c3816020239a7c937adf3f8c9cf1041c79e38ad1ff8b2fabe1868cbb5afa5f"
+}

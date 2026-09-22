@@ -1,0 +1,9 @@
+{
+  "file": "sgbc-revc-it6263.glb",
+  "source": "gb-fpga-core/hardware/revC_it6263_jlc_rework/outputs/console_revC_current.glb",
+  "sha256": "ce3212a0280e74fd379e1ad1e21263dd504de6388e3b8679284211ceb0000a41",
+  "bytes": 22953264,
+  "revision": "Rev C / IT6263FN/BX",
+  "exported": "2026-09-22",
+  "note": "Native KiCad export. Some component bodies are nominal substitutes. Engineering review model, separate from the earlier enclosure assembly study."
+}
