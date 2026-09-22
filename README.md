@@ -24,8 +24,8 @@ console assembly and its cutaway remain available under Design.
 
 `public/models/sgbc-revc-it6263.glb` is the separate current IT6263 Rev C PCB,
 copied unchanged from `../gb-fpga-core/hardware/revC_it6263_jlc_rework/outputs/console_revC_current.glb`.
-The Motherboard section provides perspective, top and bottom views, keyboard/mouse
-rotation, and a GLB download. `public/models/pcb-revision.json` records its SHA-256
+The standalone Motherboard section has been removed from the page; the GLB remains
+in the repository. `public/models/pcb-revision.json` records its SHA-256
 and source. Some component bodies are nominal substitutes. This is an engineering
 review model, not proof of hardware operation or fit in the earlier enclosure.
 
