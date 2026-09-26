@@ -78,8 +78,12 @@ The hero combines the headline, supporting copy, preorder action, and console in
 one responsive composition. Its Three.js instance uses `interaction="cursor"`:
 a passive canvas with no pointer events, no keyboard focus, and no OrbitControls.
 Mouse position over the whole hero produces a bounded, damped tilt around the
-center of the console. It returns to neutral on pointer leave or window blur and
-stays still on touch devices or when reduced motion is enabled. The separate
+center of the console. It returns to neutral on pointer leave or window blur.
+On mobile layouts (up to 760px), coarse pointers, or devices without hover,
+page scrolling rotates the console horizontally with a slight tilt as the hero
+leaves the viewport. Scrolling back reverses the rotation. Passive listeners
+leave touch scrolling native, and layout is read at most once per animation frame
+after scrolling or resizing. Reduced motion keeps the console still. The separate
 Design viewer retains its interactive rotation and camera tabs.
 
 Preorder currently opens an accessible “Preorders opening soon” dialog. No

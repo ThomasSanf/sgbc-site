@@ -46,12 +46,17 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
     let tweening = true;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const mobileMotion = window.matchMedia('(max-width: 760px), (hover: none), (pointer: coarse)');
     const pointerSurface = host.closest<HTMLElement>('[data-console-tilt]') ?? host;
     const tiltTarget = new THREE.Vector2();
+    let scrollDirty = true;
+    let scrollProgress = 0;
     let lastFrameTime = performance.now();
     const resetTilt = () => { tiltTarget.set(0, 0); };
+    const markScrollDirty = () => { scrollDirty = true; };
+    const resetMotion = () => { resetTilt(); markScrollDirty(); };
     const moveTilt = (event: PointerEvent) => {
-      if (event.pointerType !== 'mouse' || reducedMotion.matches || !finePointer.matches) return;
+      if (event.pointerType !== 'mouse' || reducedMotion.matches || mobileMotion.matches || !finePointer.matches) return;
       const bounds = pointerSurface.getBoundingClientRect();
       if (!bounds.width || !bounds.height) return;
       tiltTarget.set(
@@ -129,8 +134,11 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
         pointerSurface.addEventListener('pointermove', moveTilt, { passive: true });
         pointerSurface.addEventListener('pointerleave', resetTilt);
         window.addEventListener('blur', resetTilt);
-        reducedMotion.addEventListener('change', resetTilt);
-        finePointer.addEventListener('change', resetTilt);
+        window.addEventListener('scroll', markScrollDirty, { passive: true });
+        window.addEventListener('resize', markScrollDirty, { passive: true });
+        reducedMotion.addEventListener('change', resetMotion);
+        finePointer.addEventListener('change', resetMotion);
+        mobileMotion.addEventListener('change', resetMotion);
       }
 
       const shell = new THREE.MeshPhysicalMaterial({ color: '#98988f', roughness: 0.49, metalness: 0, clearcoat: 0.1, clearcoatRoughness: 0.6 });
@@ -211,6 +219,7 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
       }, undefined, () => { if (!disposed) setStatus('error'); });
 
       resize = new ResizeObserver(() => {
+        markScrollDirty();
         const width = host.clientWidth; const height = host.clientHeight;
         if (!width || !height || !renderer) return;
         camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height);
@@ -228,9 +237,17 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
         lastFrameTime = now;
         if (!visible || document.hidden || !renderer) return;
         if (interaction === 'cursor') {
-          const enabled = !reducedMotion.matches && finePointer.matches;
-          const targetX = enabled ? tiltTarget.y * 0.10 : 0;
-          const targetY = enabled ? tiltTarget.x * 0.17 : 0;
+          const scrollEnabled = !reducedMotion.matches && mobileMotion.matches;
+          const pointerEnabled = !reducedMotion.matches && !mobileMotion.matches && finePointer.matches;
+          if (scrollEnabled && scrollDirty) {
+            // Follow the hero through the viewport without intercepting touch scrolling.
+            const bounds = pointerSurface.getBoundingClientRect();
+            scrollProgress = THREE.MathUtils.clamp(-bounds.top / Math.max(bounds.height, 1), 0, 1);
+            scrollDirty = false;
+          }
+          const enabled = scrollEnabled || pointerEnabled;
+          const targetX = scrollEnabled ? scrollProgress * 0.08 : pointerEnabled ? tiltTarget.y * 0.10 : 0;
+          const targetY = scrollEnabled ? scrollProgress * 1.2 : pointerEnabled ? tiltTarget.x * 0.17 : 0;
           const amount = enabled ? 1 - Math.exp(-9 * delta) : 1;
           if (Math.abs(modelPivot.rotation.x - targetX) + Math.abs(modelPivot.rotation.y - targetY) > 0.00001) {
             modelPivot.rotation.x = THREE.MathUtils.lerp(modelPivot.rotation.x, targetX, amount);
@@ -267,8 +284,11 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
       pointerSurface.removeEventListener('pointermove', moveTilt);
       pointerSurface.removeEventListener('pointerleave', resetTilt);
       window.removeEventListener('blur', resetTilt);
-      reducedMotion.removeEventListener('change', resetTilt);
-      finePointer.removeEventListener('change', resetTilt);
+      window.removeEventListener('scroll', markScrollDirty);
+      window.removeEventListener('resize', markScrollDirty);
+      reducedMotion.removeEventListener('change', resetMotion);
+      finePointer.removeEventListener('change', resetMotion);
+      mobileMotion.removeEventListener('change', resetMotion);
       controls?.dispose();
       scene.traverse(object => { if (object instanceof THREE.Mesh) object.geometry.dispose(); });
       materials.forEach(material => material.dispose());
