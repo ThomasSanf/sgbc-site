@@ -148,6 +148,7 @@ h2>span { color:var(--muted); }
 .preorder-button:focus-visible { outline-color:var(--ink); }
 .hero-layout .hero-stage { height:100%; min-height:550px; pointer-events:none; }
 .hero-layout .console-canvas--cursor { transform:translateY(-5%); }
+@media (max-width:760px) { .hero-layout .console-canvas--cursor { transform:translateY(-5%) scale(1.08); } }
 .hero-layout .stage-wordmark { inset:0; font-size:clamp(190px,24vw,440px); }
 .hero-layout .stage-wordmark>span { font-size:2vw; margin-top:-10vw; margin-left:1.5vw; }
 .hero-layout .stage-corner { left:16px; bottom:34px; }
