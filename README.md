@@ -84,7 +84,10 @@ page scrolling rotates the console horizontally with a slight tilt as the hero
 leaves the viewport. Scrolling back reverses the rotation. Passive listeners
 leave touch scrolling native, and layout is read at most once per animation frame
 after scrolling or resizing. Reduced motion keeps the console still. The separate
-Design viewer retains its interactive rotation and camera tabs.
+Design viewer supports one-finger touch dragging, mouse dragging, keyboard
+rotation, and camera tabs. Its canvas uses `touch-action: none` so vertical and
+horizontal drags rotate the model; swipes outside that canvas scroll the page.
+A mobile “Drag to rotate” hint makes this interaction visible.
 
 Preorder currently opens an accessible “Preorders opening soon” dialog. No
 checkout, payment, reservation, or mailing-list submission is implied.

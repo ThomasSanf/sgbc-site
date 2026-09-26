@@ -125,8 +125,8 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
         controls.minPolarAngle = 0.1;
         controls.maxPolarAngle = model === 'pcb' ? Math.PI - 0.1 : Math.PI / 2.02;
         controls.rotateSpeed = 0.55;
-        renderer.domElement.style.touchAction = 'pan-y';
-        controls.touches.ONE = null as unknown as THREE.TOUCH;
+        renderer.domElement.style.touchAction = 'none';
+        controls.touches.ONE = THREE.TOUCH.ROTATE;
         controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
         controls.addEventListener('start', () => { tweening = false; });
         controls.addEventListener('change', () => { needsRender = true; });
@@ -299,7 +299,7 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
 
   useEffect(() => { activeView.current = view; controller.current?.setView(view); }, [view, resetKey]);
 
-  return <div className={`console-canvas ${interaction === 'cursor' ? 'console-canvas--cursor' : ''} ${status === 'ready' ? 'is-ready' : ''}`} ref={container} tabIndex={interaction === 'orbit' ? 0 : undefined} role={interaction === 'orbit' ? 'group' : 'img'} aria-label={interaction === 'orbit' ? `Interactive SGBC ${model === 'pcb' ? 'Rev C IT6263 motherboard' : 'console'}: drag with a mouse, use two fingers on touch, or arrow keys to rotate.` : 'SGBC console with a classic gray shell, black base, and solid Bordeaux controls.'}>
+  return <div className={`console-canvas ${interaction === 'cursor' ? 'console-canvas--cursor' : ''} ${status === 'ready' ? 'is-ready' : ''}`} ref={container} tabIndex={interaction === 'orbit' ? 0 : undefined} role={interaction === 'orbit' ? 'group' : 'img'} aria-label={interaction === 'orbit' ? `Interactive SGBC ${model === 'pcb' ? 'Rev C IT6263 motherboard' : 'console'}: drag with a mouse or one finger, or use arrow keys to rotate.` : 'SGBC console with a classic gray shell, black base, and solid Bordeaux controls.'}>
     {status === 'loading' && <div className="model-status" role="status"><span className="model-spinner"/><span>Bringing the details into view</span></div>}
     {status === 'error' && <div className="model-status model-error"><strong>Meet SGBC.</strong><p>The 3D view couldn’t load. You can explore the console details below.</p>{interaction === 'orbit' && <button onClick={() => { setStatus('loading'); setRetry(r => r + 1); }}>Try again</button>}</div>}
   </div>;
