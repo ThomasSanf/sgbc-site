@@ -39,6 +39,18 @@ function LazyScene({ view, resetKey }: { view: ConsoleView; resetKey: number }) 
   return <div className="lazy-scene" ref={host}>{ready && <ConsoleScene view={view} resetKey={resetKey} dark />}</div>;
 }
 
+function PreorderButton({ className = '' }: { className?: string }) {
+  return <Dialog>
+    <DialogTrigger className={`preorder-button ${className}`}>Preorder <ArrowUpRight size={18}/></DialogTrigger>
+    <DialogContent className="preorder-dialog" showCloseButton={false}>
+      <span className="mono preorder-eyebrow"><span className="status-dot"/> SGBC / COMING SOON</span>
+      <DialogTitle className="preorder-title">Preorders<br/>opening soon.</DialogTitle>
+      <DialogDescription className="preorder-description">We’re getting SGBC ready for its next chapter. Pricing and availability will be announced when preorders open.</DialogDescription>
+      <DialogClose className="preorder-button preorder-dismiss">Back to the console <ArrowUpRight size={18}/></DialogClose>
+    </DialogContent>
+  </Dialog>;
+}
+
 export default function ProductPage() {
   const [detailView, setDetailView] = useState<ConsoleView>('hero');
   const [detailReset, setDetailReset] = useState(0);
@@ -49,6 +61,7 @@ export default function ProductPage() {
       <a className="wordmark" href="#console" aria-label="SGBC home">sgbc<span>™</span></a>
       <nav aria-label="Main navigation"><a href="#console">Console <sup>01</sup></a><a href="#design">Design <sup>02</sup></a><a href="#specs">Specs <sup>03</sup></a></nav>
       <a href="#specs" className="nav-status"><span className="status-dot"/> Rev C <ArrowUpRight size={15}/></a>
+      <PreorderButton className="mobile-header-preorder"/>
     </header>
     <main id="main">
       <section className="hero" id="console" aria-labelledby="hero-title">
@@ -58,15 +71,7 @@ export default function ProductPage() {
             <h1 id="hero-title">Old soul.<br/><span>New hardware.</span></h1>
             <div className="hero-intro"><p>Your cartridges. Your big screen.<br/>An FPGA console for the games<br className="desktop-only"/> that never left you.</p></div>
             <div className="hero-actions">
-              <Dialog>
-                <DialogTrigger className="preorder-button">Preorder <ArrowUpRight size={18}/></DialogTrigger>
-                <DialogContent className="preorder-dialog" showCloseButton={false}>
-                  <span className="mono preorder-eyebrow"><span className="status-dot"/> SGBC / COMING SOON</span>
-                  <DialogTitle className="preorder-title">Preorders<br/>opening soon.</DialogTitle>
-                  <DialogDescription className="preorder-description">We’re getting SGBC ready for its next chapter. Pricing and availability will be announced when preorders open.</DialogDescription>
-                  <DialogClose className="preorder-button preorder-dismiss">Back to the console <ArrowUpRight size={18}/></DialogClose>
-                </DialogContent>
-              </Dialog>
+              <PreorderButton/>
               <a className="text-link" href="#specs">Explore the hardware <ArrowDown size={18}/></a>
             </div>
           </div>

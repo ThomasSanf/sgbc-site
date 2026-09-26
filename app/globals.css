@@ -146,6 +146,11 @@ h2>span { color:var(--muted); }
 .preorder-button { display:inline-flex; align-items:center; justify-content:space-between; gap:34px; min-height:49px; padding:14px 20px; background:var(--accent); color:#090909; border:1px solid var(--accent); font-size:14px; font-weight:700; line-height:1.4; transition:background .2s,border-color .2s; }
 .preorder-button:hover { background:#ff784d; border-color:#ff784d; }
 .preorder-button:focus-visible { outline-color:var(--ink); }
+.site-header .mobile-header-preorder { display:none; }
+@media (max-width:760px) {
+  .site-header nav,.site-header .nav-status { display:none; }
+  .site-header .mobile-header-preorder { display:inline-flex; min-height:42px; padding:10px 14px; gap:16px; font-size:13px; }
+}
 .hero-layout .hero-stage { height:100%; min-height:550px; pointer-events:none; }
 .hero-layout .console-canvas--cursor { transform:translateY(-5%); }
 @media (max-width:760px) { .hero-layout .console-canvas--cursor { transform:translateY(-5%) scale(1.08); } }
