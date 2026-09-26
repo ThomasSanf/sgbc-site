@@ -71,3 +71,16 @@ checks to the current PCB hash. `verify-model.mjs` compares both translated cap
 and tip meshes and confirms identical native switch geometry from the hardware
 report. The PCB review package is
 `../gb-fpga-core/hardware/revC/outputs/SGBC_controls_C2_identical_buttons_review.zip`.
+
+## Hero interaction and preorder
+
+The hero combines the headline, supporting copy, preorder action, and console in
+one responsive composition. Its Three.js instance uses `interaction="cursor"`:
+a passive canvas with no pointer events, no keyboard focus, and no OrbitControls.
+Mouse position over the whole hero produces a bounded, damped tilt around the
+center of the console. It returns to neutral on pointer leave or window blur and
+stays still on touch devices or when reduced motion is enabled. The separate
+Design viewer retains its interactive rotation and camera tabs.
+
+Preorder currently opens an accessible “Preorders opening soon” dialog. No
+checkout, payment, reservation, or mailing-list submission is implied.

@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { ArrowDown, ArrowUpRight, ArrowUp, Plus, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import type { ConsoleView } from './console-scene';
 
 const ConsoleScene = dynamic(() => import('./console-scene'), { ssr: false });
@@ -38,7 +39,6 @@ function LazyScene({ view, resetKey }: { view: ConsoleView; resetKey: number }) 
 }
 
 export default function ProductPage() {
-  const [heroReset, setHeroReset] = useState(0);
   const [detailView, setDetailView] = useState<ConsoleView>('hero');
   const [detailReset, setDetailReset] = useState(0);
 
@@ -52,13 +52,30 @@ export default function ProductPage() {
     <main id="main">
       <section className="hero" id="console" aria-labelledby="hero-title">
         <div className="hero-topline mono"><span>INDEPENDENT HARDWARE / FAMILIAR FEELING</span><span>FPGA CONSOLE — REV C</span></div>
-        <div className="hero-stage">
-          <div className="stage-wordmark" aria-hidden="true">sgbc<span>™</span></div>
-          <ConsoleScene view="hero" resetKey={heroReset} dark />
-          <div className="stage-corner mono"><Plus size={18}/><span>THE CONSOLE<br/><span className="muted">ENCLOSURE STUDY / 001</span></span></div>
-          <button className="reset-view" onClick={() => setHeroReset(n => n + 1)} aria-label="Reset console rotation"><RotateCcw size={18}/></button>
+        <div className="hero-layout" data-console-tilt>
+          <div className="hero-copy">
+            <h1 id="hero-title">Old soul.<br/><span>New hardware.</span></h1>
+            <div className="hero-intro"><p>Your cartridges. Your big screen.<br/>An FPGA console for the games<br className="desktop-only"/> that never left you.</p></div>
+            <div className="hero-actions">
+              <Dialog>
+                <DialogTrigger className="preorder-button">Preorder <ArrowUpRight size={18}/></DialogTrigger>
+                <DialogContent className="preorder-dialog" showCloseButton={false}>
+                  <span className="mono preorder-eyebrow"><span className="status-dot"/> SGBC / COMING SOON</span>
+                  <DialogTitle className="preorder-title">Preorders<br/>opening soon.</DialogTitle>
+                  <DialogDescription className="preorder-description">We’re getting SGBC ready for its next chapter. Pricing and availability will be announced when preorders open.</DialogDescription>
+                  <DialogClose className="preorder-button preorder-dismiss">Back to the console <ArrowUpRight size={18}/></DialogClose>
+                </DialogContent>
+              </Dialog>
+              <a className="text-link" href="#specs">Explore the hardware <ArrowDown size={18}/></a>
+            </div>
+          </div>
+          <div className="hero-stage">
+            <div className="stage-wordmark" aria-hidden="true">sgbc<span>™</span></div>
+            <ConsoleScene view="hero" interaction="cursor" dark />
+            <div className="stage-corner mono"><Plus size={18}/><span>THE CONSOLE<br/><span className="muted">ENCLOSURE STUDY / 001</span></span></div>
+          </div>
+          <span className="hero-number mono">(01—03)</span>
         </div>
-        <div className="hero-bottom"><h1 id="hero-title">Old soul.<br/><span>New hardware.</span></h1><div className="hero-intro"><p>Your cartridges. Your big screen.<br/>An FPGA console for the games<br className="desktop-only"/> that never left you.</p><a className="text-link" href="#specs">Explore the hardware <ArrowDown size={18}/></a></div><span className="hero-number mono">(01—03)</span></div>
       </section>
       <section className="manifesto section-shell" aria-labelledby="story-title">
         <div className="section-kicker mono"><span><span className="status-dot"/> BUILT AROUND THE RITUAL</span><Plus size={20}/></div>
