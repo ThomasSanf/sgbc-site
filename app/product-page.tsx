@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { ArrowDown, ArrowUpRight, ArrowUp, Plus, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -80,6 +81,17 @@ export default function ProductPage() {
       <section className="manifesto section-shell" aria-labelledby="story-title">
         <div className="section-kicker mono"><span><span className="status-dot"/> BUILT AROUND THE RITUAL</span><Plus size={20}/></div>
         <h2 id="story-title">Keep the cartridges.<br/>Change the <span>possibilities.</span></h2>
+        <figure className="cartridge-display">
+          <Image
+            src="/images/cartridge-lineup.webp"
+            alt="Three floating Game Boy and Game Boy Color cartridges with translucent clear, blue, and Bordeaux shells."
+            width={1672}
+            height={941}
+            sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1156px) calc(100vw - 56px), 1100px"
+            loading="lazy"
+            draggable={false}
+          />
+        </figure>
         <div className="manifesto-bottom"><p>The click of a cartridge. A controller you know by heart. SGBC brings programmable hardware to a console designed around three generations of handheld classics.</p><div className="system-list" aria-label="Intended cartridge families"><span>GAME BOY</span><span>GAME BOY COLOR</span><span>GAME BOY ADVANCE</span></div></div>
       </section>
       <section className="design-section section-shell" id="design" aria-labelledby="design-title">
