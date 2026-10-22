@@ -9,14 +9,16 @@ import { bordeauxParts, prepareFinishGeometry } from '@/lib/console-materials';
 import { setCutawayVisibility } from '@/lib/console-assembly';
 import consoleMetadata from '@/public/models/rear-port-fit.json';
 import pcbMetadata from '@/public/models/pcb-revision.json';
+import { siteCopy, type Locale } from '@/lib/site-copy';
 
 const modelRevision = consoleMetadata.model_sha256;
 const pcbRevision = pcbMetadata.sha256;
 
 export type ConsoleView = 'hero' | 'front' | 'top' | 'rear' | 'inside' | 'bottom';
-type Props = { view: ConsoleView; resetKey?: number; dark?: boolean; model?: 'console' | 'pcb'; interaction?: 'orbit' | 'cursor' };
+type Props = { view: ConsoleView; resetKey?: number; dark?: boolean; model?: 'console' | 'pcb'; interaction?: 'orbit' | 'cursor'; locale?: Locale };
 
-export default function ConsoleScene({ view, resetKey = 0, dark = false, model = 'console', interaction = 'orbit' }: Props) {
+export default function ConsoleScene({ view, resetKey = 0, dark = false, model = 'console', interaction = 'orbit', locale = 'en' }: Props) {
+  const copy = siteCopy[locale].viewer;
   const container = useRef<HTMLDivElement>(null);
   const controller = useRef<{ setView: (view: ConsoleView) => void } | null>(null);
   const activeView = useRef(view);
@@ -299,8 +301,8 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
 
   useEffect(() => { activeView.current = view; controller.current?.setView(view); }, [view, resetKey]);
 
-  return <div className={`console-canvas ${interaction === 'cursor' ? 'console-canvas--cursor' : ''} ${status === 'ready' ? 'is-ready' : ''}`} ref={container} tabIndex={interaction === 'orbit' ? 0 : undefined} role={interaction === 'orbit' ? 'group' : 'img'} aria-label={interaction === 'orbit' ? `Interactive SGBC ${model === 'pcb' ? 'Rev C IT6263 motherboard' : 'console'}: drag with a mouse or one finger, or use arrow keys to rotate.` : 'SGBC console with a classic gray shell, black base, and solid Bordeaux controls.'}>
-    {status === 'loading' && <div className="model-status" role="status"><span className="model-spinner"/><span>Bringing the details into view</span></div>}
-    {status === 'error' && <div className="model-status model-error"><strong>Meet SGBC.</strong><p>The 3D view couldn’t load. You can explore the console details below.</p>{interaction === 'orbit' && <button onClick={() => { setStatus('loading'); setRetry(r => r + 1); }}>Try again</button>}</div>}
+  return <div className={`console-canvas ${interaction === 'cursor' ? 'console-canvas--cursor' : ''} ${status === 'ready' ? 'is-ready' : ''}`} ref={container} tabIndex={interaction === 'orbit' ? 0 : undefined} role={interaction === 'orbit' ? 'group' : 'img'} aria-label={interaction === 'orbit' ? copy[model] : copy.alt}>
+    {status === 'loading' && <div className="model-status" role="status"><span className="model-spinner"/><span>{copy.loading}</span></div>}
+    {status === 'error' && <div className="model-status model-error"><strong>{copy.errorTitle}</strong><p>{copy.error}</p>{interaction === 'orbit' && <button onClick={() => { setStatus('loading'); setRetry(r => r + 1); }}>{copy.retry}</button>}</div>}
   </div>;
 }

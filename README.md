@@ -91,3 +91,13 @@ A mobile “Drag to rotate” hint makes this interaction visible.
 
 Preorder currently opens an accessible “Preorders opening soon” dialog. No
 checkout, payment, reservation, or mailing-list submission is implied.
+
+## Languages
+
+The header switches between English and Taiwan Traditional Chinese (`zh-TW`).
+On desktop it replaces the Rev C link; on mobile it sits immediately before
+Preorder. Copy lives in `lib/site-copy.ts`, including dialogs and viewer labels.
+The browser remembers the choice in `localStorage` under `sgbc-language`; if
+storage is unavailable, switching still works for the current visit. The document
+language, title, and description follow the selected language. Switching does not
+remount the Three.js scenes or reset their selected viewing angle.
