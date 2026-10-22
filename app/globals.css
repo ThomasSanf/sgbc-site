@@ -27,8 +27,8 @@ svg { flex-shrink:0; }
 sup { font:12px 'Courier New',monospace; margin-left:3px; color:var(--muted); top:-.4em; }
 .site-header a:hover,.text-link:hover,.download-link:hover,.site-footer>a:last-child:hover { color:var(--accent); }
 .nav-status { display:flex; align-items:center; gap:10px; font-size:14px; }
-.header-actions { display:flex; align-items:center; gap:10px; }
-.language-toggle { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:10px; border:1px solid var(--line); background:transparent; font-size:13px; line-height:1.4; white-space:nowrap; }
+.header-actions { display:flex; flex-shrink:0; align-items:center; gap:10px; }
+.language-toggle { display:inline-flex; flex:0 0 42px; align-items:center; justify-content:center; width:42px; height:42px; padding:0; appearance:none; -webkit-appearance:none; border:1px solid var(--line); border-radius:0; background:transparent; color:var(--ink); font-family:Arial,'PingFang TC','Microsoft JhengHei',sans-serif; font-size:16px; font-weight:500; line-height:1; white-space:nowrap; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 .language-toggle:hover { border-color:var(--accent); color:var(--accent); }
 .hero { padding:0 28px; overflow:clip; }
 .hero-topline { display:flex; justify-content:space-between; color:var(--muted); padding:23px 0 0; }
@@ -175,5 +175,5 @@ h2>span { color:var(--muted); }
 html[lang='zh-TW'] body { font-family:Arial,'PingFang TC','Microsoft JhengHei',sans-serif; }
 html[lang='zh-TW'] h1,html[lang='zh-TW'] h2,html[lang='zh-TW'] h3 { letter-spacing:-.025em; line-height:1.18; }
 html[lang='zh-TW'] .closing>a { letter-spacing:-.025em; }
-@media (max-width:760px) { .header-actions { gap:8px; } .language-toggle { padding:10px 8px; } html[lang='zh-TW'] .hero-copy h1 { font-size:clamp(42px,10vw,72px); } }
+@media (max-width:760px) { .header-actions { gap:8px; } html[lang='zh-TW'] .hero-copy h1 { font-size:clamp(42px,10vw,72px); } }
 @media (max-width:380px) { .site-header .mobile-header-preorder { padding:10px; gap:8px; } }
