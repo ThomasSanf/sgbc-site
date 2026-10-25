@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { sqliteTable, text, integer, index, uniqueIndex, check } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index, uniqueIndex, check, primaryKey } from 'drizzle-orm/sqlite-core';
 
 export const user = sqliteTable('user', {
   id: text('id').primaryKey(), name: text('name').notNull(), email: text('email').notNull().unique(),
@@ -77,4 +77,12 @@ export const settings = sqliteTable('settings', {
   id: text('id').primaryKey(), reservationsOpen: integer('reservations_open', { mode: 'boolean' }).notNull().default(false),
   checkoutOpen: integer('checkout_open', { mode: 'boolean' }).notNull().default(false), updatedAt: integer('updated_at').notNull(),
   shippingFeePerUnit: integer('shipping_fee_per_unit'),
+});
+
+// Daily deduplication only: no raw browser identifier, address, referrer or IP.
+export const visitorDays = sqliteTable('visitor_days', {
+  day: text('day').notNull(), visitorHash: text('visitor_hash').notNull(),
+}, table => [primaryKey({ columns: [table.day, table.visitorHash] })]);
+export const analyticsState = sqliteTable('analytics_state', {
+  id: text('id').primaryKey(), startedAt: integer('started_at').notNull(),
 });

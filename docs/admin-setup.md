@@ -104,11 +104,36 @@ orders and the events `checkout.session.completed`,
 `charge.refunded`. Legacy Stripe checkout includes delivery in the product price;
 the new separate-delivery setting applies to ECPay.
 
+## Visitor analytics
+
+Admin → Activity shows unique browsers today, in the last 7 calendar days, and in
+the last 30 calendar days, plus daily counts. All dates use Asia/Taipei (UTC+8).
+Each period deduplicates returning browsers across days; daily counts must not be
+added together to calculate the period total. Collection begins with the first
+eligible visit after deployment. Earlier traffic cannot be reconstructed.
+
+The storefront stores a random browser identifier for up to 180 days. The database
+stores only its HMAC hash and visit date, separately from orders. Daily records
+older than the 30-day window are pruned on collection and dashboard reads. Clearing
+browser storage, changing devices, or rotating `BETTER_AUTH_SECRET` can count a
+returning visitor again. Counts are estimates of browsers, not identifiable people.
+
+Only public storefront, sales-policy, and checkout-result pages on the canonical
+`BETTER_AUTH_URL` origin are eligible. Preview deployments, approved admin sessions,
+known bots, prefetch requests, Do Not Track / Global Privacy Control, and visitors
+who opt out through **Privacy choices / 隱私選項** are excluded. Blocked browser
+storage also disables counting. Analytics failures do not interrupt shopping.
+
+Apply migration `0003_visitor_analytics.sql` before deploying the tracking code.
+No new environment variables or external analytics account are required. The
+statistics endpoint requires an approved admin session and is never cached.
+
 ## API surface
 
 | Endpoint | Purpose | Access |
 | --- | --- | --- |
 | `GET /api/admin/dashboard/` | Metrics, catalog, configuration | Approved admin |
+| `GET /api/admin/visitors/` | Unique-browser totals and daily counts | Approved admin |
 | `GET /api/admin/orders/`, `/preorders/`, `/activity/` | Search and paginated records (`q`, `page`) | Approved admin |
 | `POST /api/admin/products/` | Create/edit a product with version check | Approved admin + same origin |
 | `POST /api/admin/inventory/` | Signed unit delta and reason | Approved admin + same origin |
@@ -118,6 +143,7 @@ the new separate-delivery setting applies to ECPay.
 | `POST /api/admin/reconcile/` | Retrieve current ECPay/Stripe payment status | Approved admin + same origin |
 | `PATCH /api/admin/settings/` | Set delivery per unit; open/close reservations or checkout | Approved admin + same origin |
 | `GET /api/store/catalog/` | Active catalog and availability flags | Public |
+| `POST /api/store/visit/` | Deduplicated public-page visit | Same origin + rate limit + privacy filters |
 | `POST /api/store/preorders/` | Unpaid reservation request | Open store + same origin + rate limit |
 | `POST /api/store/checkout/` | Signed ECPay hosted-card form | Open store + same origin + rate limit |
 | `POST /api/webhooks/ecpay/` | Verify payment and update order | ECPay checksum + server query |

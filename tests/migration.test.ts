@@ -24,5 +24,9 @@ test('ECPay migration preserves populated legacy orders, stock and settings', as
     for (const key of Object.keys(after)) assert.equal(embedded[key], after[key], `Embedded migration preserves ${key}`);
     assert.equal(embedded.ecpay_integration, 'aio');
     assert.equal((await client.execute('SELECT * FROM embedded_checkouts')).rows.length, 0);
+    for (const statement of readFileSync('drizzle/0003_visitor_analytics.sql', 'utf8').split('--> statement-breakpoint')) await client.execute(statement);
+    assert.deepEqual((await client.execute('SELECT * FROM orders')).rows[0], embedded);
+    assert.equal((await client.execute('SELECT reserved FROM products')).rows[0].reserved, 2);
+    assert.equal((await client.execute('SELECT * FROM visitor_days')).rows.length, 0);
   } finally { client.close(); }
 });

@@ -22,6 +22,13 @@
       "when": 1792912880409,
       "tag": "0002_plain_captain_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792916986987,
+      "tag": "0003_visitor_analytics",
+      "breakpoints": true
     }
   ]
 }

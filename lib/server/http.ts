@@ -45,7 +45,7 @@ export function apiError(error: unknown) {
   console.error('Store request failed:', error instanceof Error ? error.name : 'UnknownError');
   return json({ error: 'The request could not be completed. Please try again.' }, 500);
 }
-export async function limitPublicRequest(request: Request, scope: string) {
+export async function limitPublicRequest(request: Request, scope: string, maxRequests = 8) {
   const secret = process.env.BETTER_AUTH_SECRET;
   if (!secret) throw new StoreError(503, 'The store is not configured yet.');
   // Vercel overwrites x-real-ip. On another host, configure a trusted proxy to do so.
@@ -55,5 +55,5 @@ export async function limitPublicRequest(request: Request, scope: string) {
   const result = await getDb().run(sql`INSERT INTO rate_limit (id, key, count, last_request) VALUES (${key}, ${key}, 1, ${bucket})
     ON CONFLICT(key) DO UPDATE SET count = CASE WHEN last_request = ${bucket} THEN count + 1 ELSE 1 END, last_request = ${bucket}
     RETURNING count`);
-  if (Number(result.rows[0]?.count) > 8) throw new StoreError(429, 'Too many requests. Please wait a minute and try again.');
+  if (Number(result.rows[0]?.count) > maxRequests) throw new StoreError(429, 'Too many requests. Please wait a minute and try again.');
 }

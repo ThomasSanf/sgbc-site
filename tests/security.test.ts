@@ -6,7 +6,8 @@ import { migrate } from 'drizzle-orm/libsql/migrator';
 import Stripe from 'stripe';
 import { getDb } from '../lib/server/db';
 import { getAuth } from '../lib/server/auth';
-import { session, user } from '../lib/server/schema';
+import { session, user, visitorDays } from '../lib/server/schema';
+import { POST as visitorPost } from '../app/api/store/visit/route';
 import { GET, POST } from '../app/api/admin/[resource]/route';
 import { POST as authPost } from '../app/api/auth/[...all]/route';
 import { POST as publicPost } from '../app/api/store/[resource]/route';
@@ -47,6 +48,16 @@ test('authenticated admin can read data, and responses are never cached', async 
   const response = await GET(req('/api/admin/dashboard/'), ctx('dashboard'));
   assert.equal(response.status, 200); assert.match(response.headers.get('cache-control') ?? '', /no-store/);
   assert.equal((await response.json()).orderCount, 0);
+});
+
+test('visitor totals are admin-only and signed-in admin storefront visits are excluded', async () => {
+  assert.equal((await GET(req('/api/admin/visitors/', 'GET', undefined, { cookie: '' }), ctx('visitors'))).status, 401);
+  assert.equal((await GET(req('/api/admin/visitors/', 'GET', undefined, { cookie: 'better-auth.session_token=forged' }), ctx('visitors'))).status, 401);
+  const response = await GET(req('/api/admin/visitors/'), ctx('visitors'));
+  assert.equal(response.status, 200); assert.match(response.headers.get('cache-control') ?? '', /no-store/);
+  assert.equal((await response.json()).last30Days, 0);
+  const ignored = await visitorPost(req('/api/store/visit/', 'POST', { visitorId: crypto.randomUUID(), path: '/' }, { origin, 'user-agent': 'Mozilla/5.0 Chrome/131.0' }));
+  assert.equal(ignored.status, 204); assert.equal(await db.$count(visitorDays), 0);
 });
 test('CSRF protection rejects foreign or absent origins even with a valid session', async () => {
   assert.equal((await POST(req('/api/admin/products/', 'POST', {}), ctx('products'))).status, 403);

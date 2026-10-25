@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { SalesPolicyContent } from '@/components/sales-policy-content';
 import { salesPolicy } from '@/lib/sales-policy';
+import { VisitorPrivacy } from '@/components/visitor-tracker';
 
 export const dynamicParams = false;
 export function generateStaticParams() { return [{ locale: 'en' }, { locale: 'zh-TW' }]; }
@@ -31,6 +32,7 @@ export default async function SalesPolicyPage({ params }: { params: Promise<{ lo
       <p className="sales-policy-introduction">{copy.introduction}</p>
       <SalesPolicyContent locale={locale}/>
       <Link className="text-link sales-policy-back" href="/">← {copy.back}</Link>
+      <VisitorPrivacy locale={locale}/>
     </main>
   </div>;
 }

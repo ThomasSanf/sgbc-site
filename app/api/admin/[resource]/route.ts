@@ -5,6 +5,7 @@ import { adjustInventory, createReservation, dashboardData, fulfillOrder, listRe
 import { checkoutInput, fulfillInput, inventoryInput, preorderUpdate, productInput, reservationInput, settingsInput, StoreError } from '@/lib/server/validation';
 import { createCheckout, reconcileOrder } from '@/lib/server/payments';
 import { z } from 'zod';
+import { visitorStats } from '@/lib/server/visitor-analytics';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 type Context = { params: Promise<{ resource: string }> };
@@ -13,6 +14,7 @@ export async function GET(request: Request, context: Context) {
     await requireAdmin(request);
     const { resource } = await context.params;
     if (resource === 'dashboard') return json({ ...await dashboardData(getDb()), integrations: integrationStatus() });
+    if (resource === 'visitors') return json(await visitorStats(getDb()));
     const url = new URL(request.url);
     const page = z.coerce.number().int().min(1).max(100000).parse(url.searchParams.get('page') ?? 1);
     const query = z.string().max(120).parse(url.searchParams.get('q') ?? '');
