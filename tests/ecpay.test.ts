@@ -10,6 +10,7 @@ import { reserveEcpayCheckout, applyEcpayResult } from '../lib/server/ecpay-stor
 import { checkMacValue, verifyEcpayFields, parseEcpayForm, ecpayCheckout, ecpayConfig, taipeiTradeDate, type EcpayConfig, type EcpayFields } from '../lib/server/ecpay';
 import { ecpayConfigured, paymentProvider, ecpayEnvironment } from '../lib/server/config';
 import { SANDBOX_PRODUCT_ID, SANDBOX_SETTINGS_ID, publicEcpaySandbox } from '../lib/server/sandbox';
+import { shippingInput } from '../lib/server/validation';
 import { POST as notify } from '../app/api/webhooks/ecpay/route';
 import { POST as browserReturn } from '../app/api/store/ecpay-return/route';
 import { POST as checkout, GET as catalog } from '../app/api/store/[resource]/route';
@@ -150,6 +151,31 @@ test('public checkout validates origins, requires acknowledgment, and returns a 
   const data = await response.json(); assert.equal(data.provider, 'ecpay'); assert.equal(data.fields.ChoosePayment, 'Credit');
   verifyEcpayFields(data.fields, config);
 });
+test('delivery country and postal-code validation allow Taiwan, Japan and Singapore only', () => {
+  for (const [country, postalCode] of [['TW', '100'], ['TW', '100001'], ['JP', '100-0001'], ['JP', '1000001'], ['SG', '018956']]) {
+    assert.equal(shippingInput.safeParse({ ...shipping, country, postalCode }).success, true);
+  }
+  for (const [country, postalCode] of [['FR', '75001'], ['US', '10001'], ['TW', '1000001'], ['JP', '100'], ['SG', '01895']]) {
+    assert.equal(shippingInput.safeParse({ ...shipping, country, postalCode }).success, false);
+  }
+});
+
+test('international sandbox orders retain the country and cannot use the Taiwan rate for live payment', async () => {
+  const stage = { ...config, environment: 'stage' as const };
+  for (const [country, postalCode] of [['JP', '100-0001'], ['SG', '018956']]) {
+    const input = { ...payload(), shipping: { ...shipping, country, postalCode } };
+    await assert.rejects(reserveEcpayCheckout(db, input, config), /Delivery pricing/);
+    const order = await reserveEcpayCheckout(db, input, stage);
+    assert.equal(JSON.parse(order.shippingAddress!).country, country);
+    assert.equal(order.shippingFee, 8000);
+    assert.equal(order.total, 558000);
+    assert.equal(ecpayCheckout(order, stage).fields.ItemName, 'SGBC Rev C x 1#Delivery 80 TWD');
+    assert.equal((await reserveEcpayCheckout(db, input, stage)).id, order.id);
+    const changed = country === 'JP' ? { country: 'SG', postalCode: '018956' } : { country: 'JP', postalCode: '100-0001' };
+    await assert.rejects(reserveEcpayCheckout(db, { ...input, shipping: { ...shipping, ...changed } }, stage));
+  }
+});
+
 test('simultaneous attempts for the last unit cannot oversell the allocation', async () => {
   const [product] = await db.select().from(products).where(eq(products.id, productId));
   await db.update(products).set({ stock: product.reserved + 1 }).where(eq(products.id, productId));

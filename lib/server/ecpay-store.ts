@@ -6,6 +6,7 @@ import { orders, products, settings, auditEvents, inventoryEvents, webhookEvents
 import { paidPreorderInput, StoreError } from './validation';
 import { verifyEcpayFields, type EcpayConfig, type EcpayFields } from './ecpay';
 import { publicSandboxMode, SANDBOX_PRODUCT_ID, checkoutSettingsId } from './sandbox';
+import { deliveryFeePerUnit } from '../shipping';
 
 function assertAllocation(productId: string, config: EcpayConfig) {
   if ((publicSandboxMode() && (config.environment !== 'stage' || productId !== SANDBOX_PRODUCT_ID)) || (productId === SANDBOX_PRODUCT_ID && config.environment !== 'stage')) throw new StoreError(409, 'Test checkout cannot use live inventory.');
@@ -19,6 +20,8 @@ export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, conf
   return db.transaction(async tx => {
     const [availability] = await tx.select().from(settings).where(eq(settings.id, checkoutSettingsId()));
     if (!availability?.checkoutOpen || availability.shippingFeePerUnit === null) throw new StoreError(409, 'Checkout is not open yet.');
+    const deliveryRate = deliveryFeePerUnit(shipping.country, availability.shippingFeePerUnit, config.environment === 'stage');
+    if (deliveryRate === null) throw new StoreError(409, 'Delivery pricing for this destination is not available yet.');
     const [existing] = await tx.select().from(orders).where(eq(orders.requestKey, data.requestKey));
     if (existing) {
       if (existing.paymentProvider !== 'ecpay' || existing.paymentEnvironment !== config.environment || existing.ecpayMerchantId !== config.merchantId || existing.productId !== data.productId || existing.name !== data.name || existing.email !== data.email || existing.quantity !== data.quantity || existing.shippingAddress !== shippingAddress || existing.total !== expectedTotal || existing.locale !== data.locale || existing.status !== 'pending') throw new StoreError(409, 'Use a new checkout request.');
@@ -27,7 +30,7 @@ export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, conf
     }
     const [product] = await tx.select().from(products).where(eq(products.id, data.productId));
     if (!product || product.status !== 'active' || product.price <= 0 || product.currency !== 'TWD' || product.price % 100 !== 0) throw new StoreError(409, 'This product is not available for ECPay checkout.');
-    const shippingFee = availability.shippingFeePerUnit * data.quantity, total = product.price * data.quantity + shippingFee;
+    const shippingFee = deliveryRate * data.quantity, total = product.price * data.quantity + shippingFee;
     if (total !== expectedTotal) throw new StoreError(409, 'The price or shipping charge changed. Review your total again.');
     if (total > 19_999_900) throw new StoreError(409, 'This order exceeds the card checkout limit.');
     const [held] = await tx.update(products).set({ reserved: sql`${products.reserved} + ${data.quantity}`, updatedAt: Date.now() }).where(and(eq(products.id, product.id), sql`${products.stock} - ${products.reserved} >= ${data.quantity}`)).returning();

@@ -47,7 +47,7 @@ export function ecpayCheckout(order: typeof orders.$inferSelect, config: EcpayCo
   const fields: EcpayFields = {
     MerchantID: config.merchantId, MerchantTradeNo: order.ecpayMerchantTradeNo,
     MerchantTradeDate: taipeiTradeDate(order.createdAt), PaymentType: 'aio', TotalAmount: String(order.total / 100),
-    TradeDesc: 'SGBC console preorder', ItemName: `SGBC Rev C x ${order.quantity}#Taiwan delivery ${order.shippingFee / 100} TWD`,
+    TradeDesc: 'SGBC console preorder', ItemName: `SGBC Rev C x ${order.quantity}#Delivery ${order.shippingFee / 100} TWD`,
     ReturnURL: `${origin}/api/webhooks/ecpay/`, OrderResultURL: `${origin}/api/store/ecpay-return/`,
     ClientBackURL: `${origin}/checkout/result/?result=returned&locale=${order.locale}`,
     ChoosePayment: 'Credit', IgnorePayment: 'ApplePay#DigitalPayment', EncryptType: '1', UnionPay: '2', BindingCard: '0',
