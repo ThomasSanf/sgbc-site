@@ -4,7 +4,8 @@ import { randomBytes } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { migrate } from 'drizzle-orm/libsql/migrator';
 import { getDb } from '../lib/server/db';
-import { products, settings, orders, embeddedCheckouts } from '../lib/server/schema';
+import { products, settings, orders, embeddedCheckouts, auditEvents } from '../lib/server/schema';
+import { SALES_POLICY_VERSION } from '../lib/sales-policy-version';
 import { encryptEcpg, decryptEcpg, decodeEcpgEnvelope, createEmbeddedCheckout, completeEmbeddedPayment, cancelEmbeddedCheckout, handleEcpgNotification, verificationUrl } from '../lib/server/ecpg';
 import { publicEcpaySandbox } from '../lib/server/sandbox';
 import { applyEcpayResult } from '../lib/server/ecpay-store';
@@ -17,7 +18,7 @@ process.env.BETTER_AUTH_URL = 'http://127.0.0.1:3000';
 process.env.BETTER_AUTH_SECRET = randomBytes(48).toString('hex');
 delete process.env.PUBLIC_ECPAY_SANDBOX;
 const db = getDb(), config = publicEcpaySandbox, productId = crypto.randomUUID();
-const input = () => ({ productId, requestKey: crypto.randomUUID(), name: 'Test buyer', email: 'test@example.test', quantity: 1, expectedTotal: 558000, acknowledged: true, locale: 'en', shipping: { phone: '0900000000', postalCode: '100', city: '臺北市', district: '中正區', address: 'Test address 123', country: 'TW' } });
+const input = () => ({ productId, requestKey: crypto.randomUUID(), name: 'Test buyer', email: 'test@example.test', quantity: 1, expectedTotal: 558000, acknowledged: true, policyAccepted: true, policyVersion: SALES_POLICY_VERSION, locale: 'en', shipping: { phone: '0900000000', postalCode: '100', city: '臺北市', district: '中正區', address: 'Test address 123', country: 'TW' } });
 const envelope = (data: Record<string, unknown>) => ({ MerchantID: config.merchantId, TransCode: 1, Data: encryptEcpg({ MerchantID: config.merchantId, ...data }, config) });
 const originalFetch = globalThis.fetch;
 let calls: Array<{ url: string; data: Record<string, unknown> }> = [];
@@ -41,6 +42,18 @@ before(async () => {
   await db.insert(settings).values({ id: 'store', checkoutOpen: true, shippingFeePerUnit: 8000, updatedAt: 1 });
 });
 after(() => { globalThis.fetch = originalFetch; db.$client.close(); });
+
+void test('an older embedded checkout cannot submit a payment without recorded policy acceptance', async () => {
+  mockProvider();
+  const raw = input(), checkout = await createEmbeddedCheckout(db, raw, config);
+  const consent = (await db.select().from(auditEvents).where(eq(auditEvents.entityId, checkout.orderId))).find(event => event.action === 'order.policy_accepted')!;
+  assert.deepEqual(JSON.parse(consent.detail), { policyVersion: SALES_POLICY_VERSION, locale: 'en' });
+  await db.delete(auditEvents).where(eq(auditEvents.id, consent.id));
+  await assert.rejects(completeEmbeddedPayment(db, { orderId: checkout.orderId, requestKey: raw.requestKey, payToken: 'test-pay-token-1234567890' }, config), /accept the current sales policy/);
+  assert.equal(calls.length, 1); // Only GetTokenbyTrade; no payment request reached ECPay.
+  assert.equal((await db.select().from(embeddedCheckouts).where(eq(embeddedCheckouts.orderId, checkout.orderId)))[0].paymentStartedAt, null);
+  await cancelEmbeddedCheckout(db, { orderId: checkout.orderId, requestKey: raw.requestKey });
+});
 
 void test('ECPG encryption matches the official AES vector and rejects malformed or cross-merchant responses', () => {
   const ciphertext = 'o4TJSHkQBM1bogbn5BNFRofCVTfsQjoqv/TX8DKn757fe5AoYzoalYmrMsGXTiwxGpI8NsE2vu4tScAwISx8kw==';

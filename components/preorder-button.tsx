@@ -7,9 +7,13 @@ import { siteCopy, type Locale } from '@/lib/site-copy';
 import type { CheckoutDestination, EmbeddedCheckout, StorefrontCatalog } from '@/lib/storefront-types';
 import { EmbeddedPayment } from '@/components/embedded-payment';
 import { taiwanCities, taiwanCity, taiwanDistrict, upcomingDeliveryCountries } from '@/lib/shipping';
+import { salesPolicy } from '@/lib/sales-policy';
+import { SALES_POLICY_VERSION } from '@/lib/sales-policy-version';
+import { SalesPolicyContent } from '@/components/sales-policy-content';
 
 export function PreorderButton({ className = '', locale }: { className?: string; locale: Locale }) {
   const copy = siteCopy[locale].preorder;
+  const policy = salesPolicy[locale];
   const id = useId();
   const [open, setOpen] = useState(false);
   const [catalog, setCatalog] = useState<StorefrontCatalog | null>(null);
@@ -22,6 +26,7 @@ export function PreorderButton({ className = '', locale }: { className?: string;
   const [postalCode, setPostalCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [policyAccepted, setPolicyAccepted] = useState(false);
   const [payment, setPayment] = useState<(EmbeddedCheckout & { requestKey: string }) | null>(null);
   const attempt = useRef<{ fingerprint: string; key: string } | null>(null);
   const product = catalog?.products.find(item => item.currency === 'TWD' && item.price > 0);
@@ -54,9 +59,11 @@ export function PreorderButton({ className = '', locale }: { className?: string;
     if (busy || !ready || !product || deliveryRate === null) return;
     const form = new FormData(event.currentTarget);
     const value = (key: string) => String(form.get(key) ?? '').trim();
+    if (form.get('policyAccepted') !== 'on') { setError(policy.required); return; }
     const payload = {
       productId: product.id, name: value('name'), email: value('email'), quantity: selectedQuantity,
-      locale, expectedTotal: product.price * selectedQuantity + shippingFee, acknowledged: true,
+      locale, expectedTotal: product.price * selectedQuantity + shippingFee, acknowledged: form.get('acknowledged') === 'on',
+      policyAccepted: true, policyVersion: SALES_POLICY_VERSION,
       shipping: { phone: value('phone'), postalCode, city, district, address: value('address'), country: 'TW' },
     };
     setBusy(true);
@@ -105,7 +112,7 @@ export function PreorderButton({ className = '', locale }: { className?: string;
     finally { setBusy(false); }
   }
 
-  return <Dialog open={open} onOpenChange={value => { if (!busy) { if (value) setError(''); setOpen(value); } }}>
+  return <Dialog open={open} onOpenChange={value => { if (!busy) { if (value) { setError(''); if (!payment) setPolicyAccepted(false); } setOpen(value); } }}>
     <DialogTrigger className={`preorder-button ${className}`}>{copy.button} <ArrowUpRight size={18} aria-hidden="true"/></DialogTrigger>
     <DialogContent className={`preorder-dialog${payment ? ' preorder-payment-dialog' : ''}`} showCloseButton={false}>
       <div className="preorder-top"><span className="mono preorder-eyebrow"><span className="status-dot"/> {copy.eyebrow}</span><DialogClose className="preorder-close" aria-label={copy.close} disabled={busy}><X size={20}/></DialogClose></div>
@@ -124,15 +131,20 @@ export function PreorderButton({ className = '', locale }: { className?: string;
           <label htmlFor={`${id}-postal`}>{copy.postalCode}<input id={`${id}-postal`} name="postalCode" inputMode="numeric" autoComplete="postal-code" required value={postalCode} onChange={event => setPostalCode(event.target.value)} pattern="[0-9]{3}([0-9]{2,3})?" maxLength={6}/></label>
           <label htmlFor={`${id}-address`}>{copy.address}<input id={`${id}-address`} name="address" autoComplete="street-address" required minLength={5} maxLength={240}/></label>
           <div className="preorder-totals"><div><span>{copy.subtotal}</span><span>{money(product!.price * selectedQuantity)}</span></div><div><span>{copy.shipping}</span><span>{deliveryRate === null ? '—' : money(shippingFee)}</span></div><div className="preorder-total"><strong>{copy.total}</strong><strong>{deliveryRate === null ? '—' : money(product!.price * selectedQuantity + shippingFee)}</strong></div></div>
-          <label className="preorder-acknowledgement"><input type="checkbox" required/>{copy.acknowledgement}</label>
+          <label className="preorder-acknowledgement"><input name="acknowledged" type="checkbox" required/>{copy.acknowledgement}</label>
+          <details className="preorder-policy">
+            <summary>{policy.read}</summary>
+            <div className="preorder-policy-body"><p className="sales-policy-date">{policy.updated}</p><SalesPolicyContent locale={locale} heading="h3"/><a href={`/sales-policy/${locale}/`} target="_blank" rel="noopener noreferrer">{policy.full} ↗</a></div>
+          </details>
+          <label className="preorder-acknowledgement"><input name="policyAccepted" type="checkbox" required checked={policyAccepted} onChange={event => setPolicyAccepted(event.target.checked)}/>{policy.accept}</label>
           {error && <p className="preorder-error" role="alert">{error}</p>}
-          <button className="preorder-button preorder-submit" type="submit" disabled={deliveryRate === null}>{busy ? copy.connecting : copy.pay} {busy ? <LoaderCircle size={18} className="preorder-spinner"/> : <ArrowUpRight size={18}/>}</button>
+          <button className="preorder-button preorder-submit" type="submit" disabled={deliveryRate === null || !policyAccepted}>{busy ? copy.connecting : copy.pay} {busy ? <LoaderCircle size={18} className="preorder-spinner"/> : <ArrowUpRight size={18}/>}</button>
           <p className="preorder-privacy"><LockKeyhole size={13}/>{copy.privacy}</p>
         </fieldset>
       </form>}
       </div>
       {payment && <EmbeddedPayment key={`${payment.token}:${locale}`} checkout={payment} requestKey={payment.requestKey} locale={locale} onBusy={setBusy} onEdit={() => {
-        setPayment(null); attempt.current = null; setError('');
+        setPayment(null); attempt.current = null; setError(''); setPolicyAccepted(false);
         try { sessionStorage.removeItem('sgbc-checkout-attempt'); } catch { /* Storage is optional. */ }
       }}/>}
     </DialogContent>

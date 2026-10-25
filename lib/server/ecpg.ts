@@ -11,6 +11,7 @@ import { applyVerifiedEcpayResult, matchVerifiedEcpayOrder, reserveEcpayCheckout
 import { publicSandboxMode } from './sandbox';
 import { readBody } from './http';
 import type { EmbeddedCheckout } from '../storefront-types';
+import { requirePolicyAcceptance } from './policy-consent';
 
 // Live Embedded Checkout must be activated by ECPay before enabling this setting.
 export function embeddedEcpayEnabled() { return publicSandboxMode() || process.env.ECPAY_CHECKOUT === 'embedded'; }
@@ -122,6 +123,7 @@ export async function completeEmbeddedPayment(db: StoreDatabase, raw: unknown, c
   const [session] = await db.select().from(embeddedCheckouts).where(eq(embeddedCheckouts.orderId, order.id));
   if (!session?.token) throw new StoreError(409, 'The payment form is not ready.');
   if (session.paymentStartedAt) return { url: session.redirectUrl ?? embeddedResultUrl(order.locale) };
+  await requirePolicyAcceptance(db, order.id, order.locale as 'en' | 'zh-TW');
   if (session.expiresAt <= Date.now()) throw new StoreError(409, 'The payment session expired. Please contact the store.');
   const [claimed] = await db.update(embeddedCheckouts).set({ paymentStartedAt: Date.now() }).where(and(eq(embeddedCheckouts.orderId, order.id), isNull(embeddedCheckouts.paymentStartedAt))).returning();
   if (!claimed) return { url: embeddedResultUrl(order.locale) };

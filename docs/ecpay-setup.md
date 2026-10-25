@@ -173,6 +173,18 @@ and does not promise an email.
 
 ## Verification
 
+The sales policy is available at `/sales-policy/en/` and `/sales-policy/zh-TW/`,
+with the same text expandable in checkout. Both the browser and checkout API require
+explicit acceptance of the current version (`lib/sales-policy-version.ts`). Each
+new order records `order.policy_accepted` with the version, language and server time
+in Activity, in the same transaction as its inventory hold. Retries do not duplicate
+consent. An older embedded session without recorded consent must return to delivery
+details before submitting a payment. Already-submitted payments still reconcile.
+No database migration is needed. Keep earlier policy text in Git and increment the
+version when terms change. Before live sales, complete the seller identity,
+business/returns address, support contact and delivery commitments, and obtain a
+Taiwan legal review. Publishing this policy does not enable real payments.
+
 `pnpm test` covers the official checksum and AES vectors, forged messages, price tampering,
 checkout gating, duplicate callbacks, stock allocation, migration compatibility,
 browser-return safety and sandbox isolation, as well as existing admin security.

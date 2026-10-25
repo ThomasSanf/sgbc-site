@@ -252,3 +252,31 @@ html[lang='zh-TW'] h1,html[lang='zh-TW'] h2,html[lang='zh-TW'] h3 { letter-spaci
 html[lang='zh-TW'] .closing>a { letter-spacing:-.025em; }
 @media (max-width:760px) { .header-actions { gap:8px; } html[lang='zh-TW'] .hero-copy h1 { font-size:clamp(42px,10vw,72px); } }
 @media (max-width:380px) { .site-header .mobile-header-preorder { padding:10px; gap:8px; } }
+
+.footer-policy-link { font-size:13px; white-space:nowrap; text-decoration:underline; text-underline-offset:4px; }
+.footer-policy-link:hover { color:var(--accent); }
+.preorder-policy { border:1px solid var(--line); background:#151513; }
+.preorder-policy summary { padding:15px; cursor:pointer; font-size:14px; font-weight:600; }
+.preorder-policy summary::marker { color:var(--accent); }
+.preorder-policy-body { padding:0 16px 20px; }
+.preorder-policy-body>a { display:inline-block; margin-top:20px; font-size:13px; text-decoration:underline; text-underline-offset:4px; }
+.sales-policy-content section+section { margin-top:28px; }
+.sales-policy-content h2,.sales-policy-content h3 { font-size:20px; line-height:1.4; letter-spacing:-.02em; margin:0 0 10px; }
+.sales-policy-content p { font-size:16px; line-height:1.85; color:#c0c0b9; margin:0; }
+.sales-policy-content p+p { margin-top:14px; }
+.sales-policy-content .sales-policy-rights { margin-top:32px; padding-top:24px; border-top:1px solid var(--line); color:var(--ink); }
+.preorder-policy .sales-policy-content h3 { font-size:15px; }
+.preorder-policy .sales-policy-content p { font-size:14px; line-height:1.8; }
+.preorder-policy .sales-policy-date { margin:8px 0 22px; font-size:12px; }
+.preorder-submit:disabled { opacity:.45; cursor:not-allowed; }
+.sales-policy-page[lang='zh-TW'] { font-family:Arial,'PingFang TC','Microsoft JhengHei',sans-serif; }
+.sales-policy-header { display:flex; justify-content:space-between; align-items:center; gap:24px; padding:22px 28px; border-bottom:1px solid var(--line); }
+.sales-policy-language { padding:10px 16px; border:1px solid var(--line); font-size:14px; }
+.sales-policy-language:hover { border-color:var(--ink); }
+.sales-policy-document { max-width:800px; margin:0 auto; padding:72px 28px 80px; }
+.sales-policy-date { color:var(--muted); font-size:12px; margin-bottom:20px; }
+.sales-policy-document h1 { font-size:clamp(38px,7vw,68px); letter-spacing:-.05em; line-height:1.12; }
+.sales-policy-introduction { color:var(--muted); margin:22px 0 44px; font-size:18px; line-height:1.7; }
+.sales-policy-back { margin-top:40px; }
+@media (max-width:460px) { .sales-policy-header { padding:18px; } .sales-policy-document { padding:40px 22px 56px; } .sales-policy-introduction { font-size:16px; } .sales-policy-content p { font-size:15px; } }
+@media print { .sales-policy-page { background:white; color:black; } .sales-policy-page p { color:black; } .sales-policy-header,.sales-policy-back { display:none; } .sales-policy-document { padding:0; max-width:none; } .sales-policy-content section { break-inside:avoid; } }

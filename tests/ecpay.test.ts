@@ -4,7 +4,8 @@ import { randomBytes } from 'node:crypto';
 import { eq, sql } from 'drizzle-orm';
 import { migrate } from 'drizzle-orm/libsql/migrator';
 import { getDb } from '../lib/server/db';
-import { orders, products, settings, webhookEvents } from '../lib/server/schema';
+import { orders, products, settings, webhookEvents, auditEvents } from '../lib/server/schema';
+import { SALES_POLICY_VERSION } from '../lib/sales-policy-version';
 import { saveProduct, adjustInventory, dashboardData, fulfillOrder, updateSettings, createReservation, reserveCheckout } from '../lib/server/store';
 import { reserveEcpayCheckout, applyEcpayResult } from '../lib/server/ecpay-store';
 import { checkMacValue, verifyEcpayFields, parseEcpayForm, ecpayCheckout, ecpayConfig, taipeiTradeDate, type EcpayConfig, type EcpayFields } from '../lib/server/ecpay';
@@ -30,7 +31,7 @@ const db = getDb();
 const shipping = { phone: '0912345678', postalCode: '100', city: '臺北市', district: '中正區', address: 'Test address 123', country: 'TW' };
 let productId = '';
 const signed = (fields: EcpayFields, cfg = config) => ({ ...fields, CheckMacValue: checkMacValue(fields, cfg) });
-const payload = (quantity = 1) => ({ productId, name: 'Test buyer', email: 'buyer@example.test', quantity, requestKey: crypto.randomUUID(), shipping, locale: 'zh-TW', expectedTotal: 558000 * quantity, acknowledged: true });
+const payload = (quantity = 1) => ({ productId, name: 'Test buyer', email: 'buyer@example.test', quantity, requestKey: crypto.randomUUID(), shipping, locale: 'zh-TW', expectedTotal: 558000 * quantity, acknowledged: true, policyAccepted: true, policyVersion: SALES_POLICY_VERSION });
 const payment = (order: typeof orders.$inferSelect, extra: EcpayFields = {}, cfg = config) => signed({ MerchantID: cfg.merchantId, MerchantTradeNo: order.ecpayMerchantTradeNo!, TradeNo: randomBytes(8).toString('hex'), TradeAmt: String(order.total / 100), PaymentType: 'Credit_CreditCard', RtnCode: '1', SimulatePaid: '0', CustomField1: order.id, ...extra }, cfg);
 const formRequest = (fields: EcpayFields) => new Request('http://127.0.0.1:3000/api/webhooks/ecpay/', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(fields) });
 const ctx = (resource: string) => ({ params: Promise.resolve({ resource }) });
@@ -41,6 +42,41 @@ before(async () => {
   await updateSettings(db, 'test', { reservationsOpen: false, checkoutOpen: true, shippingFeePerUnit: 8000 }, true);
 });
 after(() => db.$client.close());
+
+test('checkout API rejects missing, unchecked or outdated policy acceptance without reserving stock', async () => {
+  const before = (await db.select().from(products).where(eq(products.id, productId)))[0].reserved;
+  const orderCount = await db.$count(orders), auditCount = await db.$count(auditEvents);
+  for (const consent of [
+    { policyAccepted: undefined, policyVersion: undefined },
+    { policyAccepted: false }, { policyAccepted: 'true' },
+    { policyVersion: undefined }, { policyVersion: 'outdated-policy' },
+  ]) {
+    const response = await checkout(new Request('http://127.0.0.1:3000/api/store/checkout/', {
+      method: 'POST', headers: { 'content-type': 'application/json', origin: 'http://127.0.0.1:3000' },
+      body: JSON.stringify({ ...payload(), ...consent }),
+    }), ctx('checkout'));
+    assert.equal(response.status, 400);
+  }
+  assert.equal((await db.select().from(products).where(eq(products.id, productId)))[0].reserved, before);
+  assert.equal(await db.$count(orders), orderCount);
+  assert.equal(await db.$count(auditEvents), auditCount);
+});
+
+test('policy consent records the version, language and server timestamp once per order', async () => {
+  const raw = payload(), start = Date.now();
+  const order = await reserveEcpayCheckout(db, raw, config);
+  await reserveEcpayCheckout(db, raw, config);
+  const consent = (await db.select().from(auditEvents).where(eq(auditEvents.entityId, order.id))).filter(event => event.action === 'order.policy_accepted');
+  assert.equal(consent.length, 1);
+  assert.deepEqual(JSON.parse(consent[0].detail), { policyVersion: SALES_POLICY_VERSION, locale: 'zh-TW' });
+  assert.ok(consent[0].createdAt >= start && consent[0].createdAt <= Date.now());
+  await db.delete(auditEvents).where(eq(auditEvents.id, consent[0].id));
+  await assert.rejects(reserveEcpayCheckout(db, raw, config), /accept the current sales policy/);
+  // Restore the shared inventory fixture; this test never exposes a payable provider session.
+  await db.delete(auditEvents).where(eq(auditEvents.entityId, order.id));
+  await db.delete(orders).where(eq(orders.id, order.id));
+  await db.update(products).set({ reserved: sql`${products.reserved} - ${raw.quantity}` }).where(eq(products.id, productId));
+});
 
 test('checksum matches the official ECPay example including Chinese and spaces', () => {
   const example = { TradeDesc: '促銷方案', PaymentType: 'aio', MerchantTradeDate: '2023/03/12 15:30:23', MerchantTradeNo: 'ecpay20230312153023', MerchantID: '3002607', ReturnURL: 'https://www.ecpay.com.tw/receive.php', ItemName: 'Apple iphone 15', TotalAmount: '30000', ChoosePayment: 'ALL', EncryptType: '1' };
@@ -232,7 +268,7 @@ test('public sandbox forces test credentials and keeps catalog, inventory, setti
     assert.equal(testProduct.stock, 198); assert.equal(testProduct.reserved, 0);
     await assert.rejects(fulfillOrder(db, 'test', { id: order.id, trackingNumber: 'NO-SHIP' }));
     await assert.rejects(createReservation(db, 'test', { productId: SANDBOX_PRODUCT_ID, name: 'Test buyer', email: 'buyer@example.test', quantity: 1, notes: '' }));
-    await assert.rejects(reserveCheckout(db, { productId: SANDBOX_PRODUCT_ID, name: 'Test buyer', email: 'buyer@example.test', quantity: 1, requestKey: crypto.randomUUID() }));
+    await assert.rejects(reserveCheckout(db, { productId: SANDBOX_PRODUCT_ID, name: 'Test buyer', email: 'buyer@example.test', quantity: 1, requestKey: crypto.randomUUID(), policyAccepted: true, policyVersion: SALES_POLICY_VERSION, locale: 'en' }), /Test checkout must use the ECPay sandbox/);
     delete process.env.PUBLIC_ECPAY_SANDBOX;
     const liveCatalog = await (await catalog(new Request('http://127.0.0.1:3000/api/store/catalog/'), ctx('catalog'))).json();
     assert.equal(liveCatalog.products.some((p: { id: string }) => p.id === SANDBOX_PRODUCT_ID), false);

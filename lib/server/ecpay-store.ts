@@ -6,13 +6,14 @@ import { orders, products, settings, auditEvents, inventoryEvents, webhookEvents
 import { paidPreorderInput, StoreError } from './validation';
 import { verifyEcpayFields, type EcpayConfig, type EcpayFields } from './ecpay';
 import { publicSandboxMode, SANDBOX_PRODUCT_ID, checkoutSettingsId } from './sandbox';
+import { recordPolicyAcceptance, requirePolicyAcceptance } from './policy-consent';
 
 function assertAllocation(productId: string, config: EcpayConfig) {
   if ((publicSandboxMode() && (config.environment !== 'stage' || productId !== SANDBOX_PRODUCT_ID)) || (productId === SANDBOX_PRODUCT_ID && config.environment !== 'stage')) throw new StoreError(409, 'Test checkout cannot use live inventory.');
 }
 
 export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, config: EcpayConfig, integration: 'aio' | 'embedded' = 'aio') {
-  const { shipping, acknowledged: _acknowledged, expectedTotal, ...data } = paidPreorderInput.parse(raw);
+  const { shipping, acknowledged: _acknowledged, policyAccepted: _policyAccepted, policyVersion: _policyVersion, expectedTotal, ...data } = paidPreorderInput.parse(raw);
   assertAllocation(data.productId, config);
   if (!publicSandboxMode() && data.productId === SANDBOX_PRODUCT_ID) throw new StoreError(409, 'Public test checkout is closed.');
   const shippingAddress = JSON.stringify(shipping);
@@ -24,6 +25,7 @@ export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, conf
       if (existing.ecpayIntegration !== integration) throw new StoreError(409, 'This checkout uses a different payment integration.');
       if (existing.paymentProvider !== 'ecpay' || existing.paymentEnvironment !== config.environment || existing.ecpayMerchantId !== config.merchantId || existing.productId !== data.productId || existing.name !== data.name || existing.email !== data.email || existing.quantity !== data.quantity || existing.shippingAddress !== shippingAddress || existing.total !== expectedTotal || existing.locale !== data.locale || existing.status !== 'pending') throw new StoreError(409, 'Use a new checkout request.');
       // Never mint another payable trade number to recover an ambiguous browser/network failure.
+      await requirePolicyAcceptance(tx, existing.id, data.locale);
       return existing;
     }
     const [product] = await tx.select().from(products).where(eq(products.id, data.productId));
@@ -35,6 +37,7 @@ export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, conf
     if (!held) throw new StoreError(409, 'This quantity is no longer available.');
     const now = Date.now(), id = crypto.randomUUID();
     const [order] = await tx.insert(orders).values({ ...data, id, productName: product.name, sku: product.sku, unitPrice: product.price, total, shippingFee, currency: 'TWD', shippingAddress, paymentProvider: 'ecpay', paymentEnvironment: config.environment, ecpayMerchantId: config.merchantId, ecpayMerchantTradeNo: `S${randomBytes(9).toString('hex')}`, ecpayIntegration: integration, createdAt: now, updatedAt: now }).returning();
+    await recordPolicyAcceptance(tx, id, data.locale);
     await tx.insert(auditEvents).values({ id: crypto.randomUUID(), actor: 'checkout', action: 'order.created', entityId: id, detail: `${data.quantity} × ${product.name} · ECPay ${config.environment} · ${publicSandboxMode() ? 'test checkout acknowledged; no payment or shipment' : 'customer acknowledged preorder without shipping date'}`, createdAt: now });
     return order;
   });

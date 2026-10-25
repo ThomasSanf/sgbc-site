@@ -2,12 +2,14 @@
 
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import Link from 'next/link';
 import { ArrowDown, ArrowUpRight, ArrowUp, Plus, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { PreorderButton } from '@/components/preorder-button';
 import type { ConsoleView } from './console-scene';
 import { languageStorageKey, siteCopy, type Locale } from '@/lib/site-copy';
+import { salesPolicy } from '@/lib/sales-policy';
 
 const ConsoleScene = dynamic(() => import('./console-scene'), { ssr: false });
 function LazyScene({ view, resetKey, locale }: { view: ConsoleView; resetKey: number; locale: Locale }) {
@@ -109,6 +111,6 @@ export default function ProductPage() {
       </section>
       <section className="closing"><p className="mono">{copy.closing.eyebrow}</p><a href="#console" aria-label={copy.preorder.close}>{copy.closing.title}<ArrowUpRight aria-hidden="true"/></a><div className="closing-bottom mono"><span>{copy.closing.project}</span><span>{copy.closing.tagline}</span></div></section>
     </main>
-    <footer className="site-footer"><a className="wordmark" href="#console" aria-label={copy.home}>sgbc<span>™</span></a><p>{copy.footer.trademarks}<br/>{copy.footer.independent}</p><a className="mono" href="#console">{copy.footer.top} <ArrowUp size={16}/></a></footer>
+    <footer className="site-footer"><a className="wordmark" href="#console" aria-label={copy.home}>sgbc<span>™</span></a><p>{copy.footer.trademarks}<br/>{copy.footer.independent}</p><Link className="footer-policy-link" href={`/sales-policy/${locale}/`}>{salesPolicy[locale].title}</Link><a className="mono" href="#console">{copy.footer.top} <ArrowUp size={16}/></a></footer>
   </>;
 }

@@ -5,6 +5,8 @@ import { eq } from 'drizzle-orm';
 import { connectDatabase } from '../lib/server/db';
 import { products, orders, auditEvents, inventoryEvents } from '../lib/server/schema';
 import { adjustInventory, applyPayment, applyRefund, createReservation, dashboardData, fulfillOrder, reserveCheckout, saveProduct, updateSettings } from '../lib/server/store';
+import { SALES_POLICY_VERSION } from '../lib/sales-policy-version';
+const consent = { policyAccepted: true, policyVersion: SALES_POLICY_VERSION, locale: 'en' };
 import { isApprovedAdmin } from '../lib/server/config';
 import { productInput, StoreError } from '../lib/server/validation';
 
@@ -54,7 +56,8 @@ test('checkout cannot open without configured payment integration', async () => 
 let firstOrderId: string;
 test('checkout holds stock atomically and repeated requests do not double-reserve', async () => {
   await updateSettings(db, actor, { reservationsOpen: true, checkoutOpen: true }, true);
-  const payload = { productId, name: 'Test buyer', email: 'buyer@example.test', quantity: 3, requestKey: crypto.randomUUID() };
+  const payload = { ...consent, productId, name: 'Test buyer', email: 'buyer@example.test', quantity: 3, requestKey: crypto.randomUUID() };
+  await assert.rejects(reserveCheckout(db, { ...payload, policyAccepted: false }));
   const first = await reserveCheckout(db, payload); firstOrderId = first.id;
   const repeated = await reserveCheckout(db, payload);
   assert.equal(repeated.id, first.id);
@@ -84,7 +87,7 @@ test('fulfillment needs paid status and a tracking number', async () => {
   await assert.rejects(fulfillOrder(db, actor, { id: firstOrderId, trackingNumber: 'SECOND-SHIPMENT' }));
 });
 test('expired checkout releases its hold once without reducing physical stock', async () => {
-  const order = await reserveCheckout(db, { productId, name: 'Other buyer', email: 'other@example.test', quantity: 1, requestKey: crypto.randomUUID() });
+  const order = await reserveCheckout(db, { ...consent, productId, name: 'Other buyer', email: 'other@example.test', quantity: 1, requestKey: crypto.randomUUID() });
   await assert.rejects(fulfillOrder(db, actor, { id: order.id, trackingNumber: 'UNPAID-ORDER' }));
   const expired = { eventId: 'expired-1', eventType: 'checkout.session.expired', orderId: order.id, sessionId: 'cs_test_expired', status: 'cancelled' as const, amount: 0, currency: 'twd' };
   await applyPayment(db, expired); await applyPayment(db, expired);

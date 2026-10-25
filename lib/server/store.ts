@@ -4,6 +4,7 @@ import { auditEvents, inventoryEvents, orders, preorders, products, settings, we
 import { checkoutInput, fulfillInput, inventoryInput, preorderUpdate, productInput, reservationInput, settingsInput, StoreError } from './validation';
 import { paymentProvider } from './config';
 import { publicSandboxMode, SANDBOX_PRODUCT_ID } from './sandbox';
+import { recordPolicyAcceptance, requirePolicyAcceptance } from './policy-consent';
 
 type Tx = Parameters<Parameters<StoreDatabase['transaction']>[0]>[0];
 function audit(tx: Tx, actor: string, action: string, entityId: string, detail: string) {
@@ -78,12 +79,13 @@ export async function updateSettings(db: StoreDatabase, actor: string, raw: unkn
   });
 }
 export async function reserveCheckout(db: StoreDatabase, raw: unknown) {
-  const data = checkoutInput.parse(raw);
+  const { policyAccepted: _policyAccepted, policyVersion: _policyVersion, ...data } = checkoutInput.parse(raw);
   if (publicSandboxMode() || data.productId === SANDBOX_PRODUCT_ID) throw new StoreError(409, 'Test checkout must use the ECPay sandbox.');
   return db.transaction(async tx => {
     const [existing] = await tx.select().from(orders).where(eq(orders.requestKey, data.requestKey));
     if (existing) {
       if (existing.paymentProvider !== 'stripe' || existing.productId !== data.productId || existing.email !== data.email || existing.name !== data.name || existing.quantity !== data.quantity || existing.status !== 'pending') throw new StoreError(409, 'Use a new checkout request.');
+      await requirePolicyAcceptance(tx, existing.id, data.locale);
       return existing;
     }
     const [config] = await tx.select().from(settings).where(eq(settings.id, 'store'));
@@ -93,6 +95,7 @@ export async function reserveCheckout(db: StoreDatabase, raw: unknown) {
     if (!product) throw new StoreError(409, 'This quantity is no longer available.');
     const now = Date.now();
     const [order] = await tx.insert(orders).values({ ...data, id: crypto.randomUUID(), productName: product.name, sku: product.sku, unitPrice: product.price, total: product.price * data.quantity, currency: product.currency, createdAt: now, updatedAt: now }).returning();
+    await recordPolicyAcceptance(tx, order.id, data.locale);
     await audit(tx, 'checkout', 'order.created', order.id, `${data.quantity} × ${product.name}`); return order;
   });
 }

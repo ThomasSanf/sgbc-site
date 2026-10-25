@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { taiwanDistrict } from '../shipping';
+import { SALES_POLICY_VERSION } from '../sales-policy-version';
 export const productInput = z.object({
   id: z.string().uuid().optional(), version: z.number().int().positive().optional(),
   name: z.string().trim().min(1).max(120), sku: z.string().trim().min(1).max(60).regex(/^[a-zA-Z0-9_-]+$/),
@@ -11,7 +12,10 @@ export const reservationInput = z.object({ productId: z.string().uuid(), name: z
 export const preorderUpdate = z.object({ id: z.string().uuid(), status: z.enum(['new', 'contacted', 'cancelled']), notes: z.string().trim().max(2000) }).strict();
 export const fulfillInput = z.object({ id: z.string().uuid(), trackingNumber: z.string().trim().min(3).max(120) }).strict();
 export const settingsInput = z.object({ reservationsOpen: z.boolean(), checkoutOpen: z.boolean(), shippingFeePerUnit: z.number().int().min(0).max(100_000).multipleOf(100).nullable().optional() }).strict();
-export const checkoutInput = reservationInput.extend({ requestKey: z.string().uuid() }).strict();
+export const checkoutInput = reservationInput.extend({
+  requestKey: z.string().uuid(), locale: z.enum(['en', 'zh-TW']),
+  policyAccepted: z.literal(true), policyVersion: z.literal(SALES_POLICY_VERSION),
+}).strict();
 export const shippingInput = z.object({
   phone: z.string().trim().min(8).max(24).regex(/^[+\d()\s-]+$/),
   postalCode: z.string().trim().regex(/^\d{3}(?:\d{2,3})?$/), city: z.string().trim().min(1).max(80),
