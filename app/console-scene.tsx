@@ -35,6 +35,7 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
     let renderer: THREE.WebGLRenderer | undefined;
     let controls: OrbitControls | undefined;
     let loadedModel: THREE.Group | undefined;
+    let framingBounds: THREE.Box3 | undefined;
     let environment: THREE.WebGLRenderTarget | undefined;
     let room: RoomEnvironment | undefined;
     let resize: ResizeObserver | undefined;
@@ -227,8 +228,8 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
         };
         goal.set(...poses[nextView]).multiplyScalar(0.76);
         // Fit the actual model, including narrow phone viewports.
-        if (loadedModel && host.clientHeight && host.clientWidth) {
-          const box = new THREE.Box3().setFromObject(loadedModel);
+        if (framingBounds && host.clientHeight && host.clientWidth) {
+          const box = framingBounds;
           const direction = goal.clone().normalize();
           const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
           const up = new THREE.Vector3().crossVectors(direction, right);
@@ -279,7 +280,10 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
         const scale = 4.85 / bounds.getSize(new THREE.Vector3()).x;
         loadedModel.scale.multiplyScalar(scale);
         loadedModel.position.sub(center.multiplyScalar(scale));
-        shadow.position.y = new THREE.Box3().setFromObject(loadedModel).min.y - 0.025;
+        // Fit the original pose before adding the model to the rotating pivot.
+        // Hover, scroll and drag must not change the camera's fitting distance.
+        framingBounds = new THREE.Box3().setFromObject(loadedModel);
+        shadow.position.y = framingBounds.min.y - 0.025;
         modelPivot.add(loadedModel);
         applyView(activeView.current, true);
         setStatus('ready');
