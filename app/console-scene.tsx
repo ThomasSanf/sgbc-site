@@ -47,25 +47,67 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
     const goal = new THREE.Vector3(-5.8, 4.8, 8.2);
     let tweening = true;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-    const mobileMotion = window.matchMedia('(max-width: 760px), (hover: none), (pointer: coarse)');
     const pointerSurface = host.closest<HTMLElement>('[data-console-tilt]') ?? host;
-    const tiltTarget = new THREE.Vector2();
+    const dragTarget = new THREE.Vector2();
+    const dragStart = new THREE.Vector2();
+    const dragOrigin = new THREE.Vector2();
+    const heldKeys = new Set<string>();
+    let dragPointer: number | null = null;
+    let touchDrag = false;
+    let touchDirection: 'pending' | 'rotate' | 'scroll' = 'pending';
     let scrollDirty = true;
     let scrollProgress = 0;
     let lastFrameTime = performance.now();
-    const resetTilt = () => { tiltTarget.set(0, 0); };
     const markScrollDirty = () => { scrollDirty = true; };
-    const resetMotion = () => { resetTilt(); markScrollDirty(); };
-    const moveTilt = (event: PointerEvent) => {
-      if (event.pointerType !== 'mouse' || reducedMotion.matches || mobileMotion.matches || !finePointer.matches) return;
-      const bounds = pointerSurface.getBoundingClientRect();
-      if (!bounds.width || !bounds.height) return;
-      tiltTarget.set(
-        THREE.MathUtils.clamp((event.clientX - bounds.left) / bounds.width * 2 - 1, -1, 1),
-        THREE.MathUtils.clamp((event.clientY - bounds.top) / bounds.height * 2 - 1, -1, 1),
+    const resetDrag = () => {
+      const pointer = dragPointer;
+      dragPointer = null; heldKeys.clear(); dragTarget.set(0, 0);
+      host.classList.remove('is-dragging');
+      if (pointer !== null && renderer?.domElement.hasPointerCapture(pointer)) renderer.domElement.releasePointerCapture(pointer);
+    };
+    const resetMotion = () => { resetDrag(); markScrollDirty(); };
+    const beginDrag = (event: PointerEvent) => {
+      if (!event.isPrimary || event.button !== 0 || dragPointer !== null || !loadedModel || !renderer) return;
+      dragPointer = event.pointerId;
+      touchDrag = event.pointerType === 'touch';
+      touchDirection = 'pending'; heldKeys.clear();
+      dragStart.set(event.clientX, event.clientY);
+      const progress = reducedMotion.matches ? 0 : scrollProgress;
+      // Pick up the visible pose if the previous release is still settling.
+      dragOrigin.set(modelPivot.rotation.x - progress * 0.08, modelPivot.rotation.y - progress * 1.2);
+      dragTarget.copy(dragOrigin);
+      renderer.domElement.setPointerCapture(event.pointerId);
+      host.classList.add('is-dragging');
+      if (!touchDrag) { event.preventDefault(); host.focus({ preventScroll: true }); }
+    };
+    const moveDrag = (event: PointerEvent) => {
+      if (event.pointerId !== dragPointer || !renderer) return;
+      const dx = event.clientX - dragStart.x, dy = event.clientY - dragStart.y;
+      if (touchDrag && touchDirection === 'pending') {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 6) return;
+        touchDirection = Math.abs(dx) > Math.abs(dy) ? 'rotate' : 'scroll';
+      }
+      if (touchDrag && touchDirection === 'scroll') return;
+      const bounds = renderer.domElement.getBoundingClientRect();
+      dragTarget.set(
+        THREE.MathUtils.clamp(dragOrigin.x + dy / Math.max(bounds.height, 1) * 1.8, -0.65, 0.65),
+        THREE.MathUtils.clamp(dragOrigin.y + dx / Math.max(bounds.width, 1) * Math.PI * 2, -Math.PI * 2, Math.PI * 2),
       );
     };
+    const endDrag = (event: PointerEvent) => { if (event.pointerId === dragPointer) resetDrag(); };
+    const heroKeyDown = (event: KeyboardEvent) => {
+      if (event.target !== host || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) return;
+      event.preventDefault();
+      if (event.key === 'Escape') { resetDrag(); return; }
+      heldKeys.add(event.key);
+      if (event.key === 'ArrowLeft') dragTarget.y -= 0.22;
+      if (event.key === 'ArrowRight') dragTarget.y += 0.22;
+      if (event.key === 'ArrowUp') dragTarget.x = Math.max(-0.65, dragTarget.x - 0.12);
+      if (event.key === 'ArrowDown') dragTarget.x = Math.min(0.65, dragTarget.x + 0.12);
+      dragTarget.y = THREE.MathUtils.clamp(dragTarget.y, -Math.PI * 2, Math.PI * 2);
+    };
+    const heroKeyUp = (event: KeyboardEvent) => { if (heldKeys.delete(event.key) && heldKeys.size === 0) resetDrag(); };
+    const visibilityChange = () => { if (document.hidden) resetDrag(); };
 
     const keyboard = (event: KeyboardEvent) => {
       if (!controls || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
@@ -133,14 +175,19 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
         controls.addEventListener('start', () => { tweening = false; });
         controls.addEventListener('change', () => { needsRender = true; });
       } else {
-        pointerSurface.addEventListener('pointermove', moveTilt, { passive: true });
-        pointerSurface.addEventListener('pointerleave', resetTilt);
-        window.addEventListener('blur', resetTilt);
+        renderer.domElement.addEventListener('pointerdown', beginDrag);
+        renderer.domElement.addEventListener('pointermove', moveDrag, { passive: true });
+        renderer.domElement.addEventListener('pointerup', endDrag);
+        renderer.domElement.addEventListener('pointercancel', endDrag);
+        renderer.domElement.addEventListener('lostpointercapture', endDrag);
+        host.addEventListener('keydown', heroKeyDown);
+        host.addEventListener('keyup', heroKeyUp);
+        host.addEventListener('blur', resetDrag);
+        window.addEventListener('blur', resetDrag);
+        document.addEventListener('visibilitychange', visibilityChange);
         window.addEventListener('scroll', markScrollDirty, { passive: true });
         window.addEventListener('resize', markScrollDirty, { passive: true });
         reducedMotion.addEventListener('change', resetMotion);
-        finePointer.addEventListener('change', resetMotion);
-        mobileMotion.addEventListener('change', resetMotion);
       }
 
       const shell = new THREE.MeshPhysicalMaterial({ color: '#98988f', roughness: 0.49, metalness: 0, clearcoat: 0.1, clearcoatRoughness: 0.6 });
@@ -221,7 +268,7 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
       }, undefined, () => { if (!disposed) setStatus('error'); });
 
       resize = new ResizeObserver(() => {
-        markScrollDirty();
+        resetMotion();
         const width = host.clientWidth; const height = host.clientHeight;
         if (!width || !height || !renderer) return;
         camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height);
@@ -239,18 +286,17 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
         lastFrameTime = now;
         if (!visible || document.hidden || !renderer) return;
         if (interaction === 'cursor') {
-          const scrollEnabled = !reducedMotion.matches && mobileMotion.matches;
-          const pointerEnabled = !reducedMotion.matches && !mobileMotion.matches && finePointer.matches;
+          const scrollEnabled = !reducedMotion.matches;
           if (scrollEnabled && scrollDirty) {
             // Follow the hero through the viewport without intercepting touch scrolling.
             const bounds = pointerSurface.getBoundingClientRect();
             scrollProgress = THREE.MathUtils.clamp(-bounds.top / Math.max(bounds.height, 1), 0, 1);
             scrollDirty = false;
           }
-          const enabled = scrollEnabled || pointerEnabled;
-          const targetX = scrollEnabled ? scrollProgress * 0.08 : pointerEnabled ? tiltTarget.y * 0.10 : 0;
-          const targetY = scrollEnabled ? scrollProgress * 1.2 : pointerEnabled ? tiltTarget.x * 0.17 : 0;
-          const amount = enabled ? 1 - Math.exp(-9 * delta) : 1;
+          const targetX = (scrollEnabled ? scrollProgress * 0.08 : 0) + dragTarget.x;
+          const targetY = (scrollEnabled ? scrollProgress * 1.2 : 0) + dragTarget.y;
+          const active = dragPointer !== null || heldKeys.size > 0;
+          const amount = reducedMotion.matches ? 1 : 1 - Math.exp(-(active ? 18 : 7) * delta);
           if (Math.abs(modelPivot.rotation.x - targetX) + Math.abs(modelPivot.rotation.y - targetY) > 0.00001) {
             modelPivot.rotation.x = THREE.MathUtils.lerp(modelPivot.rotation.x, targetX, amount);
             modelPivot.rotation.y = THREE.MathUtils.lerp(modelPivot.rotation.y, targetY, amount);
@@ -278,19 +324,25 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
         }
       };
       animate();
-    } catch { setStatus('error'); }
+    } catch { queueMicrotask(() => { if (!disposed) setStatus('error'); }); }
 
     return () => {
       disposed = true; controller.current = null; cancelAnimationFrame(frame);
       resize?.disconnect(); observer?.disconnect(); host.removeEventListener('keydown', keyboard);
-      pointerSurface.removeEventListener('pointermove', moveTilt);
-      pointerSurface.removeEventListener('pointerleave', resetTilt);
-      window.removeEventListener('blur', resetTilt);
+      resetDrag();
+      renderer?.domElement.removeEventListener('pointerdown', beginDrag);
+      renderer?.domElement.removeEventListener('pointermove', moveDrag);
+      renderer?.domElement.removeEventListener('pointerup', endDrag);
+      renderer?.domElement.removeEventListener('pointercancel', endDrag);
+      renderer?.domElement.removeEventListener('lostpointercapture', endDrag);
+      host.removeEventListener('keydown', heroKeyDown);
+      host.removeEventListener('keyup', heroKeyUp);
+      host.removeEventListener('blur', resetDrag);
+      window.removeEventListener('blur', resetDrag);
+      document.removeEventListener('visibilitychange', visibilityChange);
       window.removeEventListener('scroll', markScrollDirty);
       window.removeEventListener('resize', markScrollDirty);
       reducedMotion.removeEventListener('change', resetMotion);
-      finePointer.removeEventListener('change', resetMotion);
-      mobileMotion.removeEventListener('change', resetMotion);
       controls?.dispose();
       scene.traverse(object => { if (object instanceof THREE.Mesh) object.geometry.dispose(); });
       materials.forEach(material => material.dispose());
@@ -301,8 +353,9 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
 
   useEffect(() => { activeView.current = view; controller.current?.setView(view); }, [view, resetKey]);
 
-  return <div className={`console-canvas ${interaction === 'cursor' ? 'console-canvas--cursor' : ''} ${status === 'ready' ? 'is-ready' : ''}`} ref={container} tabIndex={interaction === 'orbit' ? 0 : undefined} role={interaction === 'orbit' ? 'group' : 'img'} aria-label={interaction === 'orbit' ? copy[model] : copy.alt}>
-    {status === 'loading' && <div className="model-status" role="status"><span className="model-spinner"/><span>{copy.loading}</span></div>}
-    {status === 'error' && <div className="model-status model-error"><strong>{copy.errorTitle}</strong><p>{copy.error}</p>{interaction === 'orbit' && <button onClick={() => { setStatus('loading'); setRetry(r => r + 1); }}>{copy.retry}</button>}</div>}
+  // oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- This custom 3D widget handles arrow keys and needs keyboard focus.
+  return <div className={`console-canvas ${interaction === 'cursor' ? 'console-canvas--cursor' : ''} ${status === 'ready' ? 'is-ready' : ''}`} ref={container} tabIndex={0} role="application" aria-label={interaction === 'orbit' ? copy[model] : copy.hero}>
+    {status === 'loading' && <output className="model-status"><span className="model-spinner"/><span>{copy.loading}</span></output>}
+    {status === 'error' && <div className="model-status model-error"><strong>{copy.errorTitle}</strong><p>{copy.error}</p><button onClick={() => { setStatus('loading'); setRetry(r => r + 1); }}>{copy.retry}</button></div>}
   </div>;
 }
