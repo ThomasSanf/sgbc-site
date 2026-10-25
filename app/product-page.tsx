@@ -96,7 +96,7 @@ export default function ProductPage() {
             draggable={false}
           />
         </figure>
-        <div className="manifesto-bottom"><p>{copy.story.description}</p><div className="system-list" aria-label={copy.story.systems}><span>GAME BOY</span><span>GAME BOY COLOR</span><span>GAME BOY ADVANCE</span></div></div>
+        <div className="manifesto-bottom"><p>{copy.story.description}</p><div className="system-list" aria-label={copy.story.systems}><span>GAME BOY<ArrowUpRight size={16} aria-hidden="true"/></span><span>GAME BOY COLOR<ArrowUpRight size={16} aria-hidden="true"/></span><span>GAME BOY ADVANCE<ArrowUpRight size={16} aria-hidden="true"/></span></div></div>
       </section>
       <section className="design-section section-shell" id="design" aria-labelledby="design-title">
         <div className="section-kicker mono"><span>{copy.design.eyebrow}</span><span>{copy.design.colors}</span></div>

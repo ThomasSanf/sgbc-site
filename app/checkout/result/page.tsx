@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getDb } from '@/lib/server/db';
 import { authorizedOrder } from '@/lib/server/order-access';
@@ -19,6 +20,6 @@ export default async function CheckoutResult({ searchParams }: { searchParams: P
   catch (error) { if (!(error instanceof StoreError && error.status === 404)) throw error; }
   return <div className="confirmation-page" lang={locale}>
     <header className="confirmation-header"><Link className="wordmark" href="/" aria-label="SGBC home">sgbc<span>™</span></Link><span className="mono">{copy.eyebrow}</span></header>
-    {order ? <OrderDetails initial={order} token={params.token!} locale={locale}/> : <main className="confirmation-unavailable"><p className="mono">SGBC / CHECKOUT</p><h1>{copy.unavailable}</h1><p>{copy.unavailableBody}</p><Link className="text-link" href="/">{copy.home} →</Link></main>}
+    {order ? <OrderDetails initial={order} token={params.token!} locale={locale}/> : <main className="confirmation-unavailable"><p className="mono">SGBC / CHECKOUT</p><h1>{copy.unavailable}</h1><p>{copy.unavailableBody}</p><Link className="text-link" href="/">{copy.home}<ArrowRight size={18} aria-hidden="true"/></Link></main>}
   </div>;
 }

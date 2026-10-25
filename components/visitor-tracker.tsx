@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { usePathname } from 'next/navigation';
+import { ChevronRight } from 'lucide-react';
 import type { Locale } from '@/lib/site-copy';
 import { isPublicPage, taipeiDay, VISITOR_ID_KEY, VISITOR_ID_LIFETIME, VISITOR_OPTOUT_KEY, VISITOR_PREFERENCE_EVENT } from '@/lib/visitor-analytics';
 
@@ -67,7 +68,7 @@ export function VisitorPrivacy({ locale }: { locale: Locale }) {
   const state = useSyncExternalStore(subscribe, preference, (): Preference => 'unavailable');
   const zh = locale === 'zh-TW';
   return <details className="visitor-privacy">
-    <summary>{zh ? '隱私選項' : 'Privacy choices'}</summary>
+    <summary className="disclosure-summary"><ChevronRight size={16} aria-hidden="true"/>{zh ? '隱私選項' : 'Privacy choices'}</summary>
     <div>
       <p>{zh ? '我們使用儲存在此瀏覽器的隨機識別碼統計不重複訪客。識別碼最長保留 180 天；伺服器保留最近 30 天的雜湊識別碼、造訪日期，以及由網站代管服務根據 IP 位址推估的國家，不將訪客紀錄連結至訂單，也不儲存原始 IP 位址。你可以關閉這項統計。' : 'We count unique visitors using a random ID stored in this browser for up to 180 days. Our server retains its hashed value, visit dates, and the approximate country supplied by our hosting provider based on the IP address for the last 30 days. Visitor records are not linked to orders, and raw IP addresses are not stored for analytics. You can turn this counting off.'}</p>
       <button type="button" disabled={state === 'browser' || state === 'unavailable'} onClick={() => {

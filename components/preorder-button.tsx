@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, LoaderCircle, LockKeyhole, X } from 'lucide-react';
+import { ArrowUpRight, ChevronRight, LoaderCircle, LockKeyhole, X } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { siteCopy, type Locale } from '@/lib/site-copy';
 import type { CheckoutDestination, EmbeddedCheckout, StorefrontCatalog } from '@/lib/storefront-types';
@@ -133,8 +133,8 @@ export function PreorderButton({ className = '', locale }: { className?: string;
           <div className="preorder-totals"><div><span>{copy.subtotal}</span><span>{money(product!.price * selectedQuantity)}</span></div><div><span>{copy.shipping}</span><span>{deliveryRate === null ? '—' : money(shippingFee)}</span></div><div className="preorder-total"><strong>{copy.total}</strong><strong>{deliveryRate === null ? '—' : money(product!.price * selectedQuantity + shippingFee)}</strong></div></div>
           <label className="preorder-acknowledgement"><input name="acknowledged" type="checkbox" required/>{copy.acknowledgement}</label>
           <details className="preorder-policy">
-            <summary>{policy.read}</summary>
-            <div className="preorder-policy-body"><p className="sales-policy-date">{policy.updated}</p><SalesPolicyContent locale={locale} heading="h3"/><a href={`/sales-policy/${locale}/`} target="_blank" rel="noopener noreferrer">{policy.full} ↗</a></div>
+            <summary className="disclosure-summary"><ChevronRight size={16} aria-hidden="true"/>{policy.read}</summary>
+            <div className="preorder-policy-body"><p className="sales-policy-date">{policy.updated}</p><SalesPolicyContent locale={locale} heading="h3"/><a href={`/sales-policy/${locale}/`} target="_blank" rel="noopener noreferrer">{policy.full}<ArrowUpRight size={16} aria-hidden="true"/></a></div>
           </details>
           <label className="preorder-acknowledgement"><input name="policyAccepted" type="checkbox" required checked={policyAccepted} onChange={event => setPolicyAccepted(event.target.checked)}/>{policy.accept}</label>
           {error && <p className="preorder-error" role="alert">{error}</p>}

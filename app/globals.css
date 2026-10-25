@@ -74,8 +74,8 @@ h2>span { color:var(--muted); }
 .manifesto-bottom { margin-top:28px; display:grid; grid-template-columns:1fr 1fr; gap:12%; align-items:start; }
 .manifesto-bottom>p { font-size:20px; line-height:1.5; max-width:550px; color:var(--muted); }
 .system-list { display:grid; font-size:14px; font-weight:700; }
-.system-list>span { padding:13px 0; border-top:1px solid var(--line); display:flex; justify-content:space-between; }
-.system-list>span::after { content:'↗'; color:var(--accent); }
+.system-list>span { padding:13px 0; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
+.system-list>span>svg { color:var(--accent); }
 .board-section { background:#111210; }
 .revision-tag { border:1px solid #484941; padding:6px 10px; color:var(--accent); }
 .section-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:40px; margin-bottom:44px; }
@@ -255,6 +255,10 @@ html[lang='zh-TW'] .closing>a { letter-spacing:-.025em; }
 
 .footer-policy-link { font-size:13px; white-space:nowrap; text-decoration:underline; text-underline-offset:4px; }
 .footer-policy-link:hover { color:var(--accent); }
+.disclosure-summary { display:flex; align-items:center; gap:8px; list-style:none; }
+.disclosure-summary::marker { content:''; }
+.disclosure-summary::-webkit-details-marker { display:none; }
+details[open]>.disclosure-summary>svg { transform:rotate(90deg); }
 .visitor-privacy { position:relative; font-size:13px; }
 .visitor-privacy summary { cursor:pointer; white-space:nowrap; text-decoration:underline; text-underline-offset:4px; }
 .visitor-privacy>div { position:absolute; z-index:30; bottom:calc(100% + 14px); right:0; width:min(340px,80vw); padding:20px; background:#191917; border:1px solid var(--line); box-shadow:0 12px 35px #0008; }
@@ -267,9 +271,9 @@ html[lang='zh-TW'] .closing>a { letter-spacing:-.025em; }
 @media (max-width:760px) { .site-footer>.visitor-privacy>div { position:static; margin-top:16px; } }
 .preorder-policy { border:1px solid var(--line); background:#151513; }
 .preorder-policy summary { padding:15px; cursor:pointer; font-size:14px; font-weight:600; }
-.preorder-policy summary::marker { color:var(--accent); }
+.preorder-policy summary>svg { color:var(--accent); }
 .preorder-policy-body { padding:0 16px 20px; }
-.preorder-policy-body>a { display:inline-block; margin-top:20px; font-size:13px; text-decoration:underline; text-underline-offset:4px; }
+.preorder-policy-body>a { display:inline-flex; align-items:center; gap:6px; margin-top:20px; font-size:13px; text-decoration:underline; text-underline-offset:4px; }
 .sales-policy-content section+section { margin-top:28px; }
 .sales-policy-content h2,.sales-policy-content h3 { font-size:20px; line-height:1.4; letter-spacing:-.02em; margin:0 0 10px; }
 .sales-policy-content p { font-size:16px; line-height:1.85; color:#c0c0b9; margin:0; }

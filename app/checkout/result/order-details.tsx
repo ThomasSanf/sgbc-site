@@ -66,6 +66,6 @@ export function OrderDetails({ initial, token, locale }: { initial: OrderConfirm
     </section>
     <div className="confirmation-actions"><button className="confirmation-download" onClick={download} disabled={downloading}>{downloading ? <LoaderCircle size={18} className="preorder-spinner"/> : <Download size={18}/>} {downloading ? copy.downloading : copy.download}</button>{order.status === 'pending' && <button className="text-link" onClick={() => { void refresh(); }} disabled={checking}>{checking ? <LoaderCircle size={16} className="preorder-spinner"/> : <RefreshCw size={16}/>} {checking ? copy.checking : copy.refresh}</button>}<Link className="text-link" href="/">{copy.home}<ArrowUpRight size={17}/></Link></div>
     {downloadError && <p className="confirmation-error" role="alert">{copy.downloadError}</p>}{checkError && order.status === 'pending' && <p className="confirmation-error" role="alert">{copy.checkError}</p>}{waiting && order.status === 'pending' && <output className="confirmation-notice">{copy.waiting}</output>}
-    <footer className="confirmation-footer"><p>{copy.private}</p><Link href={`/sales-policy/${locale}/`}>{copy.policy} ↗</Link></footer>
+    <footer className="confirmation-footer"><p>{copy.private}</p><Link href={`/sales-policy/${locale}/`}>{copy.policy}<ArrowUpRight size={14} aria-hidden="true"/></Link></footer>
   </main>;
 }

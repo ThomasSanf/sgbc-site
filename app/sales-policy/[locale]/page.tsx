@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import { SalesPolicyContent } from '@/components/sales-policy-content';
 import { salesPolicy } from '@/lib/sales-policy';
 import { VisitorPrivacy } from '@/components/visitor-tracker';
@@ -31,7 +32,7 @@ export default async function SalesPolicyPage({ params }: { params: Promise<{ lo
       <h1>{copy.title}</h1>
       <p className="sales-policy-introduction">{copy.introduction}</p>
       <SalesPolicyContent locale={locale}/>
-      <Link className="text-link sales-policy-back" href="/">← {copy.back}</Link>
+      <Link className="text-link sales-policy-back" href="/"><ArrowLeft size={18} aria-hidden="true"/>{copy.back}</Link>
       <VisitorPrivacy locale={locale}/>
     </main>
   </div>;
