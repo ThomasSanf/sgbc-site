@@ -103,6 +103,14 @@
 .admin-activity small { font-size:10px; color:#637554; }
 .admin-activity time { margin-left:auto; color:#6e7d60; font-size:10px; white-space:nowrap; }
 .admin-list-toolbar { display:flex; justify-content:space-between; gap:20px; align-items:center; margin-bottom:15px; }
+.admin-order-actions,.admin-dialog-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.admin-secondary.admin-danger,.admin-button.admin-danger { border:1px solid #79533f; background:#2b1d16; color:#f1baa0; }
+.admin-secondary.admin-danger:hover,.admin-button.admin-danger:hover { background:#42291e; }
+.admin-sandbox-cleanup { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+.admin-sandbox-cleanup>span { color:#93a082; font-size:11px; }
+.admin-delete-orders { list-style:none; padding:0; margin:0; max-height:280px; overflow:auto; }
+.admin-delete-orders li { display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding:12px 0; border-bottom:1px solid #35422a; font-size:12px; }
+.admin-delete-orders li>span:not(.admin-badge) { flex:1; color:#a5bb90; }
 .admin-list-toolbar>span { color:#829172; font-size:11px; }
 .admin-search { display:flex; align-items:center; gap:10px; border:1px solid #353f2b; padding:10px 13px; color:#81956b; width:320px; max-width:70%; }
 .admin-search input { width:100%; border:0; outline:none; background:transparent; color:#e5eddb; font:12px Arial,sans-serif; }

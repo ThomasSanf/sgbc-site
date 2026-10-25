@@ -1,7 +1,7 @@
 import { and, desc, eq, ne, inArray, like, or, sql } from 'drizzle-orm';
 import type { StoreDatabase } from './db';
-import { auditEvents, inventoryEvents, orders, preorders, products, settings, webhookEvents } from './schema';
-import { checkoutInput, fulfillInput, inventoryInput, preorderUpdate, productInput, reservationInput, settingsInput, StoreError } from './validation';
+import { auditEvents, embeddedCheckouts, inventoryEvents, orders, preorders, products, settings, webhookEvents } from './schema';
+import { checkoutInput, deleteSandboxOrdersInput, fulfillInput, inventoryInput, preorderUpdate, productInput, reservationInput, settingsInput, StoreError } from './validation';
 import { paymentProvider } from './config';
 import { publicSandboxMode, SANDBOX_PRODUCT_ID } from './sandbox';
 import { recordPolicyAcceptance, requirePolicyAcceptance } from './policy-consent';
@@ -135,6 +135,31 @@ export async function fulfillOrder(db: StoreDatabase, actor: string, raw: unknow
     if (!row) throw new StoreError(409, 'Only a paid, unfulfilled order can be fulfilled.');
     if (row.paymentEnvironment === 'stage') throw new StoreError(409, 'Sandbox orders cannot be shipped.');
     await audit(tx, actor, 'order.fulfilled', data.id, data.trackingNumber); return row;
+  });
+}
+export async function deleteSandboxOrders(db: StoreDatabase, actor: string, raw: unknown) {
+  const { ids } = deleteSandboxOrdersInput.parse(raw);
+  return db.transaction(async tx => {
+    const selected = await tx.select().from(orders).where(inArray(orders.id, [...new Set(ids)]));
+    // Trust the stored environment, never a client flag or the current checkout mode.
+    // Reject a mixed batch before changing any orders or inventory.
+    if (selected.some(order => order.paymentEnvironment !== 'stage')) throw new StoreError(409, 'Only sandbox orders can be deleted. Real orders are protected.');
+    for (const order of selected) {
+      const held = order.status === 'pending';
+      const consumed = ['paid', 'fulfilled', 'partially_refunded', 'refunded'].includes(order.status);
+      if (held || consumed) {
+        const [product] = await tx.update(products).set({
+          ...(held ? { reserved: sql`${products.reserved} - ${order.quantity}` } : { stock: sql`${products.stock} + ${order.quantity}` }),
+          updatedAt: Date.now(), version: sql`${products.version} + 1`,
+        }).where(and(eq(products.id, order.productId), held ? sql`${products.reserved} >= ${order.quantity}` : undefined)).returning({ id: products.id });
+        if (!product) throw new StoreError(409, 'The sandbox stock allocation is inconsistent. Refresh and check inventory before deleting.');
+        if (consumed) await tx.insert(inventoryEvents).values({ id: crypto.randomUUID(), productId: order.productId, delta: order.quantity, reason: `Deleted sandbox order ${order.id}`, actor, createdAt: Date.now() });
+      }
+      await tx.delete(embeddedCheckouts).where(eq(embeddedCheckouts.orderId, order.id));
+      await tx.delete(orders).where(and(eq(orders.id, order.id), eq(orders.paymentEnvironment, 'stage')));
+      await audit(tx, actor, 'order.sandbox_deleted', order.id, `${order.quantity} × ${order.productName} · ${order.status} · ${held ? 'stock hold released' : consumed ? 'test stock restored' : 'no stock change'}`);
+    }
+    return { deleted: selected.length, message: selected.length ? `${selected.length} sandbox order${selected.length === 1 ? '' : 's'} deleted.` : 'These sandbox orders have already been deleted.' };
   });
 }
 export async function dashboardData(db: StoreDatabase) {

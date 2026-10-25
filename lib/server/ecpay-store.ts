@@ -74,6 +74,7 @@ export async function applyVerifiedEcpayResult(db: StoreDatabase, fields: EcpayF
     const [seen] = await tx.select().from(webhookEvents).where(eq(webhookEvents.id, eventId));
     if (seen) return;
     const [order] = await tx.select().from(orders).where(eq(orders.id, matched.id));
+    if (!order) throw new StoreError(404, 'Order no longer exists.');
     if (order.ecpayTradeNo && fields.TradeNo && order.ecpayTradeNo !== fields.TradeNo) throw new StoreError(409, 'Payment reference changed.');
     if (paid && order.status === 'pending') {
       await tx.update(products).set({ reserved: sql`${products.reserved} - ${order.quantity}`, stock: sql`${products.stock} - ${order.quantity}`, version: sql`${products.version} + 1`, updatedAt: Date.now() }).where(eq(products.id, order.productId));

@@ -6,9 +6,9 @@ import { migrate } from 'drizzle-orm/libsql/migrator';
 import Stripe from 'stripe';
 import { getDb } from '../lib/server/db';
 import { getAuth } from '../lib/server/auth';
-import { session, user, visitorDays } from '../lib/server/schema';
+import { orders, products, session, user, visitorDays } from '../lib/server/schema';
 import { POST as visitorPost } from '../app/api/store/visit/route';
-import { GET, POST } from '../app/api/admin/[resource]/route';
+import { DELETE, GET, POST } from '../app/api/admin/[resource]/route';
 import { POST as authPost } from '../app/api/auth/[...all]/route';
 import { POST as publicPost } from '../app/api/store/[resource]/route';
 import { POST as webhookPost } from '../app/api/webhooks/stripe/route';
@@ -42,6 +42,7 @@ test('private reads and writes reject missing and forged sessions', async () => 
   for (const value of ['', 'better-auth.session_token=forged']) {
     assert.equal((await GET(req('/api/admin/dashboard/', 'GET', undefined, { cookie: value }), ctx('dashboard'))).status, 401);
     assert.equal((await POST(req('/api/admin/products/', 'POST', {}, { cookie: value, origin }), ctx('products'))).status, 401);
+    assert.equal((await DELETE(req('/api/admin/orders/', 'DELETE', { ids: [crypto.randomUUID()] }, { cookie: value, origin }), ctx('orders'))).status, 401);
   }
 });
 test('authenticated admin can read data, and responses are never cached', async () => {
@@ -63,6 +64,32 @@ test('CSRF protection rejects foreign or absent origins even with a valid sessio
   assert.equal((await POST(req('/api/admin/products/', 'POST', {}), ctx('products'))).status, 403);
   assert.equal((await POST(req('/api/admin/products/', 'POST', {}, { origin: 'https://attacker.example' }), ctx('products'))).status, 403);
   assert.equal((await publicPost(req('/api/store/preorders/', 'POST', {}, { origin: 'https://attacker.example' }), ctx('preorders'))).status, 403);
+  const deleteOrigins: Record<string, string>[] = [{}, { origin: 'https://attacker.example' }, { origin, 'sec-fetch-site': 'cross-site' }];
+  for (const extra of deleteOrigins) {
+    assert.equal((await DELETE(req('/api/admin/orders/', 'DELETE', { ids: [crypto.randomUUID()] }, extra), ctx('orders'))).status, 403);
+  }
+});
+
+void test('authenticated deletion protects real orders even during public sandbox mode', async () => {
+  const productId = crypto.randomUUID(), now = Date.now();
+  await db.insert(products).values({ id: productId, sku: productId, name: 'API test product', stock: 200, reserved: 2, createdAt: now, updatedAt: now });
+  const base = { productId, productName: 'API test product', sku: productId, name: 'Test buyer', email: 'buyer@example.test', quantity: 1, unitPrice: 550000, total: 550000, currency: 'TWD', createdAt: now, updatedAt: now };
+  const [sandbox, live] = await db.insert(orders).values((['stage', 'live'] as const).map(paymentEnvironment => ({ ...base, id: crypto.randomUUID(), requestKey: crypto.randomUUID(), paymentEnvironment }))).returning();
+  process.env.PUBLIC_ECPAY_SANDBOX = 'true';
+  try {
+    const remove = (body: unknown) => DELETE(req('/api/admin/orders/', 'DELETE', body, { origin }), ctx('orders'));
+    assert.equal((await remove({ ids: [sandbox.id, live.id] })).status, 409);
+    assert.equal((await remove({ ids: [live.id], paymentEnvironment: 'stage' })).status, 400);
+    const response = await remove({ ids: [sandbox.id] });
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get('cache-control') ?? '', /no-store/);
+    assert.equal((await response.json()).deleted, 1);
+    assert.equal((await remove({ ids: [live.id] })).status, 409);
+    assert.equal((await db.select().from(orders).where(eq(orders.id, live.id))).length, 1);
+    const [product] = await db.select().from(products).where(eq(products.id, productId));
+    assert.equal(product.stock, 200); assert.equal(product.reserved, 1);
+    assert.equal((await DELETE(req('/api/admin/products/', 'DELETE', { ids: [productId] }, { origin }), ctx('products'))).status, 404);
+  } finally { delete process.env.PUBLIC_ECPAY_SANDBOX; }
 });
 test('approved mutations are validated before writing', async () => {
   assert.equal((await POST(req('/api/admin/products/', 'POST', { name: 'Invalid', stock: 999 }, { origin }), ctx('products'))).status, 400);
