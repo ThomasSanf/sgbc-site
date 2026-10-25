@@ -1,6 +1,6 @@
 # SGBC product website
 
-Next.js App Router + TypeScript + Three.js. Product copy is based on the SGBC Rev C engineering documentation. The site presents a prototype, with no fabricated pricing, launch date, checkout, or mailing-list storage.
+Next.js App Router + TypeScript + Three.js, with a Google-protected store admin and persistent database backend. Product copy is based on the SGBC Rev C engineering documentation. The public landing page still presents a prototype with its coming-soon preorder notice. Store data starts empty except for one draft product, with no invented pricing or stock.
 
 ## Run
 
@@ -12,9 +12,25 @@ Open http://127.0.0.1:3000 and keep the terminal open. Press Ctrl+C to stop.
 
 - `pnpm install`
 - `pnpm dev`
-- `pnpm build` creates a static export in `out/`.
+- `pnpm build` builds the Next.js server and static storefront.
+- `pnpm start` serves the production build.
+- `pnpm admin:setup`, then `pnpm db:migrate`, prepares local admin configuration and storage.
+- `pnpm test` runs backend and security tests against disposable databases.
 
-The registered private Site is recorded in `.openai/hosting.json`.
+The active deployment is the existing GitHub/Vercel Next.js project. The older `.openai/hosting.json` is historical; its static hosting configuration cannot run the new backend. Unused Vinext/Cloudflare starter tooling has been removed.
+
+## Store admin
+
+Open `/admin/`. Google sign-in is restricted to verified emails in the server's
+`ADMIN_EMAILS` allowlist. There is no public signup, password fallback, or local
+authentication bypass. All data endpoints check authorization on the server.
+
+The dashboard manages products, stock, unpaid preorder reservations, Stripe
+checkout links and paid orders, fulfillment, and an activity log. Checkout and
+public reservations are closed by default. Local development uses SQLite; Vercel
+requires a persistent hosted libSQL/Turso database. See
+[the complete setup guide](docs/admin-setup.md) for Google OAuth, database,
+Stripe, deployment, API details, and current checkout limits.
 
 ## Current motherboard and visual design
 

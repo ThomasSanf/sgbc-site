@@ -1,5 +1,10 @@
-# These starter transitive tools are unused by the static Next.js build.
-# Keep their optional install scripts disabled.
+# Pinned security fixes for transitive dependencies.
+overrides:
+  ws: 8.21.0
+  source-map-js: 1.2.2
+  sharp: 0.35.5
+  esbuild: 0.28.1
+# These optional scripts are not needed by the Next.js build.
 allowBuilds:
   esbuild: false
   sharp: false

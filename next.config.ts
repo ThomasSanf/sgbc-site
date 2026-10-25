@@ -1,3 +1,21 @@
 import type { NextConfig } from 'next';
-const nextConfig: NextConfig = { output: 'export', trailingSlash: true, images: { unoptimized: true } };
+const nextConfig: NextConfig = {
+  trailingSlash: true,
+  images: { unoptimized: true },
+  serverExternalPackages: ['@libsql/client', 'libsql'],
+  async headers() {
+    return [
+      { source: '/:path*', headers: [
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        { key: 'X-Frame-Options', value: 'DENY' },
+      ] },
+      { source: '/admin/:path*', headers: [
+        { key: 'Cache-Control', value: 'private, no-store' },
+        { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        { key: 'Content-Security-Policy', value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'" },
+      ] },
+    ];
+  },
+};
 export default nextConfig;
