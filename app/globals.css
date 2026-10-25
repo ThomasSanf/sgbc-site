@@ -163,6 +163,7 @@ h2>span { color:var(--muted); }
 .hero-layout .hero-number { top:auto; bottom:38px; right:0; }
 .console-canvas--cursor,.console-canvas--cursor canvas { touch-action:pan-y pinch-zoom; user-select:none; -webkit-user-select:none; }
 .console-canvas--cursor.is-dragging canvas { cursor:grabbing; }
+@media (max-width:760px), (hover:none), (pointer:coarse) { .console-canvas--cursor canvas,.console-canvas--cursor canvas:active { cursor:default; } }
 .preorder-dialog[data-slot='dialog-content'] { width:calc(100% - 40px); max-width:480px; padding:36px; gap:24px; border:1px solid #41413d; border-radius:0; background:#111110; color:var(--ink); box-shadow:0 24px 100px #000b; }
 .preorder-eyebrow { display:flex; align-items:center; gap:10px; color:var(--muted); }
 .preorder-title[data-slot='dialog-title'] { color:var(--ink); font-size:clamp(36px,5vw,52px); font-weight:700; line-height:1; letter-spacing:-.05em; }

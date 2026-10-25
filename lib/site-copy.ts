@@ -79,7 +79,7 @@ const en = {
   closing: { eyebrow: 'A NEW HOME FOR YOUR CLASSICS.', title: 'Still game.', project: 'SGBC / AN INDEPENDENT PROJECT', tagline: 'BUILT FOR THE GAMES THAT STAY.' },
   footer: { trademarks: 'Game Boy, Game Boy Color, and Game Boy Advance are trademarks of Nintendo.', independent: 'SGBC is an independent project and is not affiliated with Nintendo.', top: 'BACK TO TOP' },
   viewer: {
-    hero: 'Interactive SGBC console: drag to rotate; release to return. On touchscreens, drag horizontally to turn or swipe vertically to scroll. Hold arrow keys to rotate, then release to return.',
+    hero: 'SGBC console: scroll the page to rotate. On desktop, drag with a mouse or hold arrow keys to rotate; release to return.',
     console: 'Interactive SGBC console: drag with a mouse or one finger, or use arrow keys to rotate.',
     pcb: 'Interactive SGBC Rev C IT6263 motherboard: drag with a mouse or one finger, or use arrow keys to rotate.',
     alt: 'SGBC console with a classic gray shell, black base, and solid Bordeaux controls.',
@@ -162,7 +162,7 @@ const zhTW: typeof en = {
   closing: { eyebrow: '為經典遊戲，找到新歸宿。', title: '繼續玩。', project: 'SGBC / 獨立開發計畫', tagline: '為始終留在心中的遊戲而生。' },
   footer: { trademarks: 'Game Boy、Game Boy Color 與 Game Boy Advance 為任天堂的商標。', independent: 'SGBC 為獨立開發計畫，與任天堂無關。', top: '回到頂部' },
   viewer: {
-    hero: 'SGBC 互動式主機模型：拖曳以旋轉，放開後自動回復。觸控螢幕可左右拖曳旋轉，上下滑動捲動頁面。也可按住方向鍵旋轉，放開後回復。',
+    hero: 'SGBC 主機模型：捲動頁面即可旋轉。電腦版也可用滑鼠拖曳或按住方向鍵旋轉，放開後自動回復。',
     console: 'SGBC 互動式主機模型：以滑鼠或單指拖曳，或使用方向鍵旋轉。',
     pcb: 'SGBC Rev C IT6263 互動式主機板模型：以滑鼠或單指拖曳，或使用方向鍵旋轉。',
     alt: 'SGBC 主機，搭配經典灰色上蓋、黑色底座與純色酒紅控制按鈕。',

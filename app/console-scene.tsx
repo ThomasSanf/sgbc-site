@@ -56,8 +56,6 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
     const dragOrigin = new THREE.Vector2();
     const heldKeys = new Set<string>();
     let dragPointer: number | null = null;
-    let touchDrag = false;
-    let touchDirection: 'pending' | 'rotate' | 'scroll' = 'pending';
     let scrollDirty = true;
     let scrollProgress = 0;
     let lastFrameTime = performance.now();
@@ -84,10 +82,9 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
     };
     const resetMotion = () => { resetDrag(); resetTilt(); markScrollDirty(); };
     const beginDrag = (event: PointerEvent) => {
-      if (!event.isPrimary || event.button !== 0 || dragPointer !== null || !loadedModel || !renderer) return;
+      if (!desktopPointer.matches || event.pointerType !== 'mouse' || !event.isPrimary || event.button !== 0 || dragPointer !== null || !loadedModel || !renderer) return;
       dragPointer = event.pointerId;
-      touchDrag = event.pointerType === 'touch';
-      touchDirection = 'pending'; heldKeys.clear();
+      heldKeys.clear();
       dragStart.set(event.clientX, event.clientY);
       const progress = reducedMotion.matches ? 0 : scrollProgress;
       // Pick up the visible pose if the previous release is still settling.
@@ -99,11 +96,6 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
     const moveDrag = (event: PointerEvent) => {
       if (event.pointerId !== dragPointer || !renderer) return;
       const dx = event.clientX - dragStart.x, dy = event.clientY - dragStart.y;
-      if (touchDrag && touchDirection === 'pending') {
-        if (Math.max(Math.abs(dx), Math.abs(dy)) < 6) return;
-        touchDirection = Math.abs(dx) > Math.abs(dy) ? 'rotate' : 'scroll';
-      }
-      if (touchDrag && touchDirection === 'scroll') return;
       const bounds = renderer.domElement.getBoundingClientRect();
       dragTarget.set(
         THREE.MathUtils.clamp(dragOrigin.x + dy / Math.max(bounds.height, 1) * 1.8, -0.65, 0.65),
@@ -112,7 +104,7 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
     };
     const endDrag = (event: PointerEvent) => { if (event.pointerId === dragPointer) resetDrag(); };
     const heroKeyDown = (event: KeyboardEvent) => {
-      if (event.target !== host || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) return;
+      if (!desktopPointer.matches || event.target !== host || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) return;
       event.preventDefault();
       if (event.key === 'Escape') { resetDrag(); return; }
       heldKeys.add(event.key);
