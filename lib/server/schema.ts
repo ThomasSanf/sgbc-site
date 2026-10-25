@@ -82,6 +82,7 @@ export const settings = sqliteTable('settings', {
 // Daily deduplication only: no raw browser identifier, address, referrer or IP.
 export const visitorDays = sqliteTable('visitor_days', {
   day: text('day').notNull(), visitorHash: text('visitor_hash').notNull(),
+  country: text('country'),
 }, table => [primaryKey({ columns: [table.day, table.visitorHash] })]);
 export const analyticsState = sqliteTable('analytics_state', {
   id: text('id').primaryKey(), startedAt: integer('started_at').notNull(),

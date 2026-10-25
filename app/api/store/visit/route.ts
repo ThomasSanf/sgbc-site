@@ -1,7 +1,7 @@
 import { getDb } from '@/lib/server/db';
 import { getAdmin } from '@/lib/server/auth';
 import { apiError, limitPublicRequest, readBody, verifyOrigin } from '@/lib/server/http';
-import { excludedVisit, recordVisit, visitInput } from '@/lib/server/visitor-analytics';
+import { excludedVisit, recordVisit, visitCountry, visitInput } from '@/lib/server/visitor-analytics';
 import { StoreError } from '@/lib/server/validation';
 
 export const runtime = 'nodejs';
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const data = visitInput.parse(body);
     if (await getAdmin(request.headers)) return empty();
     await limitPublicRequest(request, 'visitor-analytics', 120);
-    await recordVisit(getDb(), data.visitorId);
+    await recordVisit(getDb(), data.visitorId, Date.now(), visitCountry(request));
     return empty();
   } catch (error) { return apiError(error); }
 }

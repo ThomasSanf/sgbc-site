@@ -135,16 +135,25 @@ Open Font License in `assets/fonts/OFL-NotoSansTC.txt`.
 ## Visitor analytics
 
 Admin → Activity shows unique browsers today, in the last 7 calendar days, and in
-the last 30 calendar days, plus daily counts. All dates use Asia/Taipei (UTC+8).
+the last 30 calendar days, plus a daily chart and a country breakdown with counts
+and percentages for the last 30 days. All dates use Asia/Taipei (UTC+8).
 Each period deduplicates returning browsers across days; daily counts must not be
 added together to calculate the period total. Collection begins with the first
 eligible visit after deployment. Earlier traffic cannot be reconstructed.
 
 The storefront stores a random browser identifier for up to 180 days. The database
-stores only its HMAC hash and visit date, separately from orders. Daily records
+stores only its HMAC hash, visit date, and approximate country, separately from orders. Daily records
 older than the 30-day window are pruned on collection and dashboard reads. Clearing
 browser storage, changing devices, or rotating `BETTER_AUTH_SECRET` can count a
 returning visitor again. Counts are estimates of browsers, not identifiable people.
+
+Country is read from Vercel's `x-vercel-ip-country` header on production deployments;
+it is not accepted from the client beacon. No raw IP address is stored. Each browser
+is attributed to its latest known country within the 30-day window, so country
+counts sum to the unique-browser total. Missing geo headers never erase known
+country data. Visits predating this feature or without valid country data appear
+as **Unknown**. VPNs/proxies can affect the estimate. No historical country data is
+invented, and no visitor-level identifiers are returned by the admin endpoint.
 
 Only public storefront, sales-policy, and checkout-result pages on the canonical
 `BETTER_AUTH_URL` origin are eligible. Preview deployments, approved admin sessions,
@@ -152,7 +161,7 @@ known bots, prefetch requests, Do Not Track / Global Privacy Control, and visito
 who opt out through **Privacy choices / 隱私選項** are excluded. Blocked browser
 storage also disables counting. Analytics failures do not interrupt shopping.
 
-Apply migration `0003_visitor_analytics.sql` before deploying the tracking code.
+Apply migrations through `0004_visitor_countries.sql` before deploying the tracking code.
 No new environment variables or external analytics account are required. The
 statistics endpoint requires an approved admin session and is never cached.
 
@@ -161,7 +170,7 @@ statistics endpoint requires an approved admin session and is never cached.
 | Endpoint | Purpose | Access |
 | --- | --- | --- |
 | `GET /api/admin/dashboard/` | Metrics, catalog, configuration | Approved admin |
-| `GET /api/admin/visitors/` | Unique-browser totals and daily counts | Approved admin |
+| `GET /api/admin/visitors/` | Unique-browser totals, daily chart data and country counts | Approved admin |
 | `GET /api/admin/orders/`, `/preorders/`, `/activity/` | Search and paginated records (`q`, `page`) | Approved admin |
 | `POST /api/admin/products/` | Create/edit a product with version check | Approved admin + same origin |
 | `POST /api/admin/inventory/` | Signed unit delta and reason | Approved admin + same origin |

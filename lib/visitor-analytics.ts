@@ -14,5 +14,6 @@ export function taipeiDay(time: number) {
 export type VisitorStats = {
   today: number; last7Days: number; last30Days: number;
   days: Array<{ day: string; visitors: number }>;
+  countries: Array<{ country: string | null; visitors: number }>;
   startedAt: number | null; updatedAt: number;
 };
