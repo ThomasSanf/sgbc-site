@@ -12,6 +12,7 @@ import { publicSandboxMode } from './sandbox';
 import { readBody } from './http';
 import type { EmbeddedCheckout } from '../storefront-types';
 import { requirePolicyAcceptance } from './policy-consent';
+import { confirmationUrl } from './order-access';
 
 // Live Embedded Checkout must be activated by ECPay before enabling this setting.
 export function embeddedEcpayEnabled() { return publicSandboxMode() || process.env.ECPAY_CHECKOUT === 'embedded'; }
@@ -64,7 +65,6 @@ export async function queryEcpg(tradeNo: string, config: EcpayConfig) {
   if (fields.MerchantTradeNo !== tradeNo) throw new StoreError(502, 'Payment reference mismatch.');
   return fields;
 }
-export function embeddedResultUrl(locale: string) { return `${appOrigin()}/checkout/result/?result=returned&locale=${locale === 'en' ? 'en' : 'zh-TW'}`; }
 export function verificationUrl(value: unknown) {
   const url = new URL(z.string().max(2000).parse(value));
   if (url.protocol !== 'https:' || url.username || url.password || url.port || !url.hostname.endsWith('.ecpay.com.tw')) throw new StoreError(502, 'Invalid bank verification destination.');
@@ -80,7 +80,7 @@ export async function createEmbeddedCheckout(db: StoreDatabase, raw: unknown, co
       const data = await callEcpg('GetTokenbyTrade', {
         RememberCard: 0, PaymentUIType: 2, ChoosePaymentList: '1',
         OrderInfo: { MerchantTradeNo: order.ecpayMerchantTradeNo, MerchantTradeDate: taipeiTradeDate(order.createdAt), TotalAmount: order.total / 100, ReturnURL: `${appOrigin()}/api/webhooks/ecpg/`, TradeDesc: 'SGBC console preorder', ItemName: `SGBC Rev C x ${order.quantity}#Delivery ${order.shippingFee / 100} TWD` },
-        CardInfo: { OrderResultURL: `${appOrigin()}/api/store/ecpg-return/?locale=${order.locale}`, Redeem: '0' },
+        CardInfo: { OrderResultURL: confirmationUrl(order, '/api/store/ecpg-return/'), Redeem: '0' },
         ConsumerInfo: { Phone: shipping.phone.replace(/\D/g, ''), ...(order.email.length <= 100 ? { Email: order.email } : {}), CountryCode: '158' }, CustomField: order.id,
       }, config);
       if (data.RtnCode !== 1 || typeof data.Token !== 'string' || !/^[A-Za-z0-9_-]{10,64}$/.test(data.Token)) throw new StoreError(502, 'The secure payment form could not be prepared. Please retry.');
@@ -94,7 +94,7 @@ export async function createEmbeddedCheckout(db: StoreDatabase, raw: unknown, co
   const [session] = await db.select().from(embeddedCheckouts).where(eq(embeddedCheckouts.orderId, order.id));
   if (!session?.token) throw new StoreError(503, 'The payment form is being prepared. Please retry shortly.');
   if (session.expiresAt <= Date.now()) throw new StoreError(409, 'This payment session expired. Please contact the store before starting another order.');
-  return { provider: 'ecpay-embedded', orderId: order.id, merchantTradeNo: order.ecpayMerchantTradeNo!, token: session.token, environment: config.environment, expiresAt: session.expiresAt,
+  return { provider: 'ecpay-embedded', orderId: order.id, confirmationUrl: confirmationUrl(order), merchantTradeNo: order.ecpayMerchantTradeNo!, token: session.token, environment: config.environment, expiresAt: session.expiresAt,
     summary: { name: order.name, email: order.email, quantity: order.quantity, address: JSON.parse(order.shippingAddress!), subtotal: order.unitPrice * order.quantity, shippingFee: order.shippingFee, total: order.total } };
 }
 export const embeddedPaymentInput = z.object({ orderId: z.uuid(), requestKey: z.uuid(), payToken: z.string().regex(/^[A-Za-z0-9_-]{10,64}$/) }).strict();
@@ -119,20 +119,20 @@ export async function completeEmbeddedPayment(db: StoreDatabase, raw: unknown, c
   // The unpredictable request key is the buyer's checkout capability; order ID alone is never sufficient.
   const [order] = await db.select().from(orders).where(and(eq(orders.id, input.orderId), eq(orders.requestKey, input.requestKey)));
   if (!order || order.ecpayIntegration !== 'embedded' || order.paymentProvider !== 'ecpay' || order.paymentEnvironment !== config.environment || order.ecpayMerchantId !== config.merchantId || !order.ecpayMerchantTradeNo) throw new StoreError(404, 'Checkout not found.');
-  if (order.status !== 'pending') return { url: embeddedResultUrl(order.locale) };
+  if (order.status !== 'pending') return { url: confirmationUrl(order) };
   const [session] = await db.select().from(embeddedCheckouts).where(eq(embeddedCheckouts.orderId, order.id));
   if (!session?.token) throw new StoreError(409, 'The payment form is not ready.');
-  if (session.paymentStartedAt) return { url: session.redirectUrl ?? embeddedResultUrl(order.locale) };
+  if (session.paymentStartedAt) return { url: session.redirectUrl ?? confirmationUrl(order) };
   await requirePolicyAcceptance(db, order.id, order.locale as 'en' | 'zh-TW');
   if (session.expiresAt <= Date.now()) throw new StoreError(409, 'The payment session expired. Please contact the store.');
   const [claimed] = await db.update(embeddedCheckouts).set({ paymentStartedAt: Date.now() }).where(and(eq(embeddedCheckouts.orderId, order.id), isNull(embeddedCheckouts.paymentStartedAt))).returning();
-  if (!claimed) return { url: embeddedResultUrl(order.locale) };
+  if (!claimed) return { url: confirmationUrl(order) };
   // Never automatically retry CreatePayment after an ambiguous timeout or accept another PayToken.
   // The original trade is reconciled by webhook/query; this also makes double clicks harmless.
   const data = await callEcpg('CreatePayment', { MerchantTradeNo: order.ecpayMerchantTradeNo, PayToken: input.payToken }, config);
   const info = z.object({ MerchantTradeNo: z.literal(order.ecpayMerchantTradeNo) }).safeParse(data.OrderInfo);
   if (!info.success) throw new StoreError(502, 'Payment reference mismatch.');
-  let url = embeddedResultUrl(order.locale);
+  let url = confirmationUrl(order);
   if (data.RtnCode === 1 && data.ThreeDInfo) {
     const threeD = z.object({ ThreeDURL: z.string() }).parse(data.ThreeDInfo);
     url = verificationUrl(threeD.ThreeDURL);

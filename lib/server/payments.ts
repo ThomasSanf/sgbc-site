@@ -2,13 +2,14 @@ import 'server-only';
 import Stripe from 'stripe';
 import { and, eq, isNull } from 'drizzle-orm';
 import { getDb } from './db';
-import { appOrigin, stripeConfigured, paymentProvider } from './config';
+import { stripeConfigured, paymentProvider } from './config';
 import { orders } from './schema';
 import { applyPayment, applyRefund, reserveCheckout } from './store';
 import { StoreError } from './validation';
 import { ecpayConfig, ecpayCheckout, queryEcpay, type EcpayFields } from './ecpay';
 import { reserveEcpayCheckout, applyEcpayResult, applyVerifiedEcpayResult, findEcpayOrder } from './ecpay-store';
 import { createEmbeddedCheckout, embeddedEcpayEnabled, queryEcpg } from './ecpg';
+import { confirmationUrl } from './order-access';
 
 export function stripeClient() {
   if (!stripeConfigured()) throw new StoreError(503, 'Stripe is not configured yet.');
@@ -22,7 +23,6 @@ export async function createCheckout(raw: unknown) {
   }
   const stripe = stripeClient(), db = getDb();
   const order = await reserveCheckout(db, raw);
-  const origin = appOrigin();
   let session: Stripe.Checkout.Session;
   if (order.stripeSessionId) session = await stripe.checkout.sessions.retrieve(order.stripeSessionId);
   else {
@@ -35,7 +35,7 @@ export async function createCheckout(raw: unknown) {
       payment_intent_data: { metadata: { sgbc_order_id: order.id } },
       line_items: [{ quantity: order.quantity, price_data: { currency: order.currency.toLowerCase(), unit_amount: order.unitPrice, product_data: { name: order.productName } } }],
       shipping_address_collection: { allowed_countries: ['TW'] },
-      success_url: `${origin}/checkout/result/?result=complete`, cancel_url: `${origin}/checkout/result/?result=cancelled`,
+      success_url: confirmationUrl(order), cancel_url: confirmationUrl(order),
       // Keep all create parameters stable when replaying an idempotency key.
       expires_at: Math.floor(order.createdAt / 1000) + 60 * 60,
     }, { idempotencyKey: `sgbc-checkout-${order.id}` });

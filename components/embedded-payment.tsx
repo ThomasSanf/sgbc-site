@@ -31,7 +31,7 @@ export function EmbeddedPayment({ checkout, requestKey, locale, onEdit, onBusy }
   const submitting = useRef(false);
   const root = useRef<HTMLDivElement>(null);
   const money = (value: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(value / 100);
-  const resultUrl = `/checkout/result/?result=returned&locale=${locale}`;
+  const resultUrl = checkout.confirmationUrl;
 
   useEffect(() => {
     active.current = true;

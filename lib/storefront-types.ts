@@ -20,7 +20,7 @@ export type CheckoutDestination =
   | { provider: 'ecpay'; url: string; fields: Record<string, string>; orderId: string };
 
 export type EmbeddedCheckout = {
-  provider: 'ecpay-embedded'; orderId: string; merchantTradeNo: string; token: string;
+  provider: 'ecpay-embedded'; orderId: string; confirmationUrl: string; merchantTradeNo: string; token: string;
   environment: 'stage' | 'live'; expiresAt: number;
   summary: { name: string; email: string; quantity: number; subtotal: number; shippingFee: number; total: number;
     address: { phone: string; country: string; city: string; district: string; postalCode: string; address: string } };

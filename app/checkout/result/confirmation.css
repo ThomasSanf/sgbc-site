@@ -1,0 +1,38 @@
+.confirmation-page { min-height:100vh; background:#0d0e0c; color:#eeeee7; }
+.confirmation-header { max-width:1120px; margin:auto; padding:30px 32px; display:flex; align-items:center; justify-content:space-between; gap:20px; border-bottom:1px solid #30322a; }
+.confirmation-header .wordmark { font-size:42px; }
+.confirmation-header>.mono { font-size:11px; color:#969b8e; }
+.confirmation-main { max-width:900px; margin:auto; padding:60px 32px 44px; }
+.confirmation-status { display:inline-flex; align-items:center; gap:9px; padding:9px 12px; font-size:12px; color:#cec2a2; background:#27251c; border:1px solid #454132; }
+.confirmation-status.is-paid { color:#c1d2a9; background:#20271a; border-color:#3c4b30; }
+.confirmation-intro h1 { font-size:clamp(38px,5vw,62px); line-height:1.08; letter-spacing:-.045em; font-weight:600; white-space:pre-line; margin:24px 0 18px; }
+.confirmation-intro>p { font-size:16px; line-height:1.8; color:#aaafa1; max-width:650px; }
+.confirmation-sandbox { color:#e9bf92; background:#302317; border:1px solid #674a2c; padding:14px 20px; font-size:13px; margin-top:26px; }
+.confirmation-card { margin-top:28px; border:1px solid #34372c; background:#13160f; }
+.confirmation-order-meta { display:grid; grid-template-columns:1fr 1fr; padding:24px 28px; border-bottom:1px solid #34372c; gap:24px; }
+.confirmation-order-meta>div { display:flex; flex-direction:column; gap:8px; }
+.confirmation-order-meta span,.confirmation-product .mono { color:#a1ac90; font-size:11px; }
+.confirmation-order-meta strong { font-size:13px; font-weight:400; overflow-wrap:anywhere; }
+.confirmation-product { display:flex; align-items:center; gap:20px; padding:30px 28px; }
+.confirmation-product-icon { display:grid; place-items:center; width:76px; height:76px; flex-shrink:0; color:#aab794; background:#252c1e; border:1px solid #394331; }
+.confirmation-product h2 { font-size:20px; font-weight:500; margin:6px 0; overflow-wrap:anywhere; }
+.confirmation-product p { font-size:12px; line-height:1.8; color:#9aa48c; overflow-wrap:anywhere; }
+.confirmation-product>strong { margin-left:auto; white-space:nowrap; font-size:17px; font-weight:500; }
+.confirmation-totals { padding:0 28px 26px; margin-left:auto; max-width:420px; }
+.confirmation-totals>div { display:flex; justify-content:space-between; gap:24px; margin-top:12px; color:#aeb6a3; font-size:14px; }
+.confirmation-totals dd { text-align:right; white-space:nowrap; }
+.confirmation-totals>.confirmation-total { color:#f0f1e9; border-top:1px solid #363e2d; padding-top:16px; font-size:20px; }
+.confirmation-details { padding:28px; border-top:1px solid #34372c; display:grid; grid-template-columns:1fr 1fr; gap:32px; }
+.confirmation-details h2 { font-size:11px; font-weight:400; color:#a1ac90; margin:20px 0 9px; }
+.confirmation-details h2:first-child { margin-top:0; }
+.confirmation-details p { font-size:14px; line-height:1.8; overflow-wrap:anywhere; }
+.confirmation-preorder { padding:18px 28px; border-top:1px solid #34372c; font-size:12px; line-height:1.8; color:#a9b09f; }
+.confirmation-actions { margin-top:26px; display:flex; align-items:center; flex-wrap:wrap; gap:22px; }
+.confirmation-download { display:inline-flex; align-items:center; justify-content:center; gap:12px; padding:18px 22px; background:#ff5a22; color:#15150e; font-weight:600; font-size:14px; }
+.confirmation-download:hover { background:#ff713e; }.confirmation-download:disabled { opacity:.6; cursor:wait; }
+.confirmation-actions .text-link { font-size:13px; display:inline-flex; align-items:center; gap:9px; }
+.confirmation-error,.confirmation-notice { margin-top:18px; font-size:13px; line-height:1.8; color:#e8b189; }
+.confirmation-footer { display:flex; justify-content:space-between; gap:36px; padding-top:28px; font-size:11px; line-height:1.8; color:#929c85; }
+.confirmation-footer p { max-width:580px; }.confirmation-footer a { white-space:nowrap; text-decoration:underline; text-underline-offset:4px; }
+.confirmation-unavailable { max-width:720px; margin:10vh auto; padding:32px; }.confirmation-unavailable h1 { font-size:42px; line-height:1.15; margin:24px 0; }.confirmation-unavailable p { line-height:1.8; color:#aeb6a3; }.confirmation-unavailable a { display:inline-block; margin-top:30px; }
+@media(max-width:600px) { .confirmation-header { padding:22px; }.confirmation-header .wordmark { font-size:36px; }.confirmation-header>.mono { font-size:9px; }.confirmation-main { padding:34px 18px; }.confirmation-order-meta { grid-template-columns:1fr; padding:22px; gap:18px; }.confirmation-product { flex-wrap:wrap; padding:22px; gap:16px; }.confirmation-product-icon { width:52px; height:52px; }.confirmation-product>div:nth-child(2) { flex:1; min-width:180px; }.confirmation-product>strong { width:100%; text-align:right; }.confirmation-product h2 { font-size:18px; }.confirmation-totals { max-width:none; padding:0 22px 24px; }.confirmation-details { padding:22px; gap:26px; grid-template-columns:1fr; }.confirmation-preorder { padding:18px 22px; }.confirmation-download { width:100%; }.confirmation-footer { flex-direction:column; gap:16px; } }

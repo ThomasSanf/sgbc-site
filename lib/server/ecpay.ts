@@ -4,6 +4,7 @@ import { ecpayConfigured, ecpayEnvironment, appOrigin } from './config';
 import { StoreError } from './validation';
 import type { orders } from './schema';
 import { publicSandboxMode, publicEcpaySandbox } from './sandbox';
+import { confirmationUrl } from './order-access';
 
 export type EcpayConfig = { merchantId: string; hashKey: string; hashIV: string; environment: 'stage' | 'live' };
 export type EcpayFields = Record<string, string>;
@@ -48,8 +49,8 @@ export function ecpayCheckout(order: typeof orders.$inferSelect, config: EcpayCo
     MerchantID: config.merchantId, MerchantTradeNo: order.ecpayMerchantTradeNo,
     MerchantTradeDate: taipeiTradeDate(order.createdAt), PaymentType: 'aio', TotalAmount: String(order.total / 100),
     TradeDesc: 'SGBC console preorder', ItemName: `SGBC Rev C x ${order.quantity}#Delivery ${order.shippingFee / 100} TWD`,
-    ReturnURL: `${origin}/api/webhooks/ecpay/`, OrderResultURL: `${origin}/api/store/ecpay-return/`,
-    ClientBackURL: `${origin}/checkout/result/?result=returned&locale=${order.locale}`,
+    ReturnURL: `${origin}/api/webhooks/ecpay/`, OrderResultURL: confirmationUrl(order, '/api/store/ecpay-return/'),
+    ClientBackURL: confirmationUrl(order),
     ChoosePayment: 'Credit', IgnorePayment: 'ApplePay#DigitalPayment', EncryptType: '1', UnionPay: '2', BindingCard: '0',
     CustomField1: order.id, CustomField2: order.locale, NeedExtraPaidInfo: 'N',
     ...(order.locale === 'en' ? { Language: 'ENG' } : {}),

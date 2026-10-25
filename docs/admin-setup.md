@@ -104,6 +104,34 @@ orders and the events `checkout.session.completed`,
 `charge.refunded`. Legacy Stripe checkout includes delivery in the product price;
 the new separate-delivery setting applies to ECPay.
 
+## Customer order confirmation
+
+New checkouts return to a private `/checkout/result/` link for that order. Hosted
+ECPay's back button, embedded ECPay's bank-verification return, and the embedded
+checkout's confirmation link all use the same order capability. Existing provider
+sessions created before this release keep their old callback URLs; new checkout
+sessions are needed to exercise this flow.
+
+The page and PDF show the database's verified payment state, customer/delivery
+details, quantity, unit price, shipping and total. Pending orders query the payment
+provider once on arrival and poll the saved status for about a minute; the customer
+can check again. A redirect or browser success flag never marks an order paid.
+Test orders are always labeled as tests, even when live checkout is enabled later.
+
+Confirmation links expire 180 days after order creation and contain a signed
+read-only capability bound to the order and its private request key. Order IDs
+alone cannot disclose customer details. Treat these links as private and avoid
+copying their query strings into logs or support tickets. Rotating
+`BETTER_AUTH_SECRET` invalidates existing confirmation links. No new database
+migration or environment variable is needed.
+
+The PDF endpoint generates downloads on demand without storing customer files.
+Pages, APIs and downloads use private/no-store responses, no-referrer, and noindex.
+PDFKit embeds a subset of the bundled Noto Sans TC Regular font so English and
+Traditional Chinese delivery details render without a third-party font request.
+The font comes from `notofonts/noto-cjk/Sans/SubsetOTF/TC` under the included SIL
+Open Font License in `assets/fonts/OFL-NotoSansTC.txt`.
+
 ## Visitor analytics
 
 Admin → Activity shows unique browsers today, in the last 7 calendar days, and in
@@ -143,6 +171,8 @@ statistics endpoint requires an approved admin session and is never cached.
 | `POST /api/admin/reconcile/` | Retrieve current ECPay/Stripe payment status | Approved admin + same origin |
 | `PATCH /api/admin/settings/` | Set delivery per unit; open/close reservations or checkout | Approved admin + same origin |
 | `GET /api/store/catalog/` | Active catalog and availability flags | Public |
+| `GET/POST /api/store/order-confirmation/` | Buyer details / refresh verified payment status | Private order capability; POST also same origin + rate limit |
+| `GET /api/store/order-receipt/` | English or Traditional Chinese PDF download | Private order capability + rate limit |
 | `POST /api/store/visit/` | Deduplicated public-page visit | Same origin + rate limit + privacy filters |
 | `POST /api/store/preorders/` | Unpaid reservation request | Open store + same origin + rate limit |
 | `POST /api/store/checkout/` | Signed ECPay hosted-card form | Open store + same origin + rate limit |
