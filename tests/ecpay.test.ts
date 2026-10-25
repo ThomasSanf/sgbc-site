@@ -11,6 +11,7 @@ import { checkMacValue, verifyEcpayFields, parseEcpayForm, ecpayCheckout, ecpayC
 import { ecpayConfigured, paymentProvider, ecpayEnvironment } from '../lib/server/config';
 import { SANDBOX_PRODUCT_ID, SANDBOX_SETTINGS_ID, publicEcpaySandbox } from '../lib/server/sandbox';
 import { shippingInput } from '../lib/server/validation';
+import { taiwanCities, taiwanDistrict } from '../lib/shipping';
 import { POST as notify } from '../app/api/webhooks/ecpay/route';
 import { POST as browserReturn } from '../app/api/store/ecpay-return/route';
 import { POST as checkout, GET as catalog } from '../app/api/store/[resource]/route';
@@ -26,7 +27,7 @@ process.env.ECPAY_HASH_IV = 'local-test-iv--16';
 process.env.ECPAY_ENVIRONMENT = 'live';
 const config: EcpayConfig = { merchantId: '8888888', hashKey: 'local-test-key-16', hashIV: 'local-test-iv--16', environment: 'live' };
 const db = getDb();
-const shipping = { phone: '0912345678', postalCode: '100', city: 'Taipei', address: 'Test address 123', country: 'TW' };
+const shipping = { phone: '0912345678', postalCode: '100', city: '臺北市', district: '中正區', address: 'Test address 123', country: 'TW' };
 let productId = '';
 const signed = (fields: EcpayFields, cfg = config) => ({ ...fields, CheckMacValue: checkMacValue(fields, cfg) });
 const payload = (quantity = 1) => ({ productId, name: 'Test buyer', email: 'buyer@example.test', quantity, requestKey: crypto.randomUUID(), shipping, locale: 'zh-TW', expectedTotal: 558000 * quantity, acknowledged: true });
@@ -151,29 +152,39 @@ test('public checkout validates origins, requires acknowledgment, and returns a 
   const data = await response.json(); assert.equal(data.provider, 'ecpay'); assert.equal(data.fields.ChoosePayment, 'Credit');
   verifyEcpayFields(data.fields, config);
 });
-test('delivery country and postal-code validation allow Taiwan, Japan and Singapore only', () => {
-  for (const [country, postalCode] of [['TW', '100'], ['TW', '100001'], ['JP', '100-0001'], ['JP', '1000001'], ['SG', '018956']]) {
-    assert.equal(shippingInput.safeParse({ ...shipping, country, postalCode }).success, true);
+test('Taiwan address data covers all administrative areas, including districts sharing postal codes', () => {
+  assert.equal(taiwanCities.length, 22);
+  assert.equal(taiwanCities.reduce((count, city) => count + city.districts.length, 0), 368);
+  assert.equal(new Set(taiwanCities.map(city => city.name)).size, 22);
+  for (const city of taiwanCities) {
+    assert.equal(new Set(city.districts.map(district => district.name)).size, city.districts.length);
+    for (const district of city.districts) assert.equal(shippingInput.safeParse({ ...shipping, city: city.name, district: district.name, postalCode: district.postalCode }).success, true);
   }
-  for (const [country, postalCode] of [['FR', '75001'], ['US', '10001'], ['TW', '1000001'], ['JP', '100'], ['SG', '01895']]) {
-    assert.equal(shippingInput.safeParse({ ...shipping, country, postalCode }).success, false);
-  }
+  assert.equal(taiwanDistrict('新竹市', '東區')?.postalCode, '300');
+  assert.equal(taiwanDistrict('新竹市', '北區')?.postalCode, '300');
+  assert.equal(taiwanDistrict('嘉義市', '西區')?.postalCode, '600');
 });
 
-test('international sandbox orders retain the country and cannot use the Taiwan rate for live payment', async () => {
+test('delivery validation rejects overseas destinations, mismatched districts and postal prefixes', () => {
+  for (const postalCode of ['100', '10001', '100001']) assert.equal(shippingInput.safeParse({ ...shipping, postalCode }).success, true);
+  for (const country of ['JP', 'SG', 'FR', 'US']) assert.equal(shippingInput.safeParse({ ...shipping, country }).success, false);
+  for (const changes of [{ city: 'Taipei' }, { city: '臺北市', district: '板橋區' }, { district: '' }, { district: undefined }, { postalCode: '220001' }, { postalCode: '1000001' }]) assert.equal(shippingInput.safeParse({ ...shipping, ...changes }).success, false);
+});
+
+test('checkout preserves Taiwan districts and rejects overseas orders even in sandbox', async () => {
   const stage = { ...config, environment: 'stage' as const };
-  for (const [country, postalCode] of [['JP', '100-0001'], ['SG', '018956']]) {
-    const input = { ...payload(), shipping: { ...shipping, country, postalCode } };
-    await assert.rejects(reserveEcpayCheckout(db, input, config), /Delivery pricing/);
-    const order = await reserveEcpayCheckout(db, input, stage);
-    assert.equal(JSON.parse(order.shippingAddress!).country, country);
-    assert.equal(order.shippingFee, 8000);
-    assert.equal(order.total, 558000);
-    assert.equal(ecpayCheckout(order, stage).fields.ItemName, 'SGBC Rev C x 1#Delivery 80 TWD');
-    assert.equal((await reserveEcpayCheckout(db, input, stage)).id, order.id);
-    const changed = country === 'JP' ? { country: 'SG', postalCode: '018956' } : { country: 'JP', postalCode: '100-0001' };
-    await assert.rejects(reserveEcpayCheckout(db, { ...input, shipping: { ...shipping, ...changed } }, stage));
+  const before = (await db.select().from(products).where(eq(products.id, productId)))[0];
+  for (const country of ['JP', 'SG', 'FR']) {
+    for (const environment of [config, stage]) await assert.rejects(reserveEcpayCheckout(db, { ...payload(), shipping: { ...shipping, country } }, environment));
   }
+  assert.deepEqual((await db.select().from(products).where(eq(products.id, productId)))[0], before);
+  const address = { ...shipping, city: '新北市', district: '板橋區', postalCode: '220' };
+  const input = { ...payload(), shipping: address };
+  const order = await reserveEcpayCheckout(db, input, stage);
+  assert.deepEqual(JSON.parse(order.shippingAddress!), address);
+  assert.equal(order.shippingFee, 8000); assert.equal(order.total, 558000);
+  assert.equal((await reserveEcpayCheckout(db, input, stage)).id, order.id);
+  await assert.rejects(reserveEcpayCheckout(db, { ...input, shipping }, stage));
 });
 
 test('simultaneous attempts for the last unit cannot oversell the allocation', async () => {

@@ -1,0 +1,1974 @@
+[
+  {
+    "name": "臺北市",
+    "english": "Taipei City",
+    "districts": [
+      {
+        "name": "中正區",
+        "english": "Zhongzheng Dist.",
+        "postalCode": "100"
+      },
+      {
+        "name": "大同區",
+        "english": "Datong Dist.",
+        "postalCode": "103"
+      },
+      {
+        "name": "中山區",
+        "english": "Zhongshan Dist.",
+        "postalCode": "104"
+      },
+      {
+        "name": "松山區",
+        "english": "Songshan Dist.",
+        "postalCode": "105"
+      },
+      {
+        "name": "大安區",
+        "english": "Da’an Dist.",
+        "postalCode": "106"
+      },
+      {
+        "name": "萬華區",
+        "english": "Wanhua Dist.",
+        "postalCode": "108"
+      },
+      {
+        "name": "信義區",
+        "english": "Xinyi Dist.",
+        "postalCode": "110"
+      },
+      {
+        "name": "士林區",
+        "english": "Shilin Dist.",
+        "postalCode": "111"
+      },
+      {
+        "name": "北投區",
+        "english": "Beitou Dist.",
+        "postalCode": "112"
+      },
+      {
+        "name": "內湖區",
+        "english": "Neihu Dist.",
+        "postalCode": "114"
+      },
+      {
+        "name": "南港區",
+        "english": "Nangang Dist.",
+        "postalCode": "115"
+      },
+      {
+        "name": "文山區",
+        "english": "Wenshan Dist.",
+        "postalCode": "116"
+      }
+    ]
+  },
+  {
+    "name": "基隆市",
+    "english": "Keelung City",
+    "districts": [
+      {
+        "name": "仁愛區",
+        "english": "Ren’ai Dist.",
+        "postalCode": "200"
+      },
+      {
+        "name": "信義區",
+        "english": "Xinyi Dist.",
+        "postalCode": "201"
+      },
+      {
+        "name": "中正區",
+        "english": "Zhongzheng Dist.",
+        "postalCode": "202"
+      },
+      {
+        "name": "中山區",
+        "english": "Zhongshan Dist.",
+        "postalCode": "203"
+      },
+      {
+        "name": "安樂區",
+        "english": "Anle Dist.",
+        "postalCode": "204"
+      },
+      {
+        "name": "暖暖區",
+        "english": "Nuannuan Dist.",
+        "postalCode": "205"
+      },
+      {
+        "name": "七堵區",
+        "english": "Qidu Dist.",
+        "postalCode": "206"
+      }
+    ]
+  },
+  {
+    "name": "新北市",
+    "english": "New Taipei City",
+    "districts": [
+      {
+        "name": "萬里區",
+        "english": "Wanli Dist.",
+        "postalCode": "207"
+      },
+      {
+        "name": "金山區",
+        "english": "Jinshan Dist.",
+        "postalCode": "208"
+      },
+      {
+        "name": "板橋區",
+        "english": "Banqiao Dist.",
+        "postalCode": "220"
+      },
+      {
+        "name": "汐止區",
+        "english": "Xizhi Dist.",
+        "postalCode": "221"
+      },
+      {
+        "name": "深坑區",
+        "english": "Shenkeng Dist.",
+        "postalCode": "222"
+      },
+      {
+        "name": "石碇區",
+        "english": "Shiding Dist.",
+        "postalCode": "223"
+      },
+      {
+        "name": "瑞芳區",
+        "english": "Ruifang Dist.",
+        "postalCode": "224"
+      },
+      {
+        "name": "平溪區",
+        "english": "Pingxi Dist.",
+        "postalCode": "226"
+      },
+      {
+        "name": "雙溪區",
+        "english": "Shuangxi Dist.",
+        "postalCode": "227"
+      },
+      {
+        "name": "貢寮區",
+        "english": "Gongliao Dist.",
+        "postalCode": "228"
+      },
+      {
+        "name": "新店區",
+        "english": "Xindian Dist.",
+        "postalCode": "231"
+      },
+      {
+        "name": "坪林區",
+        "english": "Pinglin Dist.",
+        "postalCode": "232"
+      },
+      {
+        "name": "烏來區",
+        "english": "Wulai Dist.",
+        "postalCode": "233"
+      },
+      {
+        "name": "永和區",
+        "english": "Yonghe Dist.",
+        "postalCode": "234"
+      },
+      {
+        "name": "中和區",
+        "english": "Zhonghe Dist.",
+        "postalCode": "235"
+      },
+      {
+        "name": "土城區",
+        "english": "Tucheng Dist.",
+        "postalCode": "236"
+      },
+      {
+        "name": "三峽區",
+        "english": "Sanxia Dist.",
+        "postalCode": "237"
+      },
+      {
+        "name": "樹林區",
+        "english": "Shulin Dist.",
+        "postalCode": "238"
+      },
+      {
+        "name": "鶯歌區",
+        "english": "Yingge Dist.",
+        "postalCode": "239"
+      },
+      {
+        "name": "三重區",
+        "english": "Sanchong Dist.",
+        "postalCode": "241"
+      },
+      {
+        "name": "新莊區",
+        "english": "Xinzhuang Dist.",
+        "postalCode": "242"
+      },
+      {
+        "name": "泰山區",
+        "english": "Taishan Dist.",
+        "postalCode": "243"
+      },
+      {
+        "name": "林口區",
+        "english": "Linkou Dist.",
+        "postalCode": "244"
+      },
+      {
+        "name": "蘆洲區",
+        "english": "Luzhou Dist.",
+        "postalCode": "247"
+      },
+      {
+        "name": "五股區",
+        "english": "Wugu Dist.",
+        "postalCode": "248"
+      },
+      {
+        "name": "八里區",
+        "english": "Bali Dist.",
+        "postalCode": "249"
+      },
+      {
+        "name": "淡水區",
+        "english": "Tamsui Dist.",
+        "postalCode": "251"
+      },
+      {
+        "name": "三芝區",
+        "english": "Sanzhi Dist.",
+        "postalCode": "252"
+      },
+      {
+        "name": "石門區",
+        "english": "Shimen Dist.",
+        "postalCode": "253"
+      }
+    ]
+  },
+  {
+    "name": "連江縣",
+    "english": "Lienchiang County",
+    "districts": [
+      {
+        "name": "南竿鄉",
+        "english": "Nangan Township",
+        "postalCode": "209"
+      },
+      {
+        "name": "北竿鄉",
+        "english": "Beigan Township",
+        "postalCode": "210"
+      },
+      {
+        "name": "莒光鄉",
+        "english": "Juguang Township",
+        "postalCode": "211"
+      },
+      {
+        "name": "東引鄉",
+        "english": "Dongyin Township",
+        "postalCode": "212"
+      }
+    ]
+  },
+  {
+    "name": "宜蘭縣",
+    "english": "Yilan County",
+    "districts": [
+      {
+        "name": "宜蘭市",
+        "english": "Yilan City",
+        "postalCode": "260"
+      },
+      {
+        "name": "頭城鎮",
+        "english": "Toucheng Township",
+        "postalCode": "261"
+      },
+      {
+        "name": "礁溪鄉",
+        "english": "Jiaoxi Township",
+        "postalCode": "262"
+      },
+      {
+        "name": "壯圍鄉",
+        "english": "Zhuangwei Township",
+        "postalCode": "263"
+      },
+      {
+        "name": "員山鄉",
+        "english": "Yuanshan Township",
+        "postalCode": "264"
+      },
+      {
+        "name": "羅東鎮",
+        "english": "Luodong Township",
+        "postalCode": "265"
+      },
+      {
+        "name": "三星鄉",
+        "english": "Sanxing Township",
+        "postalCode": "266"
+      },
+      {
+        "name": "大同鄉",
+        "english": "Datong Township",
+        "postalCode": "267"
+      },
+      {
+        "name": "五結鄉",
+        "english": "Wujie Township",
+        "postalCode": "268"
+      },
+      {
+        "name": "冬山鄉",
+        "english": "Dongshan Township",
+        "postalCode": "269"
+      },
+      {
+        "name": "蘇澳鎮",
+        "english": "Su’ao Township",
+        "postalCode": "270"
+      },
+      {
+        "name": "南澳鄉",
+        "english": "Nan’ao Township",
+        "postalCode": "272"
+      }
+    ]
+  },
+  {
+    "name": "新竹市",
+    "english": "Hsinchu City",
+    "districts": [
+      {
+        "name": "東區",
+        "english": "East Dist.",
+        "postalCode": "300"
+      },
+      {
+        "name": "北區",
+        "english": "North Dist.",
+        "postalCode": "300"
+      },
+      {
+        "name": "香山區",
+        "english": "Xiangshan Dist.",
+        "postalCode": "300"
+      }
+    ]
+  },
+  {
+    "name": "新竹縣",
+    "english": "Hsinchu County",
+    "districts": [
+      {
+        "name": "竹北市",
+        "english": "Zhubei City",
+        "postalCode": "302"
+      },
+      {
+        "name": "湖口鄉",
+        "english": "Hukou Township",
+        "postalCode": "303"
+      },
+      {
+        "name": "新豐鄉",
+        "english": "Xinfeng Township",
+        "postalCode": "304"
+      },
+      {
+        "name": "新埔鎮",
+        "english": "Xinpu Township",
+        "postalCode": "305"
+      },
+      {
+        "name": "關西鎮",
+        "english": "Guanxi Township",
+        "postalCode": "306"
+      },
+      {
+        "name": "芎林鄉",
+        "english": "Qionglin Township",
+        "postalCode": "307"
+      },
+      {
+        "name": "寶山鄉",
+        "english": "Baoshan Township",
+        "postalCode": "308"
+      },
+      {
+        "name": "竹東鎮",
+        "english": "Zhudong Township",
+        "postalCode": "310"
+      },
+      {
+        "name": "五峰鄉",
+        "english": "Wufeng Township",
+        "postalCode": "311"
+      },
+      {
+        "name": "橫山鄉",
+        "english": "Hengshan Township",
+        "postalCode": "312"
+      },
+      {
+        "name": "尖石鄉",
+        "english": "Jianshi Township",
+        "postalCode": "313"
+      },
+      {
+        "name": "北埔鄉",
+        "english": "Beipu Township",
+        "postalCode": "314"
+      },
+      {
+        "name": "峨眉鄉",
+        "english": "Emei Township",
+        "postalCode": "315"
+      }
+    ]
+  },
+  {
+    "name": "桃園市",
+    "english": "Taoyuan City",
+    "districts": [
+      {
+        "name": "中壢區",
+        "english": "Zhongli Dist.",
+        "postalCode": "320"
+      },
+      {
+        "name": "平鎮區",
+        "english": "Pingzhen Dist.",
+        "postalCode": "324"
+      },
+      {
+        "name": "龍潭區",
+        "english": "Longtan Dist.",
+        "postalCode": "325"
+      },
+      {
+        "name": "楊梅區",
+        "english": "Yangmei Dist.",
+        "postalCode": "326"
+      },
+      {
+        "name": "新屋區",
+        "english": "Xinwu Dist.",
+        "postalCode": "327"
+      },
+      {
+        "name": "觀音區",
+        "english": "Guanyin Dist.",
+        "postalCode": "328"
+      },
+      {
+        "name": "桃園區",
+        "english": "Taoyuan Dist.",
+        "postalCode": "330"
+      },
+      {
+        "name": "龜山區",
+        "english": "Guishan Dist.",
+        "postalCode": "333"
+      },
+      {
+        "name": "八德區",
+        "english": "Bade Dist.",
+        "postalCode": "334"
+      },
+      {
+        "name": "大溪區",
+        "english": "Daxi Dist.",
+        "postalCode": "335"
+      },
+      {
+        "name": "復興區",
+        "english": "Fuxing Dist.",
+        "postalCode": "336"
+      },
+      {
+        "name": "大園區",
+        "english": "Dayuan Dist.",
+        "postalCode": "337"
+      },
+      {
+        "name": "蘆竹區",
+        "english": "Luzhu Dist.",
+        "postalCode": "338"
+      }
+    ]
+  },
+  {
+    "name": "苗栗縣",
+    "english": "Miaoli County",
+    "districts": [
+      {
+        "name": "竹南鎮",
+        "english": "Zhunan Township",
+        "postalCode": "350"
+      },
+      {
+        "name": "頭份市",
+        "english": "Toufen City",
+        "postalCode": "351"
+      },
+      {
+        "name": "三灣鄉",
+        "english": "Sanwan Township",
+        "postalCode": "352"
+      },
+      {
+        "name": "南庄鄉",
+        "english": "Nanzhuang Township",
+        "postalCode": "353"
+      },
+      {
+        "name": "獅潭鄉",
+        "english": "Shitan Township",
+        "postalCode": "354"
+      },
+      {
+        "name": "後龍鎮",
+        "english": "Houlong Township",
+        "postalCode": "356"
+      },
+      {
+        "name": "通霄鎮",
+        "english": "Tongxiao Township",
+        "postalCode": "357"
+      },
+      {
+        "name": "苑裡鎮",
+        "english": "Yuanli Township",
+        "postalCode": "358"
+      },
+      {
+        "name": "苗栗市",
+        "english": "Miaoli City",
+        "postalCode": "360"
+      },
+      {
+        "name": "造橋鄉",
+        "english": "Zaoqiao Township",
+        "postalCode": "361"
+      },
+      {
+        "name": "頭屋鄉",
+        "english": "Touwu Township",
+        "postalCode": "362"
+      },
+      {
+        "name": "公館鄉",
+        "english": "Gongguan Township",
+        "postalCode": "363"
+      },
+      {
+        "name": "大湖鄉",
+        "english": "Dahu Township",
+        "postalCode": "364"
+      },
+      {
+        "name": "泰安鄉",
+        "english": "Tai’an Township",
+        "postalCode": "365"
+      },
+      {
+        "name": "銅鑼鄉",
+        "english": "Tongluo Township",
+        "postalCode": "366"
+      },
+      {
+        "name": "三義鄉",
+        "english": "Sanyi Township",
+        "postalCode": "367"
+      },
+      {
+        "name": "西湖鄉",
+        "english": "Xihu Township",
+        "postalCode": "368"
+      },
+      {
+        "name": "卓蘭鎮",
+        "english": "Zhuolan Township",
+        "postalCode": "369"
+      }
+    ]
+  },
+  {
+    "name": "臺中市",
+    "english": "Taichung City",
+    "districts": [
+      {
+        "name": "中區",
+        "english": "Central Dist.",
+        "postalCode": "400"
+      },
+      {
+        "name": "東區",
+        "english": "East Dist.",
+        "postalCode": "401"
+      },
+      {
+        "name": "南區",
+        "english": "South Dist.",
+        "postalCode": "402"
+      },
+      {
+        "name": "西區",
+        "english": "West Dist.",
+        "postalCode": "403"
+      },
+      {
+        "name": "北區",
+        "english": "North Dist.",
+        "postalCode": "404"
+      },
+      {
+        "name": "北屯區",
+        "english": "Beitun Dist.",
+        "postalCode": "406"
+      },
+      {
+        "name": "西屯區",
+        "english": "Xitun Dist.",
+        "postalCode": "407"
+      },
+      {
+        "name": "南屯區",
+        "english": "Nantun Dist.",
+        "postalCode": "408"
+      },
+      {
+        "name": "太平區",
+        "english": "Taiping Dist.",
+        "postalCode": "411"
+      },
+      {
+        "name": "大里區",
+        "english": "Dali Dist.",
+        "postalCode": "412"
+      },
+      {
+        "name": "霧峰區",
+        "english": "Wufeng Dist.",
+        "postalCode": "413"
+      },
+      {
+        "name": "烏日區",
+        "english": "Wuri Dist.",
+        "postalCode": "414"
+      },
+      {
+        "name": "豐原區",
+        "english": "Fengyuan Dist.",
+        "postalCode": "420"
+      },
+      {
+        "name": "后里區",
+        "english": "Houli Dist.",
+        "postalCode": "421"
+      },
+      {
+        "name": "石岡區",
+        "english": "Shigang Dist.",
+        "postalCode": "422"
+      },
+      {
+        "name": "東勢區",
+        "english": "Dongshi Dist.",
+        "postalCode": "423"
+      },
+      {
+        "name": "和平區",
+        "english": "Heping Dist.",
+        "postalCode": "424"
+      },
+      {
+        "name": "新社區",
+        "english": "Xinshe Dist.",
+        "postalCode": "426"
+      },
+      {
+        "name": "潭子區",
+        "english": "Tanzi Dist.",
+        "postalCode": "427"
+      },
+      {
+        "name": "大雅區",
+        "english": "Daya Dist.",
+        "postalCode": "428"
+      },
+      {
+        "name": "神岡區",
+        "english": "Shengang Dist.",
+        "postalCode": "429"
+      },
+      {
+        "name": "大肚區",
+        "english": "Dadu Dist.",
+        "postalCode": "432"
+      },
+      {
+        "name": "沙鹿區",
+        "english": "Shalu Dist.",
+        "postalCode": "433"
+      },
+      {
+        "name": "龍井區",
+        "english": "Longjing Dist.",
+        "postalCode": "434"
+      },
+      {
+        "name": "梧棲區",
+        "english": "Wuqi Dist.",
+        "postalCode": "435"
+      },
+      {
+        "name": "清水區",
+        "english": "Qingshui Dist.",
+        "postalCode": "436"
+      },
+      {
+        "name": "大甲區",
+        "english": "Dajia Dist.",
+        "postalCode": "437"
+      },
+      {
+        "name": "外埔區",
+        "english": "Waipu Dist.",
+        "postalCode": "438"
+      },
+      {
+        "name": "大安區",
+        "english": "Da’an Dist.",
+        "postalCode": "439"
+      }
+    ]
+  },
+  {
+    "name": "彰化縣",
+    "english": "Changhua County",
+    "districts": [
+      {
+        "name": "彰化市",
+        "english": "Changhua City",
+        "postalCode": "500"
+      },
+      {
+        "name": "芬園鄉",
+        "english": "Fenyuan Township",
+        "postalCode": "502"
+      },
+      {
+        "name": "花壇鄉",
+        "english": "Huatan Township",
+        "postalCode": "503"
+      },
+      {
+        "name": "秀水鄉",
+        "english": "Xiushui Township",
+        "postalCode": "504"
+      },
+      {
+        "name": "鹿港鎮",
+        "english": "Lukang Township",
+        "postalCode": "505"
+      },
+      {
+        "name": "福興鄉",
+        "english": "Fuxing Township",
+        "postalCode": "506"
+      },
+      {
+        "name": "線西鄉",
+        "english": "Xianxi Township",
+        "postalCode": "507"
+      },
+      {
+        "name": "和美鎮",
+        "english": "Hemei Township",
+        "postalCode": "508"
+      },
+      {
+        "name": "伸港鄉",
+        "english": "Shengang Township",
+        "postalCode": "509"
+      },
+      {
+        "name": "員林市",
+        "english": "Yuanlin City",
+        "postalCode": "510"
+      },
+      {
+        "name": "社頭鄉",
+        "english": "Shetou Township",
+        "postalCode": "511"
+      },
+      {
+        "name": "永靖鄉",
+        "english": "Yongjing Township",
+        "postalCode": "512"
+      },
+      {
+        "name": "埔心鄉",
+        "english": "Puxin Township",
+        "postalCode": "513"
+      },
+      {
+        "name": "溪湖鎮",
+        "english": "Xihu Township",
+        "postalCode": "514"
+      },
+      {
+        "name": "大村鄉",
+        "english": "Dacun Township",
+        "postalCode": "515"
+      },
+      {
+        "name": "埔鹽鄉",
+        "english": "Puyan Township",
+        "postalCode": "516"
+      },
+      {
+        "name": "田中鎮",
+        "english": "Tianzhong Township",
+        "postalCode": "520"
+      },
+      {
+        "name": "北斗鎮",
+        "english": "Beidou Township",
+        "postalCode": "521"
+      },
+      {
+        "name": "田尾鄉",
+        "english": "Tianwei Township",
+        "postalCode": "522"
+      },
+      {
+        "name": "埤頭鄉",
+        "english": "Pitou Township",
+        "postalCode": "523"
+      },
+      {
+        "name": "溪州鄉",
+        "english": "Xizhou Township",
+        "postalCode": "524"
+      },
+      {
+        "name": "竹塘鄉",
+        "english": "Zhutang Township",
+        "postalCode": "525"
+      },
+      {
+        "name": "二林鎮",
+        "english": "Erlin Township",
+        "postalCode": "526"
+      },
+      {
+        "name": "大城鄉",
+        "english": "Dacheng Township",
+        "postalCode": "527"
+      },
+      {
+        "name": "芳苑鄉",
+        "english": "Fangyuan Township",
+        "postalCode": "528"
+      },
+      {
+        "name": "二水鄉",
+        "english": "Ershui Township",
+        "postalCode": "530"
+      }
+    ]
+  },
+  {
+    "name": "南投縣",
+    "english": "Nantou County",
+    "districts": [
+      {
+        "name": "南投市",
+        "english": "Nantou City",
+        "postalCode": "540"
+      },
+      {
+        "name": "中寮鄉",
+        "english": "Zhongliao Township",
+        "postalCode": "541"
+      },
+      {
+        "name": "草屯鎮",
+        "english": "Caotun Township",
+        "postalCode": "542"
+      },
+      {
+        "name": "國姓鄉",
+        "english": "Guoxing Township",
+        "postalCode": "544"
+      },
+      {
+        "name": "埔里鎮",
+        "english": "Puli Township",
+        "postalCode": "545"
+      },
+      {
+        "name": "仁愛鄉",
+        "english": "Ren’ai Township",
+        "postalCode": "546"
+      },
+      {
+        "name": "名間鄉",
+        "english": "Mingjian Township",
+        "postalCode": "551"
+      },
+      {
+        "name": "集集鎮",
+        "english": "Jiji Township",
+        "postalCode": "552"
+      },
+      {
+        "name": "水里鄉",
+        "english": "Shuili Township",
+        "postalCode": "553"
+      },
+      {
+        "name": "魚池鄉",
+        "english": "Yuchi Township",
+        "postalCode": "555"
+      },
+      {
+        "name": "信義鄉",
+        "english": "Xinyi Township",
+        "postalCode": "556"
+      },
+      {
+        "name": "竹山鎮",
+        "english": "Zhushan Township",
+        "postalCode": "557"
+      },
+      {
+        "name": "鹿谷鄉",
+        "english": "Lugu Township",
+        "postalCode": "558"
+      }
+    ]
+  },
+  {
+    "name": "嘉義市",
+    "english": "Chiayi City",
+    "districts": [
+      {
+        "name": "東區",
+        "english": "East Dist.",
+        "postalCode": "600"
+      },
+      {
+        "name": "西區",
+        "english": "West Dist.",
+        "postalCode": "600"
+      }
+    ]
+  },
+  {
+    "name": "嘉義縣",
+    "english": "Chiayi County",
+    "districts": [
+      {
+        "name": "番路鄉",
+        "english": "Fanlu Township",
+        "postalCode": "602"
+      },
+      {
+        "name": "梅山鄉",
+        "english": "Meishan Township",
+        "postalCode": "603"
+      },
+      {
+        "name": "竹崎鄉",
+        "english": "Zhuqi Township",
+        "postalCode": "604"
+      },
+      {
+        "name": "阿里山鄉",
+        "english": "Alishan Township",
+        "postalCode": "605"
+      },
+      {
+        "name": "中埔鄉",
+        "english": "Zhongpu Township",
+        "postalCode": "606"
+      },
+      {
+        "name": "大埔鄉",
+        "english": "Dapu Township",
+        "postalCode": "607"
+      },
+      {
+        "name": "水上鄉",
+        "english": "Shuishang Township",
+        "postalCode": "608"
+      },
+      {
+        "name": "鹿草鄉",
+        "english": "Lucao Township",
+        "postalCode": "611"
+      },
+      {
+        "name": "太保市",
+        "english": "Taibao City",
+        "postalCode": "612"
+      },
+      {
+        "name": "朴子市",
+        "english": "Puzi City",
+        "postalCode": "613"
+      },
+      {
+        "name": "東石鄉",
+        "english": "Dongshi Township",
+        "postalCode": "614"
+      },
+      {
+        "name": "六腳鄉",
+        "english": "Liujiao Township",
+        "postalCode": "615"
+      },
+      {
+        "name": "新港鄉",
+        "english": "Xingang Township",
+        "postalCode": "616"
+      },
+      {
+        "name": "民雄鄉",
+        "english": "Minxiong Township",
+        "postalCode": "621"
+      },
+      {
+        "name": "大林鎮",
+        "english": "Dalin Township",
+        "postalCode": "622"
+      },
+      {
+        "name": "溪口鄉",
+        "english": "Xikou Township",
+        "postalCode": "623"
+      },
+      {
+        "name": "義竹鄉",
+        "english": "Yizhu Township",
+        "postalCode": "624"
+      },
+      {
+        "name": "布袋鎮",
+        "english": "Budai Township",
+        "postalCode": "625"
+      }
+    ]
+  },
+  {
+    "name": "雲林縣",
+    "english": "Yunlin County",
+    "districts": [
+      {
+        "name": "斗南鎮",
+        "english": "Dounan Township",
+        "postalCode": "630"
+      },
+      {
+        "name": "大埤鄉",
+        "english": "Dapi Township",
+        "postalCode": "631"
+      },
+      {
+        "name": "虎尾鎮",
+        "english": "Huwei Township",
+        "postalCode": "632"
+      },
+      {
+        "name": "土庫鎮",
+        "english": "Tuku Township",
+        "postalCode": "633"
+      },
+      {
+        "name": "褒忠鄉",
+        "english": "Baozhong Township",
+        "postalCode": "634"
+      },
+      {
+        "name": "東勢鄉",
+        "english": "Dongshi Township",
+        "postalCode": "635"
+      },
+      {
+        "name": "臺西鄉",
+        "english": "Taixi Township",
+        "postalCode": "636"
+      },
+      {
+        "name": "崙背鄉",
+        "english": "Lunbei Township",
+        "postalCode": "637"
+      },
+      {
+        "name": "麥寮鄉",
+        "english": "Mailiao Township",
+        "postalCode": "638"
+      },
+      {
+        "name": "斗六市",
+        "english": "Douliu City",
+        "postalCode": "640"
+      },
+      {
+        "name": "林內鄉",
+        "english": "Linnei Township",
+        "postalCode": "643"
+      },
+      {
+        "name": "古坑鄉",
+        "english": "Gukeng Township",
+        "postalCode": "646"
+      },
+      {
+        "name": "莿桐鄉",
+        "english": "Citong Township",
+        "postalCode": "647"
+      },
+      {
+        "name": "西螺鎮",
+        "english": "Xiluo Township",
+        "postalCode": "648"
+      },
+      {
+        "name": "二崙鄉",
+        "english": "Erlun Township",
+        "postalCode": "649"
+      },
+      {
+        "name": "北港鎮",
+        "english": "Beigang Township",
+        "postalCode": "651"
+      },
+      {
+        "name": "水林鄉",
+        "english": "Shuilin Township",
+        "postalCode": "652"
+      },
+      {
+        "name": "口湖鄉",
+        "english": "Kouhu Township",
+        "postalCode": "653"
+      },
+      {
+        "name": "四湖鄉",
+        "english": "Sihu Township",
+        "postalCode": "654"
+      },
+      {
+        "name": "元長鄉",
+        "english": "Yuanzhang Township",
+        "postalCode": "655"
+      }
+    ]
+  },
+  {
+    "name": "臺南市",
+    "english": "Tainan City",
+    "districts": [
+      {
+        "name": "中西區",
+        "english": "West Central Dist.",
+        "postalCode": "700"
+      },
+      {
+        "name": "東區",
+        "english": "East Dist.",
+        "postalCode": "701"
+      },
+      {
+        "name": "南區",
+        "english": "South Dist.",
+        "postalCode": "702"
+      },
+      {
+        "name": "北區",
+        "english": "North Dist.",
+        "postalCode": "704"
+      },
+      {
+        "name": "安平區",
+        "english": "Anping Dist.",
+        "postalCode": "708"
+      },
+      {
+        "name": "安南區",
+        "english": "Annan Dist.",
+        "postalCode": "709"
+      },
+      {
+        "name": "永康區",
+        "english": "Yongkang Dist.",
+        "postalCode": "710"
+      },
+      {
+        "name": "歸仁區",
+        "english": "Guiren Dist.",
+        "postalCode": "711"
+      },
+      {
+        "name": "新化區",
+        "english": "Xinhua Dist.",
+        "postalCode": "712"
+      },
+      {
+        "name": "左鎮區",
+        "english": "Zuozhen Dist.",
+        "postalCode": "713"
+      },
+      {
+        "name": "玉井區",
+        "english": "Yujing Dist.",
+        "postalCode": "714"
+      },
+      {
+        "name": "楠西區",
+        "english": "Nanxi Dist.",
+        "postalCode": "715"
+      },
+      {
+        "name": "南化區",
+        "english": "Nanhua Dist.",
+        "postalCode": "716"
+      },
+      {
+        "name": "仁德區",
+        "english": "Rende Dist.",
+        "postalCode": "717"
+      },
+      {
+        "name": "關廟區",
+        "english": "Guanmiao Dist.",
+        "postalCode": "718"
+      },
+      {
+        "name": "龍崎區",
+        "english": "Longqi Dist.",
+        "postalCode": "719"
+      },
+      {
+        "name": "官田區",
+        "english": "Guantian Dist.",
+        "postalCode": "720"
+      },
+      {
+        "name": "麻豆區",
+        "english": "Madou Dist.",
+        "postalCode": "721"
+      },
+      {
+        "name": "佳里區",
+        "english": "Jiali Dist.",
+        "postalCode": "722"
+      },
+      {
+        "name": "西港區",
+        "english": "Xigang Dist.",
+        "postalCode": "723"
+      },
+      {
+        "name": "七股區",
+        "english": "Qigu Dist.",
+        "postalCode": "724"
+      },
+      {
+        "name": "將軍區",
+        "english": "Jiangjun Dist.",
+        "postalCode": "725"
+      },
+      {
+        "name": "學甲區",
+        "english": "Xuejia Dist.",
+        "postalCode": "726"
+      },
+      {
+        "name": "北門區",
+        "english": "Beimen Dist.",
+        "postalCode": "727"
+      },
+      {
+        "name": "新營區",
+        "english": "Xinying Dist.",
+        "postalCode": "730"
+      },
+      {
+        "name": "後壁區",
+        "english": "Houbi Dist.",
+        "postalCode": "731"
+      },
+      {
+        "name": "白河區",
+        "english": "Baihe Dist.",
+        "postalCode": "732"
+      },
+      {
+        "name": "東山區",
+        "english": "Dongshan Dist.",
+        "postalCode": "733"
+      },
+      {
+        "name": "六甲區",
+        "english": "Liujia Dist.",
+        "postalCode": "734"
+      },
+      {
+        "name": "下營區",
+        "english": "Xiaying Dist.",
+        "postalCode": "735"
+      },
+      {
+        "name": "柳營區",
+        "english": "Liuying Dist.",
+        "postalCode": "736"
+      },
+      {
+        "name": "鹽水區",
+        "english": "Yanshui Dist.",
+        "postalCode": "737"
+      },
+      {
+        "name": "善化區",
+        "english": "Shanhua Dist.",
+        "postalCode": "741"
+      },
+      {
+        "name": "大內區",
+        "english": "Danei Dist.",
+        "postalCode": "742"
+      },
+      {
+        "name": "山上區",
+        "english": "Shanshang Dist.",
+        "postalCode": "743"
+      },
+      {
+        "name": "新市區",
+        "english": "Xinshi Dist.",
+        "postalCode": "744"
+      },
+      {
+        "name": "安定區",
+        "english": "Anding Dist.",
+        "postalCode": "745"
+      }
+    ]
+  },
+  {
+    "name": "高雄市",
+    "english": "Kaohsiung City",
+    "districts": [
+      {
+        "name": "新興區",
+        "english": "Xinxing Dist.",
+        "postalCode": "800"
+      },
+      {
+        "name": "前金區",
+        "english": "Qianjin Dist.",
+        "postalCode": "801"
+      },
+      {
+        "name": "苓雅區",
+        "english": "Lingya Dist.",
+        "postalCode": "802"
+      },
+      {
+        "name": "鹽埕區",
+        "english": "Yancheng Dist.",
+        "postalCode": "803"
+      },
+      {
+        "name": "鼓山區",
+        "english": "Gushan Dist.",
+        "postalCode": "804"
+      },
+      {
+        "name": "旗津區",
+        "english": "Qijin Dist.",
+        "postalCode": "805"
+      },
+      {
+        "name": "前鎮區",
+        "english": "Qianzhen Dist.",
+        "postalCode": "806"
+      },
+      {
+        "name": "三民區",
+        "english": "Sanmin Dist.",
+        "postalCode": "807"
+      },
+      {
+        "name": "楠梓區",
+        "english": "Nanzi Dist.",
+        "postalCode": "811"
+      },
+      {
+        "name": "小港區",
+        "english": "Xiaogang Dist.",
+        "postalCode": "812"
+      },
+      {
+        "name": "左營區",
+        "english": "Zuoying Dist.",
+        "postalCode": "813"
+      },
+      {
+        "name": "仁武區",
+        "english": "Renwu Dist.",
+        "postalCode": "814"
+      },
+      {
+        "name": "大社區",
+        "english": "Dashe Dist.",
+        "postalCode": "815"
+      },
+      {
+        "name": "岡山區",
+        "english": "Gangshan Dist.",
+        "postalCode": "820"
+      },
+      {
+        "name": "路竹區",
+        "english": "Luzhu Dist.",
+        "postalCode": "821"
+      },
+      {
+        "name": "阿蓮區",
+        "english": "Alian Dist.",
+        "postalCode": "822"
+      },
+      {
+        "name": "田寮區",
+        "english": "Tianliao Dist.",
+        "postalCode": "823"
+      },
+      {
+        "name": "燕巢區",
+        "english": "Yanchao Dist.",
+        "postalCode": "824"
+      },
+      {
+        "name": "橋頭區",
+        "english": "Qiaotou Dist.",
+        "postalCode": "825"
+      },
+      {
+        "name": "梓官區",
+        "english": "Ziguan Dist.",
+        "postalCode": "826"
+      },
+      {
+        "name": "彌陀區",
+        "english": "Mituo Dist.",
+        "postalCode": "827"
+      },
+      {
+        "name": "永安區",
+        "english": "Yong’an Dist.",
+        "postalCode": "828"
+      },
+      {
+        "name": "湖內區",
+        "english": "Hunei Dist.",
+        "postalCode": "829"
+      },
+      {
+        "name": "鳳山區",
+        "english": "Fengshan Dist.",
+        "postalCode": "830"
+      },
+      {
+        "name": "大寮區",
+        "english": "Daliao Dist.",
+        "postalCode": "831"
+      },
+      {
+        "name": "林園區",
+        "english": "Linyuan Dist.",
+        "postalCode": "832"
+      },
+      {
+        "name": "鳥松區",
+        "english": "Niaosong Dist.",
+        "postalCode": "833"
+      },
+      {
+        "name": "大樹區",
+        "english": "Dashu Dist.",
+        "postalCode": "840"
+      },
+      {
+        "name": "旗山區",
+        "english": "Qishan Dist.",
+        "postalCode": "842"
+      },
+      {
+        "name": "美濃區",
+        "english": "Meinong Dist.",
+        "postalCode": "843"
+      },
+      {
+        "name": "六龜區",
+        "english": "Liugui Dist.",
+        "postalCode": "844"
+      },
+      {
+        "name": "內門區",
+        "english": "Neimen Dist.",
+        "postalCode": "845"
+      },
+      {
+        "name": "杉林區",
+        "english": "Shanlin Dist.",
+        "postalCode": "846"
+      },
+      {
+        "name": "甲仙區",
+        "english": "Jiaxian Dist.",
+        "postalCode": "847"
+      },
+      {
+        "name": "桃源區",
+        "english": "Taoyuan Dist.",
+        "postalCode": "848"
+      },
+      {
+        "name": "那瑪夏區",
+        "english": "Namaxia Dist.",
+        "postalCode": "849"
+      },
+      {
+        "name": "茂林區",
+        "english": "Maolin Dist.",
+        "postalCode": "851"
+      },
+      {
+        "name": "茄萣區",
+        "english": "Qieding Dist.",
+        "postalCode": "852"
+      }
+    ]
+  },
+  {
+    "name": "澎湖縣",
+    "english": "Penghu County",
+    "districts": [
+      {
+        "name": "馬公市",
+        "english": "Magong City",
+        "postalCode": "880"
+      },
+      {
+        "name": "西嶼鄉",
+        "english": "Xiyu Township",
+        "postalCode": "881"
+      },
+      {
+        "name": "望安鄉",
+        "english": "Wang’an Township",
+        "postalCode": "882"
+      },
+      {
+        "name": "七美鄉",
+        "english": "Qimei Township",
+        "postalCode": "883"
+      },
+      {
+        "name": "白沙鄉",
+        "english": "Baisha Township",
+        "postalCode": "884"
+      },
+      {
+        "name": "湖西鄉",
+        "english": "Huxi Township",
+        "postalCode": "885"
+      }
+    ]
+  },
+  {
+    "name": "金門縣",
+    "english": "Kinmen County",
+    "districts": [
+      {
+        "name": "金沙鎮",
+        "english": "Jinsha Township",
+        "postalCode": "890"
+      },
+      {
+        "name": "金湖鎮",
+        "english": "Jinhu Township",
+        "postalCode": "891"
+      },
+      {
+        "name": "金寧鄉",
+        "english": "Jinning Township",
+        "postalCode": "892"
+      },
+      {
+        "name": "金城鎮",
+        "english": "Jincheng Township",
+        "postalCode": "893"
+      },
+      {
+        "name": "烈嶼鄉",
+        "english": "Lieyu Township",
+        "postalCode": "894"
+      },
+      {
+        "name": "烏坵鄉",
+        "english": "Wuqiu Township",
+        "postalCode": "896"
+      }
+    ]
+  },
+  {
+    "name": "屏東縣",
+    "english": "Pingtung County",
+    "districts": [
+      {
+        "name": "屏東市",
+        "english": "Pingtung City",
+        "postalCode": "900"
+      },
+      {
+        "name": "三地門鄉",
+        "english": "Sandimen Township",
+        "postalCode": "901"
+      },
+      {
+        "name": "霧臺鄉",
+        "english": "Wutai Township",
+        "postalCode": "902"
+      },
+      {
+        "name": "瑪家鄉",
+        "english": "Majia Township",
+        "postalCode": "903"
+      },
+      {
+        "name": "九如鄉",
+        "english": "Jiuru Township",
+        "postalCode": "904"
+      },
+      {
+        "name": "里港鄉",
+        "english": "Ligang Township",
+        "postalCode": "905"
+      },
+      {
+        "name": "高樹鄉",
+        "english": "Gaoshu Township",
+        "postalCode": "906"
+      },
+      {
+        "name": "鹽埔鄉",
+        "english": "Yanpu Township",
+        "postalCode": "907"
+      },
+      {
+        "name": "長治鄉",
+        "english": "Changzhi Township",
+        "postalCode": "908"
+      },
+      {
+        "name": "麟洛鄉",
+        "english": "Linluo Township",
+        "postalCode": "909"
+      },
+      {
+        "name": "竹田鄉",
+        "english": "Zhutian Township",
+        "postalCode": "911"
+      },
+      {
+        "name": "內埔鄉",
+        "english": "Neipu Township",
+        "postalCode": "912"
+      },
+      {
+        "name": "萬丹鄉",
+        "english": "Wandan Township",
+        "postalCode": "913"
+      },
+      {
+        "name": "潮州鎮",
+        "english": "Chaozhou Township",
+        "postalCode": "920"
+      },
+      {
+        "name": "泰武鄉",
+        "english": "Taiwu Township",
+        "postalCode": "921"
+      },
+      {
+        "name": "來義鄉",
+        "english": "Laiyi Township",
+        "postalCode": "922"
+      },
+      {
+        "name": "萬巒鄉",
+        "english": "Wanluan Township",
+        "postalCode": "923"
+      },
+      {
+        "name": "崁頂鄉",
+        "english": "Kanding Township",
+        "postalCode": "924"
+      },
+      {
+        "name": "新埤鄉",
+        "english": "Xinpi Township",
+        "postalCode": "925"
+      },
+      {
+        "name": "南州鄉",
+        "english": "Nanzhou Township",
+        "postalCode": "926"
+      },
+      {
+        "name": "林邊鄉",
+        "english": "Linbian Township",
+        "postalCode": "927"
+      },
+      {
+        "name": "東港鎮",
+        "english": "Donggang Township",
+        "postalCode": "928"
+      },
+      {
+        "name": "琉球鄉",
+        "english": "Liuqiu Township",
+        "postalCode": "929"
+      },
+      {
+        "name": "佳冬鄉",
+        "english": "Jiadong Township",
+        "postalCode": "931"
+      },
+      {
+        "name": "新園鄉",
+        "english": "Xinyuan Township",
+        "postalCode": "932"
+      },
+      {
+        "name": "枋寮鄉",
+        "english": "Fangliao Township",
+        "postalCode": "940"
+      },
+      {
+        "name": "枋山鄉",
+        "english": "Fangshan Township",
+        "postalCode": "941"
+      },
+      {
+        "name": "春日鄉",
+        "english": "Chunri Township",
+        "postalCode": "942"
+      },
+      {
+        "name": "獅子鄉",
+        "english": "Shizi Township",
+        "postalCode": "943"
+      },
+      {
+        "name": "車城鄉",
+        "english": "Checheng Township",
+        "postalCode": "944"
+      },
+      {
+        "name": "牡丹鄉",
+        "english": "Mudan Township",
+        "postalCode": "945"
+      },
+      {
+        "name": "恆春鎮",
+        "english": "Hengchun Township",
+        "postalCode": "946"
+      },
+      {
+        "name": "滿州鄉",
+        "english": "Manzhou Township",
+        "postalCode": "947"
+      }
+    ]
+  },
+  {
+    "name": "臺東縣",
+    "english": "Taitung County",
+    "districts": [
+      {
+        "name": "臺東市",
+        "english": "Taitung City",
+        "postalCode": "950"
+      },
+      {
+        "name": "綠島鄉",
+        "english": "Ludao Township",
+        "postalCode": "951"
+      },
+      {
+        "name": "蘭嶼鄉",
+        "english": "Lanyu Township",
+        "postalCode": "952"
+      },
+      {
+        "name": "延平鄉",
+        "english": "Yanping Township",
+        "postalCode": "953"
+      },
+      {
+        "name": "卑南鄉",
+        "english": "Beinan Township",
+        "postalCode": "954"
+      },
+      {
+        "name": "鹿野鄉",
+        "english": "Luye Township",
+        "postalCode": "955"
+      },
+      {
+        "name": "關山鎮",
+        "english": "Guanshan Township",
+        "postalCode": "956"
+      },
+      {
+        "name": "海端鄉",
+        "english": "Haiduan Township",
+        "postalCode": "957"
+      },
+      {
+        "name": "池上鄉",
+        "english": "Chishang Township",
+        "postalCode": "958"
+      },
+      {
+        "name": "東河鄉",
+        "english": "Donghe Township",
+        "postalCode": "959"
+      },
+      {
+        "name": "成功鎮",
+        "english": "Chenggong Township",
+        "postalCode": "961"
+      },
+      {
+        "name": "長濱鄉",
+        "english": "Changbin Township",
+        "postalCode": "962"
+      },
+      {
+        "name": "太麻里鄉",
+        "english": "Taimali Township",
+        "postalCode": "963"
+      },
+      {
+        "name": "金峰鄉",
+        "english": "Jinfeng Township",
+        "postalCode": "964"
+      },
+      {
+        "name": "大武鄉",
+        "english": "Dawu Township",
+        "postalCode": "965"
+      },
+      {
+        "name": "達仁鄉",
+        "english": "Daren Township",
+        "postalCode": "966"
+      }
+    ]
+  },
+  {
+    "name": "花蓮縣",
+    "english": "Hualien County",
+    "districts": [
+      {
+        "name": "花蓮市",
+        "english": "Hualien City",
+        "postalCode": "970"
+      },
+      {
+        "name": "新城鄉",
+        "english": "Xincheng Township",
+        "postalCode": "971"
+      },
+      {
+        "name": "秀林鄉",
+        "english": "Xiulin Township",
+        "postalCode": "972"
+      },
+      {
+        "name": "吉安鄉",
+        "english": "Ji’an Township",
+        "postalCode": "973"
+      },
+      {
+        "name": "壽豐鄉",
+        "english": "Shoufeng Township",
+        "postalCode": "974"
+      },
+      {
+        "name": "鳳林鎮",
+        "english": "Fenglin Township",
+        "postalCode": "975"
+      },
+      {
+        "name": "光復鄉",
+        "english": "Guangfu Township",
+        "postalCode": "976"
+      },
+      {
+        "name": "豐濱鄉",
+        "english": "Fengbin Township",
+        "postalCode": "977"
+      },
+      {
+        "name": "瑞穗鄉",
+        "english": "Ruisui Township",
+        "postalCode": "978"
+      },
+      {
+        "name": "萬榮鄉",
+        "english": "Wanrong Township",
+        "postalCode": "979"
+      },
+      {
+        "name": "玉里鎮",
+        "english": "Yuli Township",
+        "postalCode": "981"
+      },
+      {
+        "name": "卓溪鄉",
+        "english": "Zhuoxi Township",
+        "postalCode": "982"
+      },
+      {
+        "name": "富里鄉",
+        "english": "Fuli Township",
+        "postalCode": "983"
+      }
+    ]
+  }
+]

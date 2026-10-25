@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { deliveryCountries, postalCodePatterns } from '../shipping';
+import { taiwanDistrict } from '../shipping';
 export const productInput = z.object({
   id: z.string().uuid().optional(), version: z.number().int().positive().optional(),
   name: z.string().trim().min(1).max(120), sku: z.string().trim().min(1).max(60).regex(/^[a-zA-Z0-9_-]+$/),
@@ -14,9 +14,14 @@ export const settingsInput = z.object({ reservationsOpen: z.boolean(), checkoutO
 export const checkoutInput = reservationInput.extend({ requestKey: z.string().uuid() }).strict();
 export const shippingInput = z.object({
   phone: z.string().trim().min(8).max(24).regex(/^[+\d()\s-]+$/),
-  postalCode: z.string().trim().min(3).max(8), city: z.string().trim().min(1).max(80),
-  address: z.string().trim().min(5).max(240), country: z.enum(deliveryCountries),
-}).strict().refine(data => new RegExp(`^${postalCodePatterns[data.country]}$`).test(data.postalCode), { path: ['postalCode'], message: 'Enter a valid postal code for the delivery country.' });
+  postalCode: z.string().trim().regex(/^\d{3}(?:\d{2,3})?$/), city: z.string().trim().min(1).max(80),
+  district: z.string().trim().min(1).max(80),
+  address: z.string().trim().min(5).max(240), country: z.literal('TW'),
+}).strict().superRefine((data, context) => {
+  const district = taiwanDistrict(data.city, data.district);
+  if (!district) context.addIssue({ code: 'custom', path: ['district'], message: 'Select a district in the chosen city or county.' });
+  else if (!data.postalCode.startsWith(district.postalCode)) context.addIssue({ code: 'custom', path: ['postalCode'], message: 'The postal code must match the selected district.' });
+});
 export const paidPreorderInput = checkoutInput.extend({
   shipping: shippingInput, locale: z.enum(['en', 'zh-TW']),
   expectedTotal: z.number().int().positive().max(500_000_000),

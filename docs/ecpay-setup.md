@@ -10,12 +10,12 @@ per console. NT$80 is only a test shipping rate until the owner confirms it. The
 is no estimated shipping date; the checkout requires acknowledgment of that fact.
 New databases still seed an unpriced draft product, not automatically open sales.
 
-The storefront delivery-country dropdown lists Taiwan, Japan and Singapore, plus
-a disabled “France — Soon” option. Country-specific postal codes are validated on
-both the client and server; France and all unlisted countries are rejected by the
-server. Sandbox orders use the test delivery fee for all three selectable countries.
-Live Japan/Singapore checkout stays blocked until destination rates are implemented
-and confirmed; the Taiwan rate is never silently used for real overseas shipping.
+The storefront delivery-country dropdown currently allows Taiwan only. Japan,
+Singapore and France are greyed out with “Soon” labels. The server rejects all
+overseas destinations in both live and sandbox modes. Linked city/county and
+district/township dropdowns use [Chunghwa Post address data](taiwan-addresses.md),
+and selecting a district fills its postal prefix. The server validates the full
+city/district/postal-code combination. Historical orders remain readable.
 ECPay's own billing-country selector is controlled by ECPay and is separate from
 SGBC's delivery-country dropdown.
 

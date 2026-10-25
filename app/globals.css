@@ -189,6 +189,9 @@ h2>span { color:var(--muted); }
 .preorder-form input:not([type='checkbox']),.preorder-form select { width:100%; min-width:0; height:46px; padding:10px 12px; border:1px solid #4a4943; border-radius:0; background:#181817; color:var(--ink); font:16px/1.4 Arial,Helvetica,sans-serif; }
 .preorder-form option:disabled { color:#77766e; }
 .preorder-fields { display:grid; grid-template-columns:1.6fr 1fr; gap:14px; }
+.preorder-address-fields { grid-template-columns:1fr 1fr; }
+.preorder-form select:disabled { color:#77766e; cursor:not-allowed; }
+@media (max-width:480px) { .preorder-address-fields { grid-template-columns:1fr; } }
 .preorder-totals { display:grid; gap:12px; border-top:1px solid var(--line); padding-top:20px; margin-top:4px; }
 .preorder-totals>div { display:flex; justify-content:space-between; gap:16px; font-size:14px; color:var(--muted); }
 .preorder-totals .preorder-total { font-size:20px; color:var(--ink); padding:4px 0; }

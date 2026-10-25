@@ -85,4 +85,4 @@ export function AdminDashboard({ initial, admin }: { initial: Dashboard; admin: 
   </div>;
 }
 function CheckoutRequestKey() { const [key] = useState(() => crypto.randomUUID()); return <input type="hidden" name="requestKey" value={key}/>; }
-function formatAddress(raw: string) { try { const value = JSON.parse(raw); if (typeof value.address === 'string') return [value.phone, value.postalCode, value.city, value.address, value.country].filter(Boolean).join('\n'); return [value.name, value.address?.line1, value.address?.line2, value.address?.city, value.address?.state, value.address?.postal_code, value.address?.country].filter(Boolean).join('\n'); } catch { return 'Address unavailable'; } }
+function formatAddress(raw: string) { try { const value = JSON.parse(raw); if (typeof value.address === 'string') return [value.phone, value.postalCode, value.city, value.district, value.address, value.country].filter(Boolean).join('\n'); return [value.name, value.address?.line1, value.address?.line2, value.address?.city, value.address?.state, value.address?.postal_code, value.address?.country].filter(Boolean).join('\n'); } catch { return 'Address unavailable'; } }

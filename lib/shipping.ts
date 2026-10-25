@@ -1,14 +1,14 @@
-export const deliveryCountries = ['TW', 'JP', 'SG'] as const;
-export type DeliveryCountry = typeof deliveryCountries[number];
+import locations from './taiwan-locations.json';
 
-export const postalCodePatterns: Record<DeliveryCountry, string> = {
-  TW: '[0-9]{3}([0-9]{2,3})?',
-  JP: '[0-9]{3}-?[0-9]{4}',
-  SG: '[0-9]{6}',
-};
+// Chunghwa Post's bilingual administrative areas and three-digit postal prefixes.
+// Source and update notes: docs/taiwan-addresses.md
+export const taiwanCities = locations;
+export const upcomingDeliveryCountries = ['JP', 'SG', 'FR'] as const;
 
-// The existing fee is a Taiwan rate. International rates are not yet configured;
-// sandbox checkout can reuse the test amount without enabling real overseas sales.
-export function deliveryFeePerUnit(country: DeliveryCountry, taiwanFee: number | null, sandbox: boolean) {
-  return country === 'TW' || sandbox ? taiwanFee : null;
+export function taiwanCity(name: string) {
+  return taiwanCities.find(city => city.name === name);
+}
+
+export function taiwanDistrict(city: string, district: string) {
+  return taiwanCity(city)?.districts.find(item => item.name === district);
 }

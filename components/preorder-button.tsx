@@ -5,7 +5,7 @@ import { ArrowUpRight, LoaderCircle, LockKeyhole, X } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { siteCopy, type Locale } from '@/lib/site-copy';
 import type { CheckoutDestination, StorefrontCatalog } from '@/lib/storefront-types';
-import { deliveryCountries, deliveryFeePerUnit, postalCodePatterns, type DeliveryCountry } from '@/lib/shipping';
+import { taiwanCities, taiwanCity, taiwanDistrict, upcomingDeliveryCountries } from '@/lib/shipping';
 
 export function PreorderButton({ className = '', locale }: { className?: string; locale: Locale }) {
   const copy = siteCopy[locale].preorder;
@@ -16,14 +16,17 @@ export function PreorderButton({ className = '', locale }: { className?: string;
   const [loadFailed, setLoadFailed] = useState(false);
   const [reload, setReload] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [country, setCountry] = useState<DeliveryCountry>('TW');
+  const [city, setCity] = useState('');
+  const [district, setDistrict] = useState('');
+  const [postalCode, setPostalCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const attempt = useRef<{ fingerprint: string; key: string } | null>(null);
   const product = catalog?.products.find(item => item.currency === 'TWD' && item.price > 0);
   const available = Math.max(0, Math.min(5, product?.available ?? 0));
   const selectedQuantity = Math.max(1, Math.min(quantity, available));
-  const deliveryRate = deliveryFeePerUnit(country, catalog?.shippingFeePerUnit ?? null, Boolean(catalog?.sandbox));
+  const selectedCity = taiwanCity(city);
+  const deliveryRate = catalog?.shippingFeePerUnit ?? null;
   const shippingFee = (deliveryRate ?? 0) * selectedQuantity;
   const ready = Boolean(catalog?.checkoutOpen && product && available > 0 && typeof catalog.shippingFeePerUnit === 'number');
   const money = (value: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'TWD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value / 100);
@@ -52,7 +55,7 @@ export function PreorderButton({ className = '', locale }: { className?: string;
     const payload = {
       productId: product.id, name: value('name'), email: value('email'), quantity: selectedQuantity,
       locale, expectedTotal: product.price * selectedQuantity + shippingFee, acknowledged: true,
-      shipping: { phone: value('phone'), postalCode: value('postalCode'), city: value('city'), address: value('address'), country },
+      shipping: { phone: value('phone'), postalCode, city, district, address: value('address'), country: 'TW' },
     };
     setBusy(true);
     setError('');
@@ -112,11 +115,11 @@ export function PreorderButton({ className = '', locale }: { className?: string;
           <label htmlFor={`${id}-name`}>{copy.name}<input id={`${id}-name`} name="name" autoComplete="name" required maxLength={120}/></label>
           <label htmlFor={`${id}-email`}>{copy.email}<input id={`${id}-email`} name="email" type="email" autoComplete="email" required maxLength={254}/></label>
           <div className="preorder-fields"><label htmlFor={`${id}-phone`}>{copy.phone}<input id={`${id}-phone`} name="phone" type="tel" autoComplete="tel" required minLength={8} maxLength={24}/></label><label htmlFor={`${id}-quantity`}>{copy.quantity}<select id={`${id}-quantity`} name="quantity" value={selectedQuantity} onChange={event => setQuantity(Number(event.target.value))}>{Array.from({ length: available }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1}</option>)}</select></label></div>
-          <label htmlFor={`${id}-country`}>{copy.country}<select id={`${id}-country`} name="country" autoComplete="country" value={country} onChange={event => { setCountry(event.target.value as DeliveryCountry); setError(''); }}>{deliveryCountries.map(code => <option key={code} value={code}>{copy.countries[code]}</option>)}<option value="FR" disabled>{copy.countries.FR}</option></select></label>
-          <div className="preorder-fields"><label htmlFor={`${id}-city`}>{copy.city}<input id={`${id}-city`} name="city" autoComplete="address-level1" required maxLength={80}/></label><label htmlFor={`${id}-postal`}>{copy.postalCode}<input id={`${id}-postal`} name="postalCode" inputMode="numeric" autoComplete="postal-code" required pattern={postalCodePatterns[country]} maxLength={country === 'JP' ? 8 : 6}/></label></div>
+          <label htmlFor={`${id}-country`}>{copy.country}<select id={`${id}-country`} name="country" autoComplete="country" defaultValue="TW"><option value="TW">{copy.countries.TW}</option>{upcomingDeliveryCountries.map(code => <option key={code} value={code} disabled>{copy.countries[code]}</option>)}</select></label>
+          <div className="preorder-fields preorder-address-fields"><label htmlFor={`${id}-city`}>{copy.city}<select id={`${id}-city`} name="city" autoComplete="address-level1" required value={city} onChange={event => { setCity(event.target.value); setDistrict(''); setPostalCode(''); setError(''); }}><option value="" disabled>{copy.selectCity}</option>{taiwanCities.map(item => <option key={item.name} value={item.name}>{locale === 'zh-TW' ? item.name : item.english}</option>)}</select></label><label htmlFor={`${id}-district`}>{copy.district}<select id={`${id}-district`} name="district" autoComplete="address-level2" required disabled={!selectedCity} value={district} onChange={event => { setDistrict(event.target.value); setPostalCode(taiwanDistrict(city, event.target.value)?.postalCode ?? ''); setError(''); }}><option value="" disabled>{copy.selectDistrict}</option>{selectedCity?.districts.map(item => <option key={item.name} value={item.name}>{locale === 'zh-TW' ? item.name : item.english}</option>)}</select></label></div>
+          <label htmlFor={`${id}-postal`}>{copy.postalCode}<input id={`${id}-postal`} name="postalCode" inputMode="numeric" autoComplete="postal-code" required value={postalCode} onChange={event => setPostalCode(event.target.value)} pattern="[0-9]{3}([0-9]{2,3})?" maxLength={6}/></label>
           <label htmlFor={`${id}-address`}>{copy.address}<input id={`${id}-address`} name="address" autoComplete="street-address" required minLength={5} maxLength={240}/></label>
           <div className="preorder-totals"><div><span>{copy.subtotal}</span><span>{money(product!.price * selectedQuantity)}</span></div><div><span>{copy.shipping}</span><span>{deliveryRate === null ? '—' : money(shippingFee)}</span></div><div className="preorder-total"><strong>{copy.total}</strong><strong>{deliveryRate === null ? '—' : money(product!.price * selectedQuantity + shippingFee)}</strong></div></div>
-          {deliveryRate === null && <p className="preorder-error" role="status">{copy.deliveryUnavailable}</p>}
           <label className="preorder-acknowledgement"><input type="checkbox" required/>{copy.acknowledgement}</label>
           {error && <p className="preorder-error" role="alert">{error}</p>}
           <button className="preorder-button preorder-submit" type="submit" disabled={deliveryRate === null}>{busy ? copy.connecting : copy.pay} {busy ? <LoaderCircle size={18} className="preorder-spinner"/> : <ArrowUpRight size={18}/>}</button>
