@@ -2,16 +2,22 @@ import 'server-only';
 import Stripe from 'stripe';
 import { and, eq, isNull } from 'drizzle-orm';
 import { getDb } from './db';
-import { appOrigin, paymentsConfigured } from './config';
+import { appOrigin, stripeConfigured, paymentProvider } from './config';
 import { orders } from './schema';
 import { applyPayment, applyRefund, reserveCheckout } from './store';
 import { StoreError } from './validation';
+import { ecpayConfig, ecpayCheckout, queryEcpay, type EcpayFields } from './ecpay';
+import { reserveEcpayCheckout, applyEcpayResult, findEcpayOrder } from './ecpay-store';
 
 export function stripeClient() {
-  if (!paymentsConfigured()) throw new StoreError(503, 'Payments are not configured yet.');
+  if (!stripeConfigured()) throw new StoreError(503, 'Stripe is not configured yet.');
   return new Stripe(process.env.STRIPE_SECRET_KEY!, { maxNetworkRetries: 2, timeout: 20_000 });
 }
 export async function createCheckout(raw: unknown) {
+  if (paymentProvider() === 'ecpay') {
+    const config = ecpayConfig();
+    return ecpayCheckout(await reserveEcpayCheckout(getDb(), raw, config), config);
+  }
   const stripe = stripeClient(), db = getDb();
   const order = await reserveCheckout(db, raw);
   const origin = appOrigin();
@@ -34,7 +40,7 @@ export async function createCheckout(raw: unknown) {
     await db.update(orders).set({ stripeSessionId: session.id, updatedAt: Date.now() }).where(and(eq(orders.id, order.id), isNull(orders.stripeSessionId)));
   }
   if (!session.url || session.status !== 'open') throw new StoreError(409, 'This checkout is no longer open.');
-  return { url: session.url, orderId: order.id };
+  return { provider: 'stripe' as const, url: session.url, orderId: order.id };
 }
 async function syncSession(session: Stripe.Checkout.Session, eventId: string, eventType: string) {
   const orderId = session.metadata?.sgbc_order_id;
@@ -63,6 +69,13 @@ export async function handleStripeEvent(event: Stripe.Event) {
 export async function reconcileOrder(id: string) {
   const [order] = await getDb().select().from(orders).where(eq(orders.id, id));
   if (!order) throw new StoreError(404, 'Order not found.');
+  if (order.paymentProvider === 'ecpay') {
+    const config = ecpayConfig();
+    if (order.ecpayMerchantId !== config.merchantId || order.paymentEnvironment !== config.environment || !order.ecpayMerchantTradeNo) throw new StoreError(409, 'Use this order’s ECPay merchant and environment to reconcile it.');
+    const result = await queryEcpay(order.ecpayMerchantTradeNo, config);
+    await applyEcpayResult(getDb(), result, config, 'query');
+    return { status: result.TradeStatus, paymentStatus: result.TradeStatus === '1' ? 'paid' : 'pending', message: result.TradeStatus === '1' ? 'Payment confirmed by ECPay.' : 'ECPay has not confirmed payment. The stock hold remains in place.' };
+  }
   if (!order.stripeSessionId) {
     throw new StoreError(409, 'No session id was saved. Retry the original checkout request within 23 hours, or locate the order id in Stripe before resolving the stock hold.');
   }
@@ -70,4 +83,15 @@ export async function reconcileOrder(id: string) {
   const session = await stripe.checkout.sessions.retrieve(order.stripeSessionId);
   await syncSession(session, `reconcile-${session.id}-${session.status}-${session.payment_status}`, 'admin.reconcile');
   return { status: session.status, paymentStatus: session.payment_status };
+}
+
+export async function handleEcpayNotification(fields: EcpayFields) {
+  const config = ecpayConfig(), db = getDb();
+  await findEcpayOrder(db, fields, config);
+  if (fields.RtnCode === '1' && fields.SimulatePaid === '0') {
+    // Confirm against ECPay's current server-side record before accepting a successful notification.
+    const current = await queryEcpay(fields.MerchantTradeNo, config);
+    if (current.TradeStatus !== '1' || current.TradeNo !== fields.TradeNo) throw new StoreError(503, 'Payment is still being confirmed.');
+    await applyEcpayResult(db, current, config, 'query');
+  } else await applyEcpayResult(db, fields, config, 'notify');
 }

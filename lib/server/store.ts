@@ -2,6 +2,7 @@ import { and, desc, eq, inArray, like, or, sql } from 'drizzle-orm';
 import type { StoreDatabase } from './db';
 import { auditEvents, inventoryEvents, orders, preorders, products, settings, webhookEvents } from './schema';
 import { checkoutInput, fulfillInput, inventoryInput, preorderUpdate, productInput, reservationInput, settingsInput, StoreError } from './validation';
+import { paymentProvider } from './config';
 
 type Tx = Parameters<Parameters<StoreDatabase['transaction']>[0]>[0];
 function audit(tx: Tx, actor: string, action: string, entityId: string, detail: string) {
@@ -9,7 +10,7 @@ function audit(tx: Tx, actor: string, action: string, entityId: string, detail: 
 }
 export async function storeSettings(db: StoreDatabase) {
   const [row] = await db.select().from(settings).where(eq(settings.id, 'store'));
-  return row ?? { id: 'store', reservationsOpen: false, checkoutOpen: false, updatedAt: 0 };
+  return row ?? { id: 'store', reservationsOpen: false, checkoutOpen: false, shippingFeePerUnit: null, updatedAt: 0 };
 }
 export async function saveProduct(db: StoreDatabase, actor: string, raw: unknown) {
   const { id, version, ...data } = productInput.parse(raw);
@@ -61,13 +62,16 @@ export async function updateReservation(db: StoreDatabase, actor: string, raw: u
     await audit(tx, actor, 'preorder.updated', id, data.status); return row;
   });
 }
-export async function updateSettings(db: StoreDatabase, actor: string, raw: unknown, stripeReady: boolean) {
+export async function updateSettings(db: StoreDatabase, actor: string, raw: unknown, paymentsReady: boolean) {
   const data = settingsInput.parse(raw);
-  if (data.checkoutOpen && !stripeReady) throw new StoreError(409, 'Configure Stripe and its webhook before enabling checkout.');
+  if (data.checkoutOpen && !paymentsReady) throw new StoreError(409, 'Configure the payment provider before enabling checkout.');
   return db.transaction(async tx => {
-    const values = { id: 'store', ...data, updatedAt: Date.now() };
+    const [current] = await tx.select().from(settings).where(eq(settings.id, 'store'));
+    const shippingFeePerUnit = data.shippingFeePerUnit === undefined ? current?.shippingFeePerUnit ?? null : data.shippingFeePerUnit;
+    if (data.checkoutOpen && paymentProvider() === 'ecpay' && shippingFeePerUnit === null) throw new StoreError(409, 'Confirm the Taiwan delivery fee per unit before opening checkout.');
+    const values = { id: 'store', ...data, shippingFeePerUnit, updatedAt: Date.now() };
     await tx.insert(settings).values(values).onConflictDoUpdate({ target: settings.id, set: values });
-    await audit(tx, actor, 'store.updated', 'store', `Reservations ${data.reservationsOpen ? 'open' : 'closed'} · Checkout ${data.checkoutOpen ? 'open' : 'closed'}`); return values;
+    await audit(tx, actor, 'store.updated', 'store', `Reservations ${data.reservationsOpen ? 'open' : 'closed'} · Checkout ${data.checkoutOpen ? 'open' : 'closed'} · Delivery per unit ${shippingFeePerUnit === null ? 'not confirmed' : shippingFeePerUnit / 100 + ' TWD'}`); return values;
   });
 }
 export async function reserveCheckout(db: StoreDatabase, raw: unknown) {
@@ -75,7 +79,7 @@ export async function reserveCheckout(db: StoreDatabase, raw: unknown) {
   return db.transaction(async tx => {
     const [existing] = await tx.select().from(orders).where(eq(orders.requestKey, data.requestKey));
     if (existing) {
-      if (existing.productId !== data.productId || existing.email !== data.email || existing.name !== data.name || existing.quantity !== data.quantity || existing.status !== 'pending') throw new StoreError(409, 'Use a new checkout request.');
+      if (existing.paymentProvider !== 'stripe' || existing.productId !== data.productId || existing.email !== data.email || existing.name !== data.name || existing.quantity !== data.quantity || existing.status !== 'pending') throw new StoreError(409, 'Use a new checkout request.');
       return existing;
     }
     const [config] = await tx.select().from(settings).where(eq(settings.id, 'store'));
@@ -93,7 +97,7 @@ export async function applyPayment(db: StoreDatabase, data: PaymentUpdate) {
   return db.transaction(async tx => {
     const [seen] = await tx.select().from(webhookEvents).where(eq(webhookEvents.id, data.eventId)); if (seen) return;
     const [order] = await tx.select().from(orders).where(eq(orders.id, data.orderId));
-    if (!order || (order.stripeSessionId && order.stripeSessionId !== data.sessionId)) throw new StoreError(409, 'Payment does not match an order.');
+    if (!order || order.paymentProvider !== 'stripe' || (order.stripeSessionId && order.stripeSessionId !== data.sessionId)) throw new StoreError(409, 'Payment does not match an order.');
     if (data.status === 'paid' && (order.total !== data.amount || order.currency.toLowerCase() !== data.currency.toLowerCase())) throw new StoreError(409, 'Payment amount does not match.');
     if (order.status === 'pending') {
       await tx.update(products).set({ reserved: sql`${products.reserved} - ${order.quantity}`, ...(data.status === 'paid' ? { stock: sql`${products.stock} - ${order.quantity}` } : {}), updatedAt: Date.now(), version: sql`${products.version} + 1` }).where(eq(products.id, order.productId));
@@ -122,6 +126,7 @@ export async function fulfillOrder(db: StoreDatabase, actor: string, raw: unknow
   return db.transaction(async tx => {
     const [row] = await tx.update(orders).set({ status: 'fulfilled', trackingNumber: data.trackingNumber, updatedAt: Date.now() }).where(and(eq(orders.id, data.id), eq(orders.status, 'paid'))).returning();
     if (!row) throw new StoreError(409, 'Only a paid, unfulfilled order can be fulfilled.');
+    if (row.paymentEnvironment === 'stage') throw new StoreError(409, 'Sandbox orders cannot be shipped.');
     await audit(tx, actor, 'order.fulfilled', data.id, data.trackingNumber); return row;
   });
 }
@@ -129,8 +134,8 @@ export async function dashboardData(db: StoreDatabase) {
   const [catalog, config, recentOrders, recentActivity, revenue, orderCount, reservationCount] = await Promise.all([
     db.select().from(products).orderBy(desc(products.createdAt)).limit(500), storeSettings(db),
     db.select().from(orders).orderBy(desc(orders.createdAt)).limit(8), db.select().from(auditEvents).orderBy(desc(auditEvents.createdAt)).limit(8),
-    db.select({ currency: orders.currency, amount: sql<number>`coalesce(sum(${orders.total} - ${orders.refundedAmount}), 0)` }).from(orders).where(inArray(orders.status, ['paid', 'fulfilled', 'partially_refunded', 'refunded'])).groupBy(orders.currency),
-    db.$count(orders, inArray(orders.status, ['paid', 'fulfilled', 'partially_refunded', 'refunded'])), db.$count(preorders, inArray(preorders.status, ['new', 'contacted'])),
+    db.select({ currency: orders.currency, amount: sql<number>`coalesce(sum(${orders.total} - ${orders.refundedAmount}), 0)` }).from(orders).where(and(eq(orders.paymentEnvironment, 'live'), inArray(orders.status, ['paid', 'fulfilled', 'partially_refunded', 'refunded']))).groupBy(orders.currency),
+    db.$count(orders, and(eq(orders.paymentEnvironment, 'live'), inArray(orders.status, ['paid', 'fulfilled', 'partially_refunded', 'refunded']))), db.$count(preorders, inArray(preorders.status, ['new', 'contacted'])),
   ]);
   return { products: catalog, settings: config, recentOrders, recentActivity, revenue, orderCount, reservationCount };
 }

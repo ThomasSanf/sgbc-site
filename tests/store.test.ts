@@ -8,6 +8,7 @@ import { adjustInventory, applyPayment, applyRefund, createReservation, dashboar
 import { isApprovedAdmin } from '../lib/server/config';
 import { productInput, StoreError } from '../lib/server/validation';
 
+process.env.PAYMENT_PROVIDER = 'stripe';
 const db = connectDatabase(':memory:');
 const actor = 'test-admin@example.test';
 const productData = { name: 'Test hardware', sku: 'TEST-1', description: '', price: 12500, currency: 'TWD', status: 'active', lowStock: 2 };

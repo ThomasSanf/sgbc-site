@@ -46,11 +46,17 @@ export const orders = sqliteTable('orders', {
   productId: text('product_id').notNull().references(() => products.id), productName: text('product_name').notNull(), sku: text('sku').notNull(),
   name: text('name').notNull(), email: text('email').notNull(), quantity: integer('quantity').notNull(),
   unitPrice: integer('unit_price').notNull(), total: integer('total').notNull(), currency: text('currency').notNull(),
+  shippingFee: integer('shipping_fee').notNull().default(0),
+  paymentProvider: text('payment_provider', { enum: ['stripe', 'ecpay'] }).notNull().default('stripe'),
+  paymentEnvironment: text('payment_environment', { enum: ['stage', 'live'] }).notNull().default('live'),
+  ecpayMerchantId: text('ecpay_merchant_id'), ecpayMerchantTradeNo: text('ecpay_merchant_trade_no').unique(),
+  ecpayTradeNo: text('ecpay_trade_no').unique(), ecpayPaymentCode: text('ecpay_payment_code'),
+  locale: text('locale').notNull().default('en'),
   status: text('status', { enum: ['pending', 'paid', 'fulfilled', 'cancelled', 'refunded', 'partially_refunded'] }).notNull().default('pending'),
   stripeSessionId: text('stripe_session_id').unique(), paymentIntentId: text('payment_intent_id').unique(), refundedAmount: integer('refunded_amount').notNull().default(0),
   trackingNumber: text('tracking_number').notNull().default(''), shippingAddress: text('shipping_address'),
   createdAt: integer('created_at').notNull(), updatedAt: integer('updated_at').notNull(),
-}, t => [index('order_created_idx').on(t.createdAt), check('order_total_valid', sql`${t.quantity} > 0 AND ${t.total} = ${t.unitPrice} * ${t.quantity}`)]);
+}, t => [index('order_created_idx').on(t.createdAt), check('order_total_valid', sql`${t.quantity} > 0 AND ${t.shippingFee} >= 0 AND ${t.total} = ${t.unitPrice} * ${t.quantity} + ${t.shippingFee}`)]);
 export const inventoryEvents = sqliteTable('inventory_events', {
   id: text('id').primaryKey(), productId: text('product_id').notNull().references(() => products.id),
   delta: integer('delta').notNull(), reason: text('reason').notNull(), actor: text('actor').notNull(), createdAt: integer('created_at').notNull(),
@@ -62,4 +68,5 @@ export const webhookEvents = sqliteTable('webhook_events', { id: text('id').prim
 export const settings = sqliteTable('settings', {
   id: text('id').primaryKey(), reservationsOpen: integer('reservations_open', { mode: 'boolean' }).notNull().default(false),
   checkoutOpen: integer('checkout_open', { mode: 'boolean' }).notNull().default(false), updatedAt: integer('updated_at').notNull(),
+  shippingFeePerUnit: integer('shipping_fee_per_unit'),
 });

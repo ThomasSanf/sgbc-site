@@ -17,7 +17,7 @@ export async function requireAdmin(request: Request) {
   if (!['GET', 'HEAD'].includes(request.method)) verifyOrigin(request);
   return admin;
 }
-export async function readBody(request: Request, maxBytes = 16_384) {
+export async function readBody(request: Pick<Request, 'headers' | 'body'>, maxBytes = 16_384) {
   if (Number(request.headers.get('content-length')) > maxBytes) throw new StoreError(413, 'Request is too large.');
   const reader = request.body?.getReader();
   if (!reader) throw new StoreError(400, 'A request body is required.');

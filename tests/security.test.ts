@@ -14,6 +14,7 @@ import { POST as webhookPost } from '../app/api/webhooks/stripe/route';
 
 const origin = 'http://127.0.0.1:3000';
 // Disposable test identities and keys. No test bypass exists in the application.
+process.env.PAYMENT_PROVIDER = 'stripe';
 process.env.DATABASE_URL = ':memory:';
 process.env.BETTER_AUTH_URL = origin;
 process.env.BETTER_AUTH_SECRET = randomBytes(48).toString('base64url');

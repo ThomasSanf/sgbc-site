@@ -1,6 +1,6 @@
 # SGBC product website
 
-Next.js App Router + TypeScript + Three.js, with a Google-protected store admin and persistent database backend. Product copy is based on the SGBC Rev C engineering documentation. The public landing page still presents a prototype with its coming-soon preorder notice. Store data starts empty except for one draft product, with no invented pricing or stock.
+Next.js App Router + TypeScript + Three.js, with a Google-protected store admin, persistent database, and ECPay hosted credit-card preorders. Product copy is based on the SGBC Rev C engineering documentation. Checkout stays closed until live merchant credentials, a confirmed shipping fee, and the store's availability setting are ready.
 
 ## Run
 
@@ -25,12 +25,13 @@ Open `/admin/`. Google sign-in is restricted to verified emails in the server's
 `ADMIN_EMAILS` allowlist. There is no public signup, password fallback, or local
 authentication bypass. All data endpoints check authorization on the server.
 
-The dashboard manages products, stock, unpaid preorder reservations, Stripe
-checkout links and paid orders, fulfillment, and an activity log. Checkout and
+The dashboard manages products, stock, paid ECPay orders, legacy unpaid reservations,
+fulfillment, and an activity log. Checkout and
 public reservations are closed by default. Local development uses SQLite; Vercel
 requires a persistent hosted libSQL/Turso database. See
 [the complete setup guide](docs/admin-setup.md) for Google OAuth, database,
-Stripe, deployment, API details, and current checkout limits.
+deployment and API details, and [ECPay setup](docs/ecpay-setup.md) for sandbox testing,
+live activation, shipping, payment reconciliation, and current limitations.
 
 ## Current motherboard and visual design
 
@@ -105,8 +106,13 @@ rotation, and camera tabs. Its canvas uses `touch-action: none` so vertical and
 horizontal drags rotate the model; swipes outside that canvas scroll the page.
 A mobile “Drag to rotate” hint makes this interaction visible.
 
-Preorder currently opens an accessible “Preorders opening soon” dialog. No
-checkout, payment, reservation, or mailing-list submission is implied.
+Preorder opens a bilingual, accessible dialog with the unit price and the disclosure
+that no shipping date has been announced. Once checkout is configured and enabled,
+it collects contact details, a Taiwan delivery address and quantity, calculates
+delivery per unit, and posts a server-signed order to ECPay's hosted card page.
+Card details never pass through SGBC. Server-verified payments update the order and
+allocation exactly once. Browser redirects do not confirm payment. Sandbox orders
+are labeled, excluded from revenue, and blocked from fulfillment.
 
 ## Languages
 

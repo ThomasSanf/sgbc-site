@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { ArrowDown, ArrowUpRight, ArrowUp, Plus, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
+import { PreorderButton } from '@/components/preorder-button';
 import type { ConsoleView } from './console-scene';
 import { languageStorageKey, siteCopy, type Locale } from '@/lib/site-copy';
 
@@ -21,19 +21,6 @@ function LazyScene({ view, resetKey, locale }: { view: ConsoleView; resetKey: nu
     return () => observer.disconnect();
   }, []);
   return <div className="lazy-scene" ref={host}>{ready && <ConsoleScene view={view} resetKey={resetKey} locale={locale} dark />}</div>;
-}
-
-function PreorderButton({ className = '', locale }: { className?: string; locale: Locale }) {
-  const copy = siteCopy[locale].preorder;
-  return <Dialog>
-    <DialogTrigger className={`preorder-button ${className}`}>{copy.button} <ArrowUpRight size={18}/></DialogTrigger>
-    <DialogContent className="preorder-dialog" showCloseButton={false}>
-      <span className="mono preorder-eyebrow"><span className="status-dot"/> {copy.eyebrow}</span>
-      <DialogTitle className="preorder-title">{copy.title}<br/>{copy.subtitle}</DialogTitle>
-      <DialogDescription className="preorder-description">{copy.description}</DialogDescription>
-      <DialogClose className="preorder-button preorder-dismiss">{copy.close} <ArrowUpRight size={18}/></DialogClose>
-    </DialogContent>
-  </Dialog>;
 }
 
 export default function ProductPage() {

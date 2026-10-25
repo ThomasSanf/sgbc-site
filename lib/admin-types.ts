@@ -5,5 +5,5 @@ export type Product = InferSelectModel<typeof products>;
 export type Reservation = InferSelectModel<typeof preorders>;
 export type Order = InferSelectModel<typeof orders>;
 export type Activity = InferSelectModel<typeof auditEvents>;
-export type Dashboard = Awaited<ReturnType<typeof dashboardData>> & { integrations: { google: boolean; stripe: boolean; hostedDatabase: boolean; adminEmails: string[] } };
+export type Dashboard = Awaited<ReturnType<typeof dashboardData>> & { integrations: ReturnType<typeof import('./server/config').integrationStatus> };
 export type AdminIdentity = { id: string; name: string; email: string };

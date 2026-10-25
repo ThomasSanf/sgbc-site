@@ -167,7 +167,38 @@ h2>span { color:var(--muted); }
 .preorder-eyebrow { display:flex; align-items:center; gap:10px; color:var(--muted); }
 .preorder-title[data-slot='dialog-title'] { color:var(--ink); font-size:clamp(36px,5vw,52px); font-weight:700; line-height:1; letter-spacing:-.05em; }
 .preorder-description[data-slot='dialog-description'] { color:var(--muted); font-size:16px; line-height:1.65; }
-.preorder-dismiss { width:100%; margin-top:6px; }
+.preorder-dialog[data-slot='dialog-content'] { max-width:560px; max-height:calc(100dvh - 32px); overflow-y:auto; overscroll-behavior:contain; gap:22px; }
+.preorder-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.preorder-close { display:grid; place-items:center; width:36px; height:36px; border:1px solid var(--line); flex-shrink:0; }
+.preorder-description { margin-top:16px; }
+.preorder-product { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:20px; background:#1d1c1a; border-left:3px solid #875162; }
+.preorder-product>div { display:grid; gap:6px; }
+.preorder-product>div:last-child { text-align:right; flex-shrink:0; }
+.preorder-product strong { font-size:16px; }
+.preorder-product span { font-size:12px; color:var(--muted); }
+.preorder-delivery { display:flex; gap:10px; color:#c3bba9; font-size:13px; line-height:1.6; }
+.preorder-delivery .status-dot { margin-top:7px; }
+.preorder-status { display:grid; gap:12px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); line-height:1.6; }
+.preorder-status strong { color:var(--ink); }
+.preorder-status .text-link { justify-self:start; }
+.preorder-sandbox { padding:12px; border:1px solid #756b39; color:#dfcd78; font-size:13px; }
+.preorder-form fieldset { display:grid; gap:16px; border:0; padding:0; margin:0; min-width:0; }
+.preorder-form label { display:grid; gap:8px; min-width:0; font-size:12px; color:var(--muted); }
+.preorder-form input:not([type='checkbox']),.preorder-form select { width:100%; min-width:0; height:46px; padding:10px 12px; border:1px solid #4a4943; border-radius:0; background:#181817; color:var(--ink); font:16px/1.4 Arial,Helvetica,sans-serif; }
+.preorder-fields { display:grid; grid-template-columns:1.6fr 1fr; gap:14px; }
+.preorder-totals { display:grid; gap:12px; border-top:1px solid var(--line); padding-top:20px; margin-top:4px; }
+.preorder-totals>div { display:flex; justify-content:space-between; gap:16px; font-size:14px; color:var(--muted); }
+.preorder-totals .preorder-total { font-size:20px; color:var(--ink); padding:4px 0; }
+.preorder-form .preorder-acknowledgement { display:flex; align-items:flex-start; gap:10px; font-size:12px; line-height:1.6; }
+.preorder-acknowledgement input { accent-color:var(--accent); width:18px; height:18px; flex-shrink:0; margin-top:2px; }
+.preorder-submit { width:100%; }
+.preorder-form .preorder-privacy { display:flex; align-items:flex-start; gap:8px; color:var(--muted); font-size:11px; line-height:1.6; }
+.preorder-privacy svg { margin-top:3px; }
+.preorder-error { color:#ffae9b; font-size:13px; line-height:1.5; }
+.preorder-spinner { animation:preorder-spin 1s linear infinite; }
+@keyframes preorder-spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce) { .preorder-spinner { animation:none; } }
+@media (max-width:420px) { .preorder-dialog[data-slot='dialog-content'] { width:calc(100% - 24px); padding:22px!important; } .preorder-product { padding:14px; gap:12px; } .preorder-product strong { font-size:14px; } }
 @media (min-width:761px) and (max-width:1050px) { .hero-layout { min-height:570px; } .hero-layout .hero-stage { min-height:500px; } .hero-actions { gap:18px; } .hero-actions .text-link { font-size:13px; } .preorder-button { gap:20px; } }
 @media (max-width:760px) { .hero-layout { grid-template-columns:1fr; gap:0; min-height:0; } .hero-copy { padding:46px 0 0; } .hero-copy h1 { font-size:clamp(34px,10.5vw,80px); } .hero-copy .hero-intro { margin-top:22px; } .hero-copy .hero-intro p { font-size:17px; } .hero-actions { margin-top:24px; gap:24px; } .hero-layout .hero-stage { min-height:0; height:clamp(310px,65vw,440px); margin-top:8px; } .hero-layout .stage-wordmark { font-size:47vw; } .hero-layout .stage-wordmark>span { font-size:4vw; margin-top:-19vw; } .hero-layout .stage-corner { left:0; bottom:24px; font-size:11px; } .hero-layout .hero-number { display:none; } .preorder-dialog[data-slot='dialog-content'] { padding:28px; } }
 @media (max-width:380px) { .hero-actions { gap:17px; } .hero-actions .text-link { font-size:13px; gap:8px; } .preorder-button { padding:12px 16px; gap:20px; } }
