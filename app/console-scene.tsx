@@ -47,7 +47,9 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
     const goal = new THREE.Vector3(-5.8, 4.8, 8.2);
     let tweening = true;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const desktopPointer = window.matchMedia('(min-width: 761px) and (hover: hover) and (pointer: fine)');
     const pointerSurface = host.closest<HTMLElement>('[data-console-tilt]') ?? host;
+    const tiltTarget = new THREE.Vector2();
     const dragTarget = new THREE.Vector2();
     const dragStart = new THREE.Vector2();
     const dragOrigin = new THREE.Vector2();
@@ -59,13 +61,27 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
     let scrollProgress = 0;
     let lastFrameTime = performance.now();
     const markScrollDirty = () => { scrollDirty = true; };
+    const resetTilt = () => { tiltTarget.set(0, 0); };
+    const moveTilt = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse' || reducedMotion.matches || !desktopPointer.matches) return;
+      const bounds = pointerSurface.getBoundingClientRect();
+      // Captured drag events can arrive after the cursor has left the hero.
+      if (!bounds.width || !bounds.height || event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) {
+        resetTilt();
+        return;
+      }
+      tiltTarget.set(
+        (event.clientX - bounds.left) / bounds.width * 2 - 1,
+        (event.clientY - bounds.top) / bounds.height * 2 - 1,
+      );
+    };
     const resetDrag = () => {
       const pointer = dragPointer;
       dragPointer = null; heldKeys.clear(); dragTarget.set(0, 0);
       host.classList.remove('is-dragging');
       if (pointer !== null && renderer?.domElement.hasPointerCapture(pointer)) renderer.domElement.releasePointerCapture(pointer);
     };
-    const resetMotion = () => { resetDrag(); markScrollDirty(); };
+    const resetMotion = () => { resetDrag(); resetTilt(); markScrollDirty(); };
     const beginDrag = (event: PointerEvent) => {
       if (!event.isPrimary || event.button !== 0 || dragPointer !== null || !loadedModel || !renderer) return;
       dragPointer = event.pointerId;
@@ -106,7 +122,7 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
       dragTarget.y = THREE.MathUtils.clamp(dragTarget.y, -Math.PI * 2, Math.PI * 2);
     };
     const heroKeyUp = (event: KeyboardEvent) => { if (heldKeys.delete(event.key) && heldKeys.size === 0) resetDrag(); };
-    const visibilityChange = () => { if (document.hidden) resetDrag(); };
+    const visibilityChange = () => { if (document.hidden) resetMotion(); };
 
     const keyboard = (event: KeyboardEvent) => {
       if (!controls || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
@@ -174,6 +190,8 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
         controls.addEventListener('start', () => { tweening = false; });
         controls.addEventListener('change', () => { needsRender = true; });
       } else {
+        pointerSurface.addEventListener('pointermove', moveTilt, { passive: true });
+        pointerSurface.addEventListener('pointerleave', resetTilt);
         renderer.domElement.addEventListener('pointerdown', beginDrag);
         renderer.domElement.addEventListener('pointermove', moveDrag, { passive: true });
         renderer.domElement.addEventListener('pointerup', endDrag);
@@ -182,11 +200,12 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
         host.addEventListener('keydown', heroKeyDown);
         host.addEventListener('keyup', heroKeyUp);
         host.addEventListener('blur', resetDrag);
-        window.addEventListener('blur', resetDrag);
+        window.addEventListener('blur', resetMotion);
         document.addEventListener('visibilitychange', visibilityChange);
         window.addEventListener('scroll', markScrollDirty, { passive: true });
         window.addEventListener('resize', markScrollDirty, { passive: true });
         reducedMotion.addEventListener('change', resetMotion);
+        desktopPointer.addEventListener('change', resetMotion);
       }
 
       const shell = new THREE.MeshPhysicalMaterial({ color: '#98988f', roughness: 0.49, metalness: 0, clearcoat: 0.1, clearcoatRoughness: 0.6 });
@@ -292,9 +311,11 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
             scrollProgress = THREE.MathUtils.clamp(-bounds.top / Math.max(bounds.height, 1), 0, 1);
             scrollDirty = false;
           }
-          const targetX = (scrollEnabled ? scrollProgress * 0.08 : 0) + dragTarget.x;
-          const targetY = (scrollEnabled ? scrollProgress * 1.2 : 0) + dragTarget.y;
           const active = dragPointer !== null || heldKeys.size > 0;
+          // Keep tracking the cursor, but let manual rotation take over until release.
+          const tiltEnabled = !active && !reducedMotion.matches && desktopPointer.matches;
+          const targetX = (scrollEnabled ? scrollProgress * 0.08 : 0) + dragTarget.x + (tiltEnabled ? tiltTarget.y * 0.10 : 0);
+          const targetY = (scrollEnabled ? scrollProgress * 1.2 : 0) + dragTarget.y + (tiltEnabled ? tiltTarget.x * 0.17 : 0);
           const amount = reducedMotion.matches ? 1 : 1 - Math.exp(-(active ? 18 : 7) * delta);
           if (Math.abs(modelPivot.rotation.x - targetX) + Math.abs(modelPivot.rotation.y - targetY) > 0.00001) {
             modelPivot.rotation.x = THREE.MathUtils.lerp(modelPivot.rotation.x, targetX, amount);
@@ -329,6 +350,8 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
       disposed = true; controller.current = null; cancelAnimationFrame(frame);
       resize?.disconnect(); observer?.disconnect(); host.removeEventListener('keydown', keyboard);
       resetDrag();
+      pointerSurface.removeEventListener('pointermove', moveTilt);
+      pointerSurface.removeEventListener('pointerleave', resetTilt);
       renderer?.domElement.removeEventListener('pointerdown', beginDrag);
       renderer?.domElement.removeEventListener('pointermove', moveDrag);
       renderer?.domElement.removeEventListener('pointerup', endDrag);
@@ -337,11 +360,12 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
       host.removeEventListener('keydown', heroKeyDown);
       host.removeEventListener('keyup', heroKeyUp);
       host.removeEventListener('blur', resetDrag);
-      window.removeEventListener('blur', resetDrag);
+      window.removeEventListener('blur', resetMotion);
       document.removeEventListener('visibilitychange', visibilityChange);
       window.removeEventListener('scroll', markScrollDirty);
       window.removeEventListener('resize', markScrollDirty);
       reducedMotion.removeEventListener('change', resetMotion);
+      desktopPointer.removeEventListener('change', resetMotion);
       controls?.dispose();
       scene.traverse(object => { if (object instanceof THREE.Mesh) object.geometry.dispose(); });
       materials.forEach(material => material.dispose());
