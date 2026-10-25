@@ -19,5 +19,10 @@ test('ECPay migration preserves populated legacy orders, stock and settings', as
     assert.equal((await client.execute('SELECT reserved FROM products')).rows[0].reserved, 2);
     assert.equal((await client.execute('PRAGMA foreign_key_check')).rows.length, 0);
     await assert.rejects(client.execute("UPDATE orders SET total=1 WHERE id='legacy'"));
+    for (const statement of readFileSync('drizzle/0002_plain_captain_stacy.sql', 'utf8').split('--> statement-breakpoint')) await client.execute(statement);
+    const embedded = (await client.execute('SELECT * FROM orders')).rows[0];
+    for (const key of Object.keys(after)) assert.equal(embedded[key], after[key], `Embedded migration preserves ${key}`);
+    assert.equal(embedded.ecpay_integration, 'aio');
+    assert.equal((await client.execute('SELECT * FROM embedded_checkouts')).rows.length, 0);
   } finally { client.close(); }
 });

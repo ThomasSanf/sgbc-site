@@ -7,7 +7,8 @@ import { orders } from './schema';
 import { applyPayment, applyRefund, reserveCheckout } from './store';
 import { StoreError } from './validation';
 import { ecpayConfig, ecpayCheckout, queryEcpay, type EcpayFields } from './ecpay';
-import { reserveEcpayCheckout, applyEcpayResult, findEcpayOrder } from './ecpay-store';
+import { reserveEcpayCheckout, applyEcpayResult, applyVerifiedEcpayResult, findEcpayOrder } from './ecpay-store';
+import { createEmbeddedCheckout, embeddedEcpayEnabled, queryEcpg } from './ecpg';
 
 export function stripeClient() {
   if (!stripeConfigured()) throw new StoreError(503, 'Stripe is not configured yet.');
@@ -16,6 +17,7 @@ export function stripeClient() {
 export async function createCheckout(raw: unknown) {
   if (paymentProvider() === 'ecpay') {
     const config = ecpayConfig();
+    if (embeddedEcpayEnabled()) return createEmbeddedCheckout(getDb(), raw, config);
     return ecpayCheckout(await reserveEcpayCheckout(getDb(), raw, config), config);
   }
   const stripe = stripeClient(), db = getDb();
@@ -72,8 +74,9 @@ export async function reconcileOrder(id: string) {
   if (order.paymentProvider === 'ecpay') {
     const config = ecpayConfig();
     if (order.ecpayMerchantId !== config.merchantId || order.paymentEnvironment !== config.environment || !order.ecpayMerchantTradeNo) throw new StoreError(409, 'Use this order’s ECPay merchant and environment to reconcile it.');
-    const result = await queryEcpay(order.ecpayMerchantTradeNo, config);
-    await applyEcpayResult(getDb(), result, config, 'query');
+    const result = order.ecpayIntegration === 'embedded' ? await queryEcpg(order.ecpayMerchantTradeNo, config) : await queryEcpay(order.ecpayMerchantTradeNo, config);
+    if (order.ecpayIntegration === 'embedded') await applyVerifiedEcpayResult(getDb(), result, config, 'query', 'embedded');
+    else await applyEcpayResult(getDb(), result, config, 'query');
     return { status: result.TradeStatus, paymentStatus: result.TradeStatus === '1' ? 'paid' : 'pending', message: result.TradeStatus === '1' ? 'Payment confirmed by ECPay.' : 'ECPay has not confirmed payment. The stock hold remains in place.' };
   }
   if (!order.stripeSessionId) {

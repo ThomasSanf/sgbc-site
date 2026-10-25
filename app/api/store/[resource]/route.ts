@@ -9,6 +9,7 @@ import { paymentsConfigured, paymentProvider, ecpayEnvironment } from '@/lib/ser
 import { publicSandboxMode, SANDBOX_PRODUCT_ID, checkoutSettingsId } from '@/lib/server/sandbox';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 type Context = { params: Promise<{ resource: string }> };
 export async function GET(_request: Request, context: Context) {
   try {

@@ -4,7 +4,8 @@ import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { ArrowUpRight, LoaderCircle, LockKeyhole, X } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { siteCopy, type Locale } from '@/lib/site-copy';
-import type { CheckoutDestination, StorefrontCatalog } from '@/lib/storefront-types';
+import type { CheckoutDestination, EmbeddedCheckout, StorefrontCatalog } from '@/lib/storefront-types';
+import { EmbeddedPayment } from '@/components/embedded-payment';
 import { taiwanCities, taiwanCity, taiwanDistrict, upcomingDeliveryCountries } from '@/lib/shipping';
 
 export function PreorderButton({ className = '', locale }: { className?: string; locale: Locale }) {
@@ -21,6 +22,7 @@ export function PreorderButton({ className = '', locale }: { className?: string;
   const [postalCode, setPostalCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [payment, setPayment] = useState<(EmbeddedCheckout & { requestKey: string }) | null>(null);
   const attempt = useRef<{ fingerprint: string; key: string } | null>(null);
   const product = catalog?.products.find(item => item.currency === 'TWD' && item.price > 0);
   const available = Math.max(0, Math.min(5, product?.available ?? 0));
@@ -61,7 +63,7 @@ export function PreorderButton({ className = '', locale }: { className?: string;
     setError('');
     try {
       // Keep retries tied to one checkout without storing customer details in browser storage.
-      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(payload)));
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`embedded-v1:${JSON.stringify(payload)}`));
       const fingerprint = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
       if (attempt.current?.fingerprint !== fingerprint) {
         let previous: { fingerprint?: string; key?: string; created?: number } | null = null;
@@ -80,6 +82,7 @@ export function PreorderButton({ className = '', locale }: { className?: string;
         return;
       }
       const destination: CheckoutDestination = await response.json();
+      if (destination.provider === 'ecpay-embedded') { setPayment({ ...destination, requestKey: attempt.current.key }); return; }
       const url = new URL(destination.url);
       if (url.protocol !== 'https:' || url.username || url.password || url.port) throw new Error('Invalid payment destination');
       if (destination.provider === 'ecpay') {
@@ -104,12 +107,13 @@ export function PreorderButton({ className = '', locale }: { className?: string;
 
   return <Dialog open={open} onOpenChange={value => { if (!busy) { if (value) setError(''); setOpen(value); } }}>
     <DialogTrigger className={`preorder-button ${className}`}>{copy.button} <ArrowUpRight size={18} aria-hidden="true"/></DialogTrigger>
-    <DialogContent className="preorder-dialog" showCloseButton={false}>
+    <DialogContent className={`preorder-dialog${payment ? ' preorder-payment-dialog' : ''}`} showCloseButton={false}>
       <div className="preorder-top"><span className="mono preorder-eyebrow"><span className="status-dot"/> {copy.eyebrow}</span><DialogClose className="preorder-close" aria-label={copy.close} disabled={busy}><X size={20}/></DialogClose></div>
       <div><DialogTitle className="preorder-title">{copy.title}<br/>{copy.subtitle}</DialogTitle><DialogDescription className="preorder-description">{copy.description}</DialogDescription></div>
       <div className="preorder-product"><div><strong>{product?.name ?? 'SGBC Console · Rev C'}</strong><span>{copy.finish}</span></div><div><strong>{money(product?.price ?? 550000)}</strong><span>{copy.perUnit}</span></div></div>
       <p className="preorder-delivery"><span className="status-dot"/>{copy.shippingDate}</p>
-      {catalog?.sandbox && <div className="preorder-sandbox" role="status"><strong>{copy.sandbox}</strong><span>{copy.testCard}</span><code>4311 9522 2222 2222</code><span>{copy.testDetails}</span></div>}
+      {catalog?.sandbox && !payment && <div className="preorder-sandbox" role="status"><strong>{copy.sandbox}</strong><span>{copy.testCard}</span><code>4311 9522 2222 2222</code><span>{copy.testDetails}</span></div>}
+      <div hidden={Boolean(payment)}>
       {loading ? <p className="preorder-status" role="status"><LoaderCircle size={18} className="preorder-spinner"/>{copy.loading}</p> : loadFailed ? <div className="preorder-status" role="alert"><p>{copy.loadFailed}</p><button className="text-link" onClick={() => setReload(value => value + 1)}>{copy.retry} <ArrowUpRight size={16}/></button></div> : !ready ? <div className="preorder-status" role="status"><strong>{catalog?.checkoutOpen && product && available === 0 ? copy.soldOut : copy.closedTitle}</strong><p>{copy.closedDescription}</p></div> : <form className="preorder-form" onSubmit={submit}>
         <fieldset disabled={busy}>
           <label htmlFor={`${id}-name`}>{copy.name}<input id={`${id}-name`} name="name" autoComplete="name" required maxLength={120}/></label>
@@ -126,6 +130,11 @@ export function PreorderButton({ className = '', locale }: { className?: string;
           <p className="preorder-privacy"><LockKeyhole size={13}/>{copy.privacy}</p>
         </fieldset>
       </form>}
+      </div>
+      {payment && <EmbeddedPayment key={`${payment.token}:${locale}`} checkout={payment} requestKey={payment.requestKey} locale={locale} onBusy={setBusy} onEdit={() => {
+        setPayment(null); attempt.current = null; setError('');
+        try { sessionStorage.removeItem('sgbc-checkout-attempt'); } catch { /* Storage is optional. */ }
+      }}/>}
     </DialogContent>
   </Dialog>;
 }

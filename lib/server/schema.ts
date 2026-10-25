@@ -51,6 +51,7 @@ export const orders = sqliteTable('orders', {
   paymentEnvironment: text('payment_environment', { enum: ['stage', 'live'] }).notNull().default('live'),
   ecpayMerchantId: text('ecpay_merchant_id'), ecpayMerchantTradeNo: text('ecpay_merchant_trade_no').unique(),
   ecpayTradeNo: text('ecpay_trade_no').unique(), ecpayPaymentCode: text('ecpay_payment_code'),
+  ecpayIntegration: text('ecpay_integration', { enum: ['aio', 'embedded'] }).notNull().default('aio'),
   locale: text('locale').notNull().default('en'),
   status: text('status', { enum: ['pending', 'paid', 'fulfilled', 'cancelled', 'refunded', 'partially_refunded'] }).notNull().default('pending'),
   stripeSessionId: text('stripe_session_id').unique(), paymentIntentId: text('payment_intent_id').unique(), refundedAmount: integer('refunded_amount').notNull().default(0),
@@ -65,6 +66,13 @@ export const auditEvents = sqliteTable('audit_events', {
   id: text('id').primaryKey(), actor: text('actor').notNull(), action: text('action').notNull(), entityId: text('entity_id').notNull(), detail: text('detail').notNull(), createdAt: integer('created_at').notNull(),
 }, t => [index('audit_created_idx').on(t.createdAt)]);
 export const webhookEvents = sqliteTable('webhook_events', { id: text('id').primaryKey(), type: text('type').notNull(), createdAt: integer('created_at').notNull() });
+// Provider tokens only. Card numbers, security codes and cardholder data never enter this table.
+export const embeddedCheckouts = sqliteTable('embedded_checkouts', {
+  orderId: text('order_id').primaryKey().references(() => orders.id),
+  token: text('token'), expiresAt: integer('expires_at').notNull(),
+  paymentStartedAt: integer('payment_started_at'), redirectUrl: text('redirect_url'),
+  createdAt: integer('created_at').notNull(),
+});
 export const settings = sqliteTable('settings', {
   id: text('id').primaryKey(), reservationsOpen: integer('reservations_open', { mode: 'boolean' }).notNull().default(false),
   checkoutOpen: integer('checkout_open', { mode: 'boolean' }).notNull().default(false), updatedAt: integer('updated_at').notNull(),

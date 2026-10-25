@@ -1,9 +1,16 @@
 # ECPay paid preorders
 
-The storefront uses ECPay All-in-One hosted **one-time credit-card payment**. ATM,
-bank transfer, installments and card binding are not enabled. Customers enter card
-details on ECPay; SGBC stores only the order, delivery details and payment references.
-Both English and Taiwan Traditional Chinese are supported.
+The public sandbox uses **ECPay Embedded Checkout 2.0**, with an SGBC payment step
+after delivery details. ECPay's JS SDK renders its secure card fields inside this
+step; SGBC's server receives only a PayToken, never card numbers or security codes.
+The surrounding design, delivery summary and Pay button belong to SGBC. Both
+English and Taiwan Traditional Chinese are supported. Bank 3DS verification may
+still redirect to ECPay before returning to SGBC.
+
+Live embedded checkout requires an approved ECPay contract merchant and separate
+service activation. Once activated, set `ECPAY_CHECKOUT=embedded`. Without that
+setting, non-demo checkout retains the existing AIO redirect integration. Historical
+AIO orders keep their original callback and reconciliation path.
 
 The intended launch is **200 consoles at NT$5,500 each**, with Taiwan delivery charged
 per console. NT$80 is only a test shipping rate until the owner confirms it. There
@@ -27,6 +34,7 @@ or paste credentials into chat:
 ```dotenv
 PAYMENT_PROVIDER=ecpay
 ECPAY_ENVIRONMENT=live
+ECPAY_CHECKOUT=embedded
 ECPAY_MERCHANT_ID=your-merchant-id
 ECPAY_HASH_KEY=your-hash-key
 ECPAY_HASH_IV=your-hash-iv
@@ -36,6 +44,9 @@ BETTER_AUTH_URL=https://sgbc-site.vercel.app
 Keep the existing Google authentication and database variables. Run `pnpm db:migrate`
 against the target database before deploying. Migration 0001 retains existing Stripe
 orders and adds ECPay references, environment tags and separate shipping amounts.
+Migration 0002 adds the integration tag (historical orders default to AIO) and a
+table for expiring SDK tokens and the payment submission lock. It preserves all
+existing inventory, orders, settings and credentials.
 
 The application sends these URLs with every order; do not interchange them:
 
@@ -43,6 +54,8 @@ The application sends these URLs with every order; do not interchange them:
 | --- | --- |
 | `/api/webhooks/ecpay/` | Public server-to-server payment notification (`ReturnURL`) |
 | `/api/store/ecpay-return/` | Browser POST return (`OrderResultURL`), never changes payment state |
+| `/api/webhooks/ecpg/` | Embedded checkout encrypted JSON notification, verified by a server query |
+| `/api/store/ecpg-return/` | Embedded checkout browser return, never changes payment state |
 | `/checkout/result/` | Customer return page, never claims payment from URL parameters |
 
 Use the exact public HTTPS origin in `BETTER_AUTH_URL`. ECPay must be able to POST
@@ -62,7 +75,7 @@ deploy. This creates a dedicated 200-unit test allocation and separate test
 availability settings. It does not change real inventory, prices or availability.
 The setup script is safe to rerun and does not reset existing test orders/holds.
 
-Public demo mode forces ECPay's published stage credentials and stage host even if
+Public demo mode forces Embedded Checkout 2.0, ECPay's published stage credentials and stage host even if
 live credentials are present. Only the dedicated test product can be checked out;
 the real product is hidden from checkout, while the test product is hidden from
 normal admin inventory. Fake payments are marked sandbox, excluded from real
@@ -97,7 +110,7 @@ ignored: it cannot create a paid order, even with valid signatures.
 
 ## Open live checkout
 
-1. Complete ECPay merchant approval and obtain the live AIO MerchantID, HashKey and
+1. Complete ECPay merchant approval, activate Embedded Checkout 2.0, and obtain its live MerchantID, HashKey and
    HashIV. Confirm that credit-card acceptance and the required preorder volume are
    approved for this merchant.
 2. Add the live server variables to the existing Vercel project's Production
@@ -113,15 +126,25 @@ ignored: it cannot create a paid order, even with valid signatures.
 ## Payment and stock handling
 
 - The server loads prices and shipping, checks the displayed expected total, and
-  atomically holds available units before issuing a signed ECPay form.
+  atomically holds available units before obtaining a payment token (or issuing a legacy AIO form).
 - Retries of the same request reuse the same order and merchant trade number.
   Never create a second checkout to resolve an uncertain payment.
-- Notifications require the correct merchant, SHA-256 checksum, trade reference,
+- Notifications require the correct merchant, AES envelope (ECPG) or SHA-256 checksum (AIO), trade reference,
   amount and credit-card method. Successful notifications are checked against a
   fresh signed ECPay query before stock is consumed and the order becomes paid.
 - Duplicate and out-of-order messages cannot consume stock twice. `1|OK` is returned
   only after database persistence. Provider/network failures keep the hold so a
   retry can safely reconcile the order.
+- Embedded form sessions expire after 25 minutes. Before payment submission, Edit
+  details cancels that order and releases its hold atomically. Once CreatePayment
+  starts, the server never automatically resubmits a PayToken, even after a timeout.
+  Retries return the saved bank-verification URL or the neutral confirmation page.
+  Changing or cancelling a payment already submitted requires reconciliation.
+- The SDK is loaded only on the payment step. Styling is scoped to `#ECPayPayment`;
+  provider validation, notices, branding and dynamic form height remain intact.
+  Only the credit-card list item is requested, with card binding disabled. Any
+  ECPay-managed flexible-installment offer depends on the merchant configuration;
+  ask ECPay to disable it when activating a strictly one-time-payment service.
 - Sandbox payments are excluded from net sales and paid-order metrics and cannot
   be fulfilled. The public demo uses a separate allocation within the persistent
   database; ordinary local/preview testing should use a separate database.
@@ -129,7 +152,8 @@ ignored: it cannot create a paid order, even with valid signatures.
 
 ## Operational limits
 
-**Unpaid ECPay holds do not automatically expire.** A failed card attempt, closing
+**Unpaid ECPay holds do not automatically expire.** Embedded checkouts can release
+their hold through Edit details only before payment submission. A failed card attempt, closing
 the browser, or an unpaid query does not prove that an issued hosted checkout can
 never be paid. Check payment status in Admin. Abandoned trades need confirmation
 from ECPay that they are unpayable before an operator performs an audited database
@@ -149,7 +173,7 @@ and does not promise an email.
 
 ## Verification
 
-`pnpm test` covers the official checksum vector, forged messages, price tampering,
+`pnpm test` covers the official checksum and AES vectors, forged messages, price tampering,
 checkout gating, duplicate callbacks, stock allocation, migration compatibility,
 browser-return safety and sandbox isolation, as well as existing admin security.
 These tests mock provider queries. A real sandbox checkout and a public callback
@@ -160,3 +184,9 @@ Official references: [checkout fields](https://developers.ecpay.com.tw/2866/),
 [checksums](https://developers.ecpay.com.tw/2902/),
 [notifications](https://developers.ecpay.com.tw/2878/),
 [order queries](https://developers.ecpay.com.tw/2890/).
+
+Embedded references: [overview and activation](https://developers.ecpay.com.tw/64936/),
+[SDK](https://developers.ecpay.com.tw/8989/), [tokens](https://developers.ecpay.com.tw/9040/),
+[CreatePayment](https://developers.ecpay.com.tw/9053/), [AES](https://developers.ecpay.com.tw/9103/),
+[notifications](https://developers.ecpay.com.tw/9058/), [query](https://developers.ecpay.com.tw/9083/),
+[supported CSS](https://developers.ecpay.com.tw/9118/).

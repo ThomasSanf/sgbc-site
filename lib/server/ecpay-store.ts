@@ -11,7 +11,7 @@ function assertAllocation(productId: string, config: EcpayConfig) {
   if ((publicSandboxMode() && (config.environment !== 'stage' || productId !== SANDBOX_PRODUCT_ID)) || (productId === SANDBOX_PRODUCT_ID && config.environment !== 'stage')) throw new StoreError(409, 'Test checkout cannot use live inventory.');
 }
 
-export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, config: EcpayConfig) {
+export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, config: EcpayConfig, integration: 'aio' | 'embedded' = 'aio') {
   const { shipping, acknowledged: _acknowledged, expectedTotal, ...data } = paidPreorderInput.parse(raw);
   assertAllocation(data.productId, config);
   if (!publicSandboxMode() && data.productId === SANDBOX_PRODUCT_ID) throw new StoreError(409, 'Public test checkout is closed.');
@@ -21,6 +21,7 @@ export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, conf
     if (!availability?.checkoutOpen || availability.shippingFeePerUnit === null) throw new StoreError(409, 'Checkout is not open yet.');
     const [existing] = await tx.select().from(orders).where(eq(orders.requestKey, data.requestKey));
     if (existing) {
+      if (existing.ecpayIntegration !== integration) throw new StoreError(409, 'This checkout uses a different payment integration.');
       if (existing.paymentProvider !== 'ecpay' || existing.paymentEnvironment !== config.environment || existing.ecpayMerchantId !== config.merchantId || existing.productId !== data.productId || existing.name !== data.name || existing.email !== data.email || existing.quantity !== data.quantity || existing.shippingAddress !== shippingAddress || existing.total !== expectedTotal || existing.locale !== data.locale || existing.status !== 'pending') throw new StoreError(409, 'Use a new checkout request.');
       // Never mint another payable trade number to recover an ambiguous browser/network failure.
       return existing;
@@ -33,7 +34,7 @@ export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, conf
     const [held] = await tx.update(products).set({ reserved: sql`${products.reserved} + ${data.quantity}`, updatedAt: Date.now() }).where(and(eq(products.id, product.id), sql`${products.stock} - ${products.reserved} >= ${data.quantity}`)).returning();
     if (!held) throw new StoreError(409, 'This quantity is no longer available.');
     const now = Date.now(), id = crypto.randomUUID();
-    const [order] = await tx.insert(orders).values({ ...data, id, productName: product.name, sku: product.sku, unitPrice: product.price, total, shippingFee, currency: 'TWD', shippingAddress, paymentProvider: 'ecpay', paymentEnvironment: config.environment, ecpayMerchantId: config.merchantId, ecpayMerchantTradeNo: `S${randomBytes(9).toString('hex')}`, createdAt: now, updatedAt: now }).returning();
+    const [order] = await tx.insert(orders).values({ ...data, id, productName: product.name, sku: product.sku, unitPrice: product.price, total, shippingFee, currency: 'TWD', shippingAddress, paymentProvider: 'ecpay', paymentEnvironment: config.environment, ecpayMerchantId: config.merchantId, ecpayMerchantTradeNo: `S${randomBytes(9).toString('hex')}`, ecpayIntegration: integration, createdAt: now, updatedAt: now }).returning();
     await tx.insert(auditEvents).values({ id: crypto.randomUUID(), actor: 'checkout', action: 'order.created', entityId: id, detail: `${data.quantity} × ${product.name} · ECPay ${config.environment} · ${publicSandboxMode() ? 'test checkout acknowledged; no payment or shipment' : 'customer acknowledged preorder without shipping date'}`, createdAt: now });
     return order;
   });
@@ -41,21 +42,31 @@ export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, conf
 
 export async function findEcpayOrder(db: StoreDatabase, fields: EcpayFields, config: EcpayConfig) {
   verifyEcpayFields(fields, config);
+  return matchVerifiedEcpayOrder(db, fields, config, 'aio');
+}
+
+// Call only after verifying the provider envelope (AIO MAC or ECPG AES response).
+export async function matchVerifiedEcpayOrder(db: StoreDatabase, fields: EcpayFields, config: EcpayConfig, integration: 'aio' | 'embedded') {
   const [order] = await db.select().from(orders).where(eq(orders.ecpayMerchantTradeNo, fields.MerchantTradeNo ?? ''));
-  if (!order || order.paymentProvider !== 'ecpay' || order.paymentEnvironment !== config.environment || order.ecpayMerchantId !== config.merchantId || (fields.CustomField1 && fields.CustomField1 !== order.id) || !/^\d+$/.test(fields.TradeAmt ?? '') || Number(fields.TradeAmt) * 100 !== order.total || order.currency !== 'TWD') throw new StoreError(400, 'Payment does not match an order.');
+  if (!order || order.ecpayIntegration !== integration || fields.MerchantID !== config.merchantId || order.paymentProvider !== 'ecpay' || order.paymentEnvironment !== config.environment || order.ecpayMerchantId !== config.merchantId || (fields.CustomField1 && fields.CustomField1 !== order.id) || !/^\d+$/.test(fields.TradeAmt ?? '') || Number(fields.TradeAmt) * 100 !== order.total || order.currency !== 'TWD') throw new StoreError(400, 'Payment does not match an order.');
   assertAllocation(order.productId, config);
   return order;
 }
 
 // The same transition handles signed notifications and authenticated server queries.
 export async function applyEcpayResult(db: StoreDatabase, fields: EcpayFields, config: EcpayConfig, source: 'notify' | 'query') {
-  const matched = await findEcpayOrder(db, fields, config);
+  verifyEcpayFields(fields, config);
+  return applyVerifiedEcpayResult(db, fields, config, source, 'aio');
+}
+
+export async function applyVerifiedEcpayResult(db: StoreDatabase, fields: EcpayFields, config: EcpayConfig, source: 'notify' | 'query', integration: 'aio' | 'embedded') {
+  const matched = await matchVerifiedEcpayOrder(db, fields, config, integration);
   const code = source === 'query' ? fields.TradeStatus : fields.RtnCode;
   if (!code || !/^\d+$/.test(code) || (source === 'notify' && !['0', '1'].includes(fields.SimulatePaid))) throw new StoreError(400, 'Invalid payment state.');
   const simulated = fields.SimulatePaid === '1';
   const paid = code === '1' && !simulated;
   if (paid && (!/^[A-Za-z0-9]{1,20}$/.test(fields.TradeNo ?? '') || !/^Credit(?:_|$)/.test(fields.PaymentType ?? ''))) throw new StoreError(400, 'Unexpected payment method or reference.');
-  const eventId = `ecpay-${createHash('sha256').update(`${config.environment}:${config.merchantId}:${fields.MerchantTradeNo}:${fields.TradeNo ?? ''}:${code}:${simulated}`).digest('hex')}`;
+  const eventId = `ecpay-${createHash('sha256').update(`${integration}:${config.environment}:${config.merchantId}:${fields.MerchantTradeNo}:${fields.TradeNo ?? ''}:${code}:${simulated}`).digest('hex')}`;
   return db.transaction(async tx => {
     const [seen] = await tx.select().from(webhookEvents).where(eq(webhookEvents.id, eventId));
     if (seen) return;
