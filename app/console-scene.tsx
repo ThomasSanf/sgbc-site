@@ -78,7 +78,6 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
       dragTarget.copy(dragOrigin);
       renderer.domElement.setPointerCapture(event.pointerId);
       host.classList.add('is-dragging');
-      if (!touchDrag) { event.preventDefault(); host.focus({ preventScroll: true }); }
     };
     const moveDrag = (event: PointerEvent) => {
       if (event.pointerId !== dragPointer || !renderer) return;
