@@ -3,10 +3,12 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { ecpayConfigured, ecpayEnvironment, appOrigin } from './config';
 import { StoreError } from './validation';
 import type { orders } from './schema';
+import { publicSandboxMode, publicEcpaySandbox } from './sandbox';
 
 export type EcpayConfig = { merchantId: string; hashKey: string; hashIV: string; environment: 'stage' | 'live' };
 export type EcpayFields = Record<string, string>;
 export function ecpayConfig(): EcpayConfig {
+  if (publicSandboxMode()) return { ...publicEcpaySandbox };
   if (!ecpayConfigured()) throw new StoreError(503, 'ECPay is not configured for this environment.');
   return { merchantId: process.env.ECPAY_MERCHANT_ID!, hashKey: process.env.ECPAY_HASH_KEY!, hashIV: process.env.ECPAY_HASH_IV!, environment: ecpayEnvironment() };
 }

@@ -1,3 +1,5 @@
+import { publicSandboxMode } from './sandbox';
+
 export function adminEmails() {
   return (process.env.ADMIN_EMAILS ?? '').split(',').map(value => value.trim().toLowerCase()).filter(Boolean);
 }
@@ -17,9 +19,10 @@ export function authConfigured() {
   return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && (process.env.BETTER_AUTH_SECRET?.length ?? 0) >= 32 && process.env.BETTER_AUTH_URL && adminEmails().length);
 }
 export function stripeConfigured() { return Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET); }
-export function paymentProvider() { return process.env.PAYMENT_PROVIDER === 'stripe' ? 'stripe' : 'ecpay'; }
-export function ecpayEnvironment() { return process.env.ECPAY_ENVIRONMENT === 'live' ? 'live' : 'stage'; }
+export function paymentProvider() { return !publicSandboxMode() && process.env.PAYMENT_PROVIDER === 'stripe' ? 'stripe' : 'ecpay'; }
+export function ecpayEnvironment() { return !publicSandboxMode() && process.env.ECPAY_ENVIRONMENT === 'live' ? 'live' : 'stage'; }
 export function ecpayConfigured() {
+  if (publicSandboxMode()) return true;
   const { ECPAY_MERCHANT_ID: id, ECPAY_HASH_KEY: key, ECPAY_HASH_IV: iv, ECPAY_ENVIRONMENT: environment } = process.env;
   if (!id || !/^\d{7,10}$/.test(id) || !key || !iv || !['stage', 'live'].includes(environment ?? '')) return false;
   // Public sandbox credentials must never authorize real orders or production checkout.
@@ -30,5 +33,5 @@ export function ecpayConfigured() {
 }
 export function paymentsConfigured() { return paymentProvider() === 'ecpay' ? ecpayConfigured() : stripeConfigured(); }
 export function integrationStatus() {
-  return { google: authConfigured(), stripe: stripeConfigured(), payments: paymentsConfigured(), provider: paymentProvider(), environment: ecpayEnvironment(), hostedDatabase: !process.env.DATABASE_URL?.startsWith('file:'), adminEmails: adminEmails() };
+  return { google: authConfigured(), stripe: stripeConfigured(), payments: paymentsConfigured(), provider: paymentProvider(), environment: ecpayEnvironment(), publicSandbox: publicSandboxMode(), hostedDatabase: !process.env.DATABASE_URL?.startsWith('file:'), adminEmails: adminEmails() };
 }

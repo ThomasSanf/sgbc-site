@@ -114,6 +114,12 @@ Card details never pass through SGBC. Server-verified payments update the order 
 allocation exactly once. Browser redirects do not confirm payment. Sandbox orders
 are labeled, excluded from revenue, and blocked from fulfillment.
 
+An explicit `PUBLIC_ECPAY_SANDBOX=true` deployment opens a clearly labeled public
+test checkout using ECPay's test credentials and a dedicated test allocation. Run
+`node --conditions=react-server --import tsx scripts/setup-ecpay-sandbox.ts` once
+against the target database first. Real inventory and availability stay unchanged;
+turn off the flag and redeploy to close the demo. See the ECPay guide above.
+
 ## Languages
 
 The header switches between English and Taiwan Traditional Chinese (`zh-TW`).

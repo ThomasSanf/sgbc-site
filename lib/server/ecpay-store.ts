@@ -5,12 +5,19 @@ import type { StoreDatabase } from './db';
 import { orders, products, settings, auditEvents, inventoryEvents, webhookEvents } from './schema';
 import { paidPreorderInput, StoreError } from './validation';
 import { verifyEcpayFields, type EcpayConfig, type EcpayFields } from './ecpay';
+import { publicSandboxMode, SANDBOX_PRODUCT_ID, checkoutSettingsId } from './sandbox';
+
+function assertAllocation(productId: string, config: EcpayConfig) {
+  if ((publicSandboxMode() && (config.environment !== 'stage' || productId !== SANDBOX_PRODUCT_ID)) || (productId === SANDBOX_PRODUCT_ID && config.environment !== 'stage')) throw new StoreError(409, 'Test checkout cannot use live inventory.');
+}
 
 export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, config: EcpayConfig) {
   const { shipping, acknowledged: _acknowledged, expectedTotal, ...data } = paidPreorderInput.parse(raw);
+  assertAllocation(data.productId, config);
+  if (!publicSandboxMode() && data.productId === SANDBOX_PRODUCT_ID) throw new StoreError(409, 'Public test checkout is closed.');
   const shippingAddress = JSON.stringify(shipping);
   return db.transaction(async tx => {
-    const [availability] = await tx.select().from(settings).where(eq(settings.id, 'store'));
+    const [availability] = await tx.select().from(settings).where(eq(settings.id, checkoutSettingsId()));
     if (!availability?.checkoutOpen || availability.shippingFeePerUnit === null) throw new StoreError(409, 'Checkout is not open yet.');
     const [existing] = await tx.select().from(orders).where(eq(orders.requestKey, data.requestKey));
     if (existing) {
@@ -27,7 +34,7 @@ export async function reserveEcpayCheckout(db: StoreDatabase, raw: unknown, conf
     if (!held) throw new StoreError(409, 'This quantity is no longer available.');
     const now = Date.now(), id = crypto.randomUUID();
     const [order] = await tx.insert(orders).values({ ...data, id, productName: product.name, sku: product.sku, unitPrice: product.price, total, shippingFee, currency: 'TWD', shippingAddress, paymentProvider: 'ecpay', paymentEnvironment: config.environment, ecpayMerchantId: config.merchantId, ecpayMerchantTradeNo: `S${randomBytes(9).toString('hex')}`, createdAt: now, updatedAt: now }).returning();
-    await tx.insert(auditEvents).values({ id: crypto.randomUUID(), actor: 'checkout', action: 'order.created', entityId: id, detail: `${data.quantity} × ${product.name} · ECPay ${config.environment} · customer acknowledged preorder without shipping date`, createdAt: now });
+    await tx.insert(auditEvents).values({ id: crypto.randomUUID(), actor: 'checkout', action: 'order.created', entityId: id, detail: `${data.quantity} × ${product.name} · ECPay ${config.environment} · ${publicSandboxMode() ? 'test checkout acknowledged; no payment or shipment' : 'customer acknowledged preorder without shipping date'}`, createdAt: now });
     return order;
   });
 }
@@ -36,6 +43,7 @@ export async function findEcpayOrder(db: StoreDatabase, fields: EcpayFields, con
   verifyEcpayFields(fields, config);
   const [order] = await db.select().from(orders).where(eq(orders.ecpayMerchantTradeNo, fields.MerchantTradeNo ?? ''));
   if (!order || order.paymentProvider !== 'ecpay' || order.paymentEnvironment !== config.environment || order.ecpayMerchantId !== config.merchantId || (fields.CustomField1 && fields.CustomField1 !== order.id) || !/^\d+$/.test(fields.TradeAmt ?? '') || Number(fields.TradeAmt) * 100 !== order.total || order.currency !== 'TWD') throw new StoreError(400, 'Payment does not match an order.');
+  assertAllocation(order.productId, config);
   return order;
 }
 

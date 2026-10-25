@@ -5,15 +5,17 @@ import { eq, sql } from 'drizzle-orm';
 import { migrate } from 'drizzle-orm/libsql/migrator';
 import { getDb } from '../lib/server/db';
 import { orders, products, settings, webhookEvents } from '../lib/server/schema';
-import { saveProduct, adjustInventory, dashboardData, fulfillOrder, updateSettings } from '../lib/server/store';
+import { saveProduct, adjustInventory, dashboardData, fulfillOrder, updateSettings, createReservation, reserveCheckout } from '../lib/server/store';
 import { reserveEcpayCheckout, applyEcpayResult } from '../lib/server/ecpay-store';
-import { checkMacValue, verifyEcpayFields, parseEcpayForm, ecpayCheckout, taipeiTradeDate, type EcpayConfig, type EcpayFields } from '../lib/server/ecpay';
-import { ecpayConfigured } from '../lib/server/config';
+import { checkMacValue, verifyEcpayFields, parseEcpayForm, ecpayCheckout, ecpayConfig, taipeiTradeDate, type EcpayConfig, type EcpayFields } from '../lib/server/ecpay';
+import { ecpayConfigured, paymentProvider, ecpayEnvironment } from '../lib/server/config';
+import { SANDBOX_PRODUCT_ID, SANDBOX_SETTINGS_ID, publicEcpaySandbox } from '../lib/server/sandbox';
 import { POST as notify } from '../app/api/webhooks/ecpay/route';
 import { POST as browserReturn } from '../app/api/store/ecpay-return/route';
 import { POST as checkout, GET as catalog } from '../app/api/store/[resource]/route';
 
 process.env.DATABASE_URL = ':memory:';
+delete process.env.PUBLIC_ECPAY_SANDBOX;
 process.env.PAYMENT_PROVIDER = 'ecpay';
 process.env.BETTER_AUTH_URL = 'http://127.0.0.1:3000';
 process.env.BETTER_AUTH_SECRET = randomBytes(48).toString('hex');
@@ -156,4 +158,50 @@ test('simultaneous attempts for the last unit cannot oversell the allocation', a
   const [after] = await db.select().from(products).where(eq(products.id, productId));
   assert.equal(after.reserved, after.stock);
   assert.ok((await db.select({ count: sql<number>`count(*)` }).from(webhookEvents))[0].count > 0);
+});
+
+test('public sandbox forces test credentials and keeps catalog, inventory, settings and revenue isolated', async () => {
+  const previous = { PUBLIC_ECPAY_SANDBOX: process.env.PUBLIC_ECPAY_SANDBOX, VERCEL_ENV: process.env.VERCEL_ENV, PAYMENT_PROVIDER: process.env.PAYMENT_PROVIDER };
+  const originalFetch = globalThis.fetch, before = await dashboardData(db);
+  const [liveProduct] = await db.select().from(products).where(eq(products.id, productId));
+  await db.insert(products).values({ id: SANDBOX_PRODUCT_ID, sku: 'SGBC-REV-C-SANDBOX', name: 'Test SGBC', price: 550000, currency: 'TWD', status: 'active', stock: 200, createdAt: Date.now(), updatedAt: Date.now() });
+  await db.insert(settings).values({ id: SANDBOX_SETTINGS_ID, checkoutOpen: true, reservationsOpen: false, shippingFeePerUnit: 8000, updatedAt: Date.now() });
+  process.env.PUBLIC_ECPAY_SANDBOX = 'true'; process.env.VERCEL_ENV = 'production'; process.env.PAYMENT_PROVIDER = 'stripe';
+  try {
+    assert.equal(ecpayConfigured(), true);
+    assert.equal(paymentProvider(), 'ecpay'); assert.equal(ecpayEnvironment(), 'stage');
+    assert.deepEqual(ecpayConfig(), publicEcpaySandbox);
+    const data = await (await catalog(new Request('http://127.0.0.1:3000/api/store/catalog/'), ctx('catalog'))).json();
+    assert.equal(data.checkoutOpen, true); assert.equal(data.sandbox, true); assert.equal(data.shippingFeePerUnit, 8000);
+    assert.deepEqual(data.products.map((p: { id: string }) => p.id), [SANDBOX_PRODUCT_ID]);
+    await assert.rejects(reserveEcpayCheckout(db, payload(), publicEcpaySandbox));
+    await assert.rejects(reserveEcpayCheckout(db, { ...payload(), productId: SANDBOX_PRODUCT_ID }, config));
+    await assert.rejects(updateSettings(db, 'test', { checkoutOpen: true, reservationsOpen: false, shippingFeePerUnit: 8000 }, true));
+    const order = await reserveEcpayCheckout(db, { ...payload(2), productId: SANDBOX_PRODUCT_ID }, ecpayConfig());
+    assert.equal(order.total, 1116000); assert.equal(order.paymentEnvironment, 'stage');
+    assert.equal(ecpayCheckout(order, ecpayConfig()).url, 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5');
+    const fields = payment(order, {}, publicEcpaySandbox);
+    globalThis.fetch = async url => {
+      assert.equal(String(url), 'https://payment-stage.ecpay.com.tw/Cashier/QueryTradeInfo/V5');
+      return new Response(new URLSearchParams(signed({ ...fields, TradeStatus: '1' }, publicEcpaySandbox)).toString());
+    };
+    assert.equal(await (await notify(formRequest(fields))).text(), '1|OK');
+    assert.equal(await (await notify(formRequest(fields))).text(), '1|OK');
+    const after = await dashboardData(db);
+    assert.deepEqual(after.revenue, before.revenue); assert.equal(after.orderCount, before.orderCount);
+    assert.deepEqual(after.settings, before.settings); assert.deepEqual(after.products, before.products);
+    assert.deepEqual((await db.select().from(products).where(eq(products.id, productId)))[0], liveProduct);
+    const [testProduct] = await db.select().from(products).where(eq(products.id, SANDBOX_PRODUCT_ID));
+    assert.equal(testProduct.stock, 198); assert.equal(testProduct.reserved, 0);
+    await assert.rejects(fulfillOrder(db, 'test', { id: order.id, trackingNumber: 'NO-SHIP' }));
+    await assert.rejects(createReservation(db, 'test', { productId: SANDBOX_PRODUCT_ID, name: 'Test buyer', email: 'buyer@example.test', quantity: 1, notes: '' }));
+    await assert.rejects(reserveCheckout(db, { productId: SANDBOX_PRODUCT_ID, name: 'Test buyer', email: 'buyer@example.test', quantity: 1, requestKey: crypto.randomUUID() }));
+    delete process.env.PUBLIC_ECPAY_SANDBOX;
+    const liveCatalog = await (await catalog(new Request('http://127.0.0.1:3000/api/store/catalog/'), ctx('catalog'))).json();
+    assert.equal(liveCatalog.products.some((p: { id: string }) => p.id === SANDBOX_PRODUCT_ID), false);
+    await assert.rejects(reserveEcpayCheckout(db, { ...payload(), productId: SANDBOX_PRODUCT_ID }, publicEcpaySandbox));
+  } finally {
+    globalThis.fetch = originalFetch;
+    for (const [key, value] of Object.entries(previous)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; }
+  }
 });

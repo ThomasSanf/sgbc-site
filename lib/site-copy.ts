@@ -26,6 +26,9 @@ const en = {
     rateLimited: 'Please wait a minute before trying again.', changed: 'Availability or pricing changed. Review your order and try again.',
     invalid: 'Please check your contact and delivery details.', failed: 'We couldn’t open checkout. Please retry with the same details.',
     sandbox: 'Test checkout · No real payment will be taken.',
+    testTitle: 'Take it', testSubtitle: 'for a test run.', testDescription: 'Try the ECPay checkout with test details. No real order or shipment will be created.',
+    testCard: 'Use this test card only', testDetails: 'Expiry 12/30 · CVV 123 · 3D code 1234. Please do not enter a real card.',
+    testAcknowledgement: 'I understand this is a test. No real payment or shipment will be made.', testPay: 'Try ECPay test payment',
     close: 'Back to the console',
   },
   hero: {
@@ -99,6 +102,9 @@ const zhTW: typeof en = {
     rateLimited: '請稍候一分鐘再試。', changed: '可預購數量或價格已變更，請確認訂單後再試。',
     invalid: '請確認聯絡與配送資料。', failed: '目前無法開啟付款頁面，請使用相同資料重試。',
     sandbox: '測試結帳 · 不會收取實際款項。',
+    testTitle: '先試試，', testSubtitle: '結帳流程。', testDescription: '使用測試資料體驗綠界結帳流程，不會成立正式訂單或安排出貨。',
+    testCard: '請使用這組測試卡號', testDetails: '有效期限 12/30 · 安全碼 123 · 3D 驗證碼 1234。請勿輸入真實信用卡。',
+    testAcknowledgement: '我了解這是測試，不會實際扣款或出貨。', testPay: '前往綠界測試付款',
   },
   hero: {
     eyebrow: '獨立打造 / 熟悉的感動', revision: 'FPGA 主機 — REV C',

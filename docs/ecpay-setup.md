@@ -42,9 +42,28 @@ slashes are included in the submitted URLs to match this Next.js deployment.
 
 ## Sandbox first
 
-Use a **separate database and local/preview deployment**. Never share production
-inventory or customer data with the sandbox. Vercel production explicitly refuses
-stage checkout. Live mode also rejects the known public test merchant credentials.
+For local/preview development, use a **separate database**. Ordinary stage
+configuration is blocked on Vercel production. Live mode rejects public test
+merchant credentials.
+
+For an explicitly requested public demo on the existing site, run
+`node --conditions=react-server --import tsx scripts/setup-ecpay-sandbox.ts` against
+the target database, then set `PUBLIC_ECPAY_SANDBOX=true` in Vercel Production and
+deploy. This creates a dedicated 200-unit test allocation and separate test
+availability settings. It does not change real inventory, prices or availability.
+The setup script is safe to rerun and does not reset existing test orders/holds.
+
+Public demo mode forces ECPay's published stage credentials and stage host even if
+live credentials are present. Only the dedicated test product can be checked out;
+the real product is hidden from checkout, while the test product is hidden from
+normal admin inventory. Fake payments are marked sandbox, excluded from real
+revenue/order totals and blocked from fulfillment. The dialog includes a test-card
+guide and states that no payment or shipment occurs. NT$80 per unit is a **test**
+shipping amount. Use fictitious contact and address details for testing.
+
+To close the demo, set `PUBLIC_ECPAY_SANDBOX=false` and redeploy. The storefront
+returns to the unchanged real-store availability settings. Do this before opening
+live checkout. Test orders remain visible with sandbox labels for review.
 
 ECPay publishes these sandbox credentials:
 
@@ -94,8 +113,9 @@ ignored: it cannot create a paid order, even with valid signatures.
 - Duplicate and out-of-order messages cannot consume stock twice. `1|OK` is returned
   only after database persistence. Provider/network failures keep the hold so a
   retry can safely reconcile the order.
-- Sandbox payments are excluded from net sales and paid-order metrics. They cannot
-  be fulfilled. Production and sandbox databases must still remain separate.
+- Sandbox payments are excluded from net sales and paid-order metrics and cannot
+  be fulfilled. The public demo uses a separate allocation within the persistent
+  database; ordinary local/preview testing should use a separate database.
 - Fulfillment requires confirmed live payment and a tracking number.
 
 ## Operational limits

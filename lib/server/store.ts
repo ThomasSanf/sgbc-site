@@ -1,16 +1,17 @@
-import { and, desc, eq, inArray, like, or, sql } from 'drizzle-orm';
+import { and, desc, eq, ne, inArray, like, or, sql } from 'drizzle-orm';
 import type { StoreDatabase } from './db';
 import { auditEvents, inventoryEvents, orders, preorders, products, settings, webhookEvents } from './schema';
 import { checkoutInput, fulfillInput, inventoryInput, preorderUpdate, productInput, reservationInput, settingsInput, StoreError } from './validation';
 import { paymentProvider } from './config';
+import { publicSandboxMode, SANDBOX_PRODUCT_ID } from './sandbox';
 
 type Tx = Parameters<Parameters<StoreDatabase['transaction']>[0]>[0];
 function audit(tx: Tx, actor: string, action: string, entityId: string, detail: string) {
   return tx.insert(auditEvents).values({ id: crypto.randomUUID(), actor, action, entityId, detail, createdAt: Date.now() });
 }
-export async function storeSettings(db: StoreDatabase) {
-  const [row] = await db.select().from(settings).where(eq(settings.id, 'store'));
-  return row ?? { id: 'store', reservationsOpen: false, checkoutOpen: false, shippingFeePerUnit: null, updatedAt: 0 };
+export async function storeSettings(db: StoreDatabase, id = 'store') {
+  const [row] = await db.select().from(settings).where(eq(settings.id, id));
+  return row ?? { id, reservationsOpen: false, checkoutOpen: false, shippingFeePerUnit: null, updatedAt: 0 };
 }
 export async function saveProduct(db: StoreDatabase, actor: string, raw: unknown) {
   const { id, version, ...data } = productInput.parse(raw);
@@ -41,6 +42,7 @@ export async function adjustInventory(db: StoreDatabase, actor: string, raw: unk
 }
 export async function createReservation(db: StoreDatabase, actor: string, raw: unknown, publicRequest = false) {
   const data = reservationInput.parse(raw);
+  if (data.productId === SANDBOX_PRODUCT_ID) throw new StoreError(409, 'Test products cannot be reserved.');
   return db.transaction(async tx => {
     const [product] = await tx.select().from(products).where(eq(products.id, data.productId));
     const [config] = await tx.select().from(settings).where(eq(settings.id, 'store'));
@@ -64,6 +66,7 @@ export async function updateReservation(db: StoreDatabase, actor: string, raw: u
 }
 export async function updateSettings(db: StoreDatabase, actor: string, raw: unknown, paymentsReady: boolean) {
   const data = settingsInput.parse(raw);
+  if (data.checkoutOpen && publicSandboxMode()) throw new StoreError(409, 'Turn off public test mode and configure live payments before opening real checkout.');
   if (data.checkoutOpen && !paymentsReady) throw new StoreError(409, 'Configure the payment provider before enabling checkout.');
   return db.transaction(async tx => {
     const [current] = await tx.select().from(settings).where(eq(settings.id, 'store'));
@@ -76,6 +79,7 @@ export async function updateSettings(db: StoreDatabase, actor: string, raw: unkn
 }
 export async function reserveCheckout(db: StoreDatabase, raw: unknown) {
   const data = checkoutInput.parse(raw);
+  if (publicSandboxMode() || data.productId === SANDBOX_PRODUCT_ID) throw new StoreError(409, 'Test checkout must use the ECPay sandbox.');
   return db.transaction(async tx => {
     const [existing] = await tx.select().from(orders).where(eq(orders.requestKey, data.requestKey));
     if (existing) {
@@ -132,7 +136,7 @@ export async function fulfillOrder(db: StoreDatabase, actor: string, raw: unknow
 }
 export async function dashboardData(db: StoreDatabase) {
   const [catalog, config, recentOrders, recentActivity, revenue, orderCount, reservationCount] = await Promise.all([
-    db.select().from(products).orderBy(desc(products.createdAt)).limit(500), storeSettings(db),
+    db.select().from(products).where(ne(products.id, SANDBOX_PRODUCT_ID)).orderBy(desc(products.createdAt)).limit(500), storeSettings(db),
     db.select().from(orders).orderBy(desc(orders.createdAt)).limit(8), db.select().from(auditEvents).orderBy(desc(auditEvents.createdAt)).limit(8),
     db.select({ currency: orders.currency, amount: sql<number>`coalesce(sum(${orders.total} - ${orders.refundedAmount}), 0)` }).from(orders).where(and(eq(orders.paymentEnvironment, 'live'), inArray(orders.status, ['paid', 'fulfilled', 'partially_refunded', 'refunded']))).groupBy(orders.currency),
     db.$count(orders, and(eq(orders.paymentEnvironment, 'live'), inArray(orders.status, ['paid', 'fulfilled', 'partially_refunded', 'refunded']))), db.$count(preorders, inArray(preorders.status, ['new', 'contacted'])),

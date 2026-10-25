@@ -100,10 +100,10 @@ export function PreorderButton({ className = '', locale }: { className?: string;
     <DialogTrigger className={`preorder-button ${className}`}>{copy.button} <ArrowUpRight size={18} aria-hidden="true"/></DialogTrigger>
     <DialogContent className="preorder-dialog" showCloseButton={false}>
       <div className="preorder-top"><span className="mono preorder-eyebrow"><span className="status-dot"/> {copy.eyebrow}</span><DialogClose className="preorder-close" aria-label={copy.close} disabled={busy}><X size={20}/></DialogClose></div>
-      <div><DialogTitle className="preorder-title">{copy.title}<br/>{copy.subtitle}</DialogTitle><DialogDescription className="preorder-description">{copy.description}</DialogDescription></div>
+      <div><DialogTitle className="preorder-title">{catalog?.sandbox ? copy.testTitle : copy.title}<br/>{catalog?.sandbox ? copy.testSubtitle : copy.subtitle}</DialogTitle><DialogDescription className="preorder-description">{catalog?.sandbox ? copy.testDescription : copy.description}</DialogDescription></div>
       <div className="preorder-product"><div><strong>{product?.name ?? 'SGBC Console · Rev C'}</strong><span>{copy.finish}</span></div><div><strong>{money(product?.price ?? 550000)}</strong><span>{copy.perUnit}</span></div></div>
       <p className="preorder-delivery"><span className="status-dot"/>{copy.shippingDate}</p>
-      {catalog?.sandbox && <p className="preorder-sandbox" role="status">{copy.sandbox}</p>}
+      {catalog?.sandbox && <div className="preorder-sandbox" role="status"><strong>{copy.sandbox}</strong><span>{copy.testCard}</span><code>4311 9522 2222 2222</code><span>{copy.testDetails}</span></div>}
       {loading ? <p className="preorder-status" role="status"><LoaderCircle size={18} className="preorder-spinner"/>{copy.loading}</p> : loadFailed ? <div className="preorder-status" role="alert"><p>{copy.loadFailed}</p><button className="text-link" onClick={() => setReload(value => value + 1)}>{copy.retry} <ArrowUpRight size={16}/></button></div> : !ready ? <div className="preorder-status" role="status"><strong>{catalog?.checkoutOpen && product && available === 0 ? copy.soldOut : copy.closedTitle}</strong><p>{copy.closedDescription}</p></div> : <form className="preorder-form" onSubmit={submit}>
         <fieldset disabled={busy}>
           <label htmlFor={`${id}-name`}>{copy.name}<input id={`${id}-name`} name="name" autoComplete="name" required maxLength={120}/></label>
@@ -112,9 +112,9 @@ export function PreorderButton({ className = '', locale }: { className?: string;
           <div className="preorder-fields"><label htmlFor={`${id}-city`}>{copy.city}<input id={`${id}-city`} name="city" autoComplete="address-level1" required maxLength={80}/></label><label htmlFor={`${id}-postal`}>{copy.postalCode}<input id={`${id}-postal`} name="postalCode" inputMode="numeric" autoComplete="postal-code" required pattern="[0-9]{3}([0-9]{2,3})?" maxLength={6}/></label></div>
           <label htmlFor={`${id}-address`}>{copy.address}<input id={`${id}-address`} name="address" autoComplete="street-address" required minLength={5} maxLength={240}/></label>
           <div className="preorder-totals"><div><span>{copy.subtotal}</span><span>{money(product!.price * selectedQuantity)}</span></div><div><span>{copy.shipping}</span><span>{money(shippingFee)}</span></div><div className="preorder-total"><strong>{copy.total}</strong><strong>{money(product!.price * selectedQuantity + shippingFee)}</strong></div></div>
-          <label className="preorder-acknowledgement"><input type="checkbox" required/>{copy.acknowledgement}</label>
+          <label className="preorder-acknowledgement"><input type="checkbox" required/>{catalog?.sandbox ? copy.testAcknowledgement : copy.acknowledgement}</label>
           {error && <p className="preorder-error" role="alert">{error}</p>}
-          <button className="preorder-button preorder-submit" type="submit">{busy ? copy.connecting : copy.pay} {busy ? <LoaderCircle size={18} className="preorder-spinner"/> : <ArrowUpRight size={18}/>}</button>
+          <button className="preorder-button preorder-submit" type="submit">{busy ? copy.connecting : catalog?.sandbox ? copy.testPay : copy.pay} {busy ? <LoaderCircle size={18} className="preorder-spinner"/> : <ArrowUpRight size={18}/>}</button>
           <p className="preorder-privacy"><LockKeyhole size={13}/>{copy.privacy}</p>
         </fieldset>
       </form>}
