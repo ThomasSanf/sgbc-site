@@ -59,7 +59,7 @@ export default function ProductPage() {
       <nav aria-label={copy.nav.label}><a href="#console">{copy.nav.console} <sup>01</sup></a><a href="#design">{copy.nav.design} <sup>02</sup></a><a href="#specs">{copy.nav.specs} <sup>03</sup></a></nav>
       <div className="header-actions">
         <button type="button" className="language-toggle" onClick={switchLanguage} lang={locale === 'en' ? 'zh-TW' : 'en'} aria-label={locale === 'en' ? '切換至繁體中文（台灣）' : 'Switch to English'}>{locale === 'en' ? '中' : 'EN'}</button>
-        <PreorderButton className="mobile-header-preorder" locale={locale}/>
+        <PreorderButton className="header-preorder" locale={locale}/>
       </div>
     </header>
     <main id="main">

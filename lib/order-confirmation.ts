@@ -13,7 +13,7 @@ export const confirmationCopy = {
   en: {
     eyebrow: 'SGBC / YOUR ORDER', title: 'A new home.\nA few steps closer.',
     paid: 'Payment confirmed', fulfilled: 'Order shipped', pending: 'Confirming your payment', cancelled: 'Order cancelled', refunded: 'Payment refunded', partially_refunded: 'Payment partially refunded',
-    paidBody: 'Thank you. Your payment has been verified and your preorder is confirmed.',
+    paidBody: 'Thank you. Your payment has been verified and your pre-order is confirmed.',
     pendingBody: 'We are checking your payment with the provider. If you already paid, please do not place another order.',
     cancelledBody: 'This order is cancelled. It is not a payment confirmation.',
     refundedBody: 'The latest payment status and refund amount are shown below.',
@@ -21,7 +21,7 @@ export const confirmationCopy = {
     order: 'Order number', date: 'Ordered on', payment: 'Payment', reference: 'Payment reference',
     product: 'Your console', quantity: 'Quantity', unitPrice: 'Unit price', subtotal: 'Subtotal', shippingFee: 'Delivery', total: 'Order total', refund: 'Refunded',
     customer: 'Customer', delivery: 'Deliver to', tracking: 'Tracking number', method: 'Credit card',
-    preorder: 'This is a preorder. An estimated shipping date has not been announced.',
+    preorder: 'This is a pre-order. An estimated shipping date has not been announced.',
     download: 'Save order details as PDF', downloading: 'Preparing PDF…', downloadError: 'The PDF could not be downloaded. Please try again.',
     refresh: 'Check payment status', checking: 'Checking…', checkError: 'We could not refresh the payment status. Your order is unchanged. Please try again shortly.',
     waiting: 'Confirmation is taking longer than usual. Check again shortly; please do not pay again.',
