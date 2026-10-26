@@ -4,7 +4,7 @@ export const VISITOR_PREFERENCE_EVENT = 'sgbc-visitor-preference';
 export const VISITOR_ID_LIFETIME = 180 * 24 * 60 * 60 * 1000;
 
 export function isPublicPage(path: string) {
-  return ['/', '/sales-policy/en', '/sales-policy/zh-TW', '/checkout/result'].includes(path === '/' ? path : path.replace(/\/$/, ''));
+  return ['/', '/zh-TW', '/sales-policy/en', '/sales-policy/zh-TW', '/checkout/result'].includes(path === '/' ? path : path.replace(/\/$/, ''));
 }
 
 export function taipeiDay(time: number) {

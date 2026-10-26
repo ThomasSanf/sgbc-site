@@ -2,8 +2,9 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowDown, ArrowUpRight, ArrowUp, Plus, RotateCcw } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { WishlistButton } from '@/components/wishlist-button';
 import { FeatureSection } from '@/components/feature-section';
@@ -26,39 +27,34 @@ function LazyScene({ view, resetKey, locale }: { view: ConsoleView; resetKey: nu
   return <div className="lazy-scene" ref={host}>{ready && <ConsoleScene view={view} resetKey={resetKey} locale={locale} dark />}</div>;
 }
 
-export default function ProductPage() {
-  const [locale, setLocale] = useState<Locale>('en');
+export default function ProductPage({ locale = 'en' }: { locale?: Locale }) {
+  const router = useRouter();
   const [detailView, setDetailView] = useState<ConsoleView>('hero');
   const [detailReset, setDetailReset] = useState(0);
   const copy = siteCopy[locale];
   const views = copy.views;
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(languageStorageKey);
-      if (saved === 'en' || saved === 'zh-TW') setLocale(saved);
-    } catch { /* Language switching still works when storage is unavailable. */ }
-  }, []);
+  const nextLocale: Locale = locale === 'en' ? 'zh-TW' : 'en';
+  const nextHome = nextLocale === 'en' ? '/' : '/zh-TW/';
 
   useEffect(() => {
     document.documentElement.lang = locale;
+    try { localStorage.setItem(languageStorageKey, locale); } catch { /* The URL remains the language source when storage is unavailable. */ }
   }, [locale]);
 
-  function switchLanguage() {
-    const nextLocale = locale === 'en' ? 'zh-TW' : 'en';
-    setLocale(nextLocale);
-    try { localStorage.setItem(languageStorageKey, nextLocale); } catch { /* Keep the selection for this visit. */ }
+  function switchLanguage(event: MouseEvent<HTMLAnchorElement>) {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    router.push(nextHome + window.location.hash, { scroll: false });
   }
 
-  return <>
-    <title>{copy.meta.title}</title>
-    <meta name="description" content={copy.meta.description}/>
+  return <div lang={locale}>
     <a className="skip-link" href="#main">{copy.skip}</a>
     <header className="site-header">
       <a className="wordmark" href="#console" aria-label={copy.home}>sgbc<span>™</span></a>
       <nav aria-label={copy.nav.label}><a href="#console">{copy.nav.console} <sup>01</sup></a><a href="#specs">{copy.nav.specs} <sup>02</sup></a><a href="#design">{copy.nav.design} <sup>03</sup></a></nav>
       <div className="header-actions">
-        <button type="button" className="language-toggle" onClick={switchLanguage} lang={locale === 'en' ? 'zh-TW' : 'en'} aria-label={locale === 'en' ? '切換至繁體中文（台灣）' : 'Switch to English'}>{locale === 'en' ? '中' : 'EN'}</button>
+        <Link className="language-toggle" href={nextHome} onClick={switchLanguage} lang={nextLocale} hrefLang={nextLocale} aria-label={locale === 'en' ? '切換至繁體中文（台灣）' : 'Switch to English'}>{locale === 'en' ? '中' : 'EN'}</Link>
         <WishlistButton className="header-preorder" locale={locale}/>
       </div>
     </header>
@@ -94,5 +90,5 @@ export default function ProductPage() {
       <section className="closing"><p className="mono">{copy.closing.eyebrow}</p><a href="#console" aria-label={copy.preorder.close}>{copy.closing.title}<ArrowUpRight aria-hidden="true"/></a><div className="closing-bottom mono"><span>{copy.closing.project}</span><span>{copy.closing.tagline}</span></div></section>
     </main>
     <footer className="site-footer"><a className="wordmark" href="#console" aria-label={copy.home}>sgbc<span>™</span></a><p>{copy.footer.trademarks}<br/>{copy.footer.independent}</p><Link className="footer-policy-link" href={`/sales-policy/${locale}/`}>{salesPolicy[locale].title}</Link><VisitorPrivacy locale={locale}/><a className="mono" href="#console">{copy.footer.top} <ArrowUp size={16}/></a></footer>
-  </>;
+  </div>;
 }

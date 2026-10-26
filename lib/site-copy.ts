@@ -5,8 +5,8 @@ export const languageStorageKey = 'sgbc-language';
 
 const en = {
   meta: {
-    title: 'SGBC — A new home for your classics.',
-    description: 'Meet SGBC. An FPGA console designed around original Game Boy, Game Boy Color, and Game Boy Advance cartridges. Explore the Rev C design in three dimensions.',
+    title: 'SGBC | FPGA Console for Game Boy, Game Boy Color & GBA',
+    description: 'Meet SGBC, an FPGA console in development for Game Boy, Game Boy Color and Game Boy Advance cartridges, with 1080p HDMI output and integer scaling.',
   },
   skip: 'Skip to content',
   home: 'SGBC home',
@@ -89,8 +89,8 @@ const en = {
 
 const zhTW: typeof en = {
   meta: {
-    title: 'SGBC — 經典遊戲的新歸宿。',
-    description: '認識 SGBC：為原版 Game Boy、Game Boy Color 與 Game Boy Advance 卡帶打造的 FPGA 主機。透過 3D 模型探索 Rev C 設計。',
+    title: 'SGBC｜Game Boy、GBC、GBA FPGA 遊戲主機',
+    description: 'SGBC 是開發中的 FPGA 遊戲主機，為原版 Game Boy、Game Boy Color 與 Game Boy Advance 卡帶打造。探索 1080p HDMI 輸出、整數倍放大、連線埠與 microSD 遊戲庫，加入願望清單掌握開放訂購消息。',
   },
   skip: '跳至主要內容',
   home: 'SGBC 首頁',
