@@ -7,6 +7,7 @@ import { ArrowDown, ArrowUpRight, ArrowUp, Plus, RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { WishlistButton } from '@/components/wishlist-button';
+import { FeatureSection } from '@/components/feature-section';
 import type { ConsoleView } from './console-scene';
 import { languageStorageKey, siteCopy, type Locale } from '@/lib/site-copy';
 import { salesPolicy } from '@/lib/sales-policy';
@@ -106,10 +107,7 @@ export default function ProductPage() {
           <div className="design-grid"><div className="detail-stage"><LazyScene view={detailView} resetKey={detailReset} locale={locale}/><div className="viewer-bottom mono"><span><span className="desktop-hint">{copy.design.study}</span><span className="touch-hint">{copy.design.drag}</span></span><button className="reset-view" onClick={() => setDetailReset(n => n + 1)} aria-label={copy.design.reset}><RotateCcw size={18}/></button></div></div><div className="detail-copy">{views.map((v, i) => <TabsContent value={v.id} key={v.id}><span className="detail-number mono">[ 0{i + 1} ]</span><h3>{v.title}</h3><p>{v.description}</p></TabsContent>)}<div className="material-strip"><span><i className="shell-swatch"/>{copy.design.gray}</span><span><i className="black-swatch"/>{copy.design.black}</span><span><i className="bordeaux-swatch"/>{copy.design.bordeaux}</span></div></div></div>
         </Tabs>
       </section>
-      <section className="specs section-shell" id="specs" aria-labelledby="specs-title">
-        <div className="specs-heading"><p className="mono section-label">{copy.specs.eyebrow}</p><h2 id="specs-title">{copy.specs.title}<br/><span>{copy.specs.subtitle}</span></h2><p className="revision-label mono"><span className="status-dot"/> {copy.specs.revision}</p></div>
-        <div><dl className="spec-table">{copy.specs.rows.map(([label, value], i) => <div className="spec-row" key={label}><dt><span className="mono">{String(i + 1).padStart(2, '0')}</span>{label}</dt><dd>{value}</dd></div>)}</dl><p className="model-note">{copy.specs.note}</p></div>
-      </section>
+      <FeatureSection copy={copy.specs}/>
       <section className="closing"><p className="mono">{copy.closing.eyebrow}</p><a href="#console" aria-label={copy.preorder.close}>{copy.closing.title}<ArrowUpRight aria-hidden="true"/></a><div className="closing-bottom mono"><span>{copy.closing.project}</span><span>{copy.closing.tagline}</span></div></section>
     </main>
     <footer className="site-footer"><a className="wordmark" href="#console" aria-label={copy.home}>sgbc<span>™</span></a><p>{copy.footer.trademarks}<br/>{copy.footer.independent}</p><Link className="footer-policy-link" href={`/sales-policy/${locale}/`}>{salesPolicy[locale].title}</Link><VisitorPrivacy locale={locale}/><a className="mono" href="#console">{copy.footer.top} <ArrowUp size={16}/></a></footer>
