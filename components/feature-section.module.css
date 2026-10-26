@@ -21,6 +21,9 @@
 .grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
 .card { min-width:0; overflow:hidden; border:1px solid #2d3028; background:#11130f; }
 .visual { position:relative; display:flex; align-items:center; justify-content:center; height:190px; padding:20px 20px 0; background:radial-gradient(ellipse at 50% 65%,#22271c 0,transparent 72%); }
+.card[data-feature='dump'] { grid-column:span 2; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:center; }
+.card[data-feature='dump'] .visual { height:100%; min-height:240px; }
+.card[data-feature='dump'] .copy { padding:26px 26px 26px 10px; }
 .number { position:absolute; top:17px; left:20px; color:#8a927e; font-size:11px; }
 .art { display:block; width:100%; max-width:300px; height:auto; max-height:170px; overflow:visible; }
 .copy { padding:18px 22px 26px; }
@@ -44,6 +47,9 @@
   .copy { padding:18px 22px 26px; }
 }
 @media (max-width:560px) {
+  .card[data-feature='dump'] { grid-column:auto; display:block; }
+  .card[data-feature='dump'] .visual { height:200px; min-height:0; }
+  .card[data-feature='dump'] .copy { padding:16px 24px 27px; }
   .grid { grid-template-columns:minmax(0,1fr); }
   .visual { height:200px; padding:20px 30px 0; }
   .copy { padding:16px 24px 27px; }

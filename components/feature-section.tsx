@@ -2,7 +2,7 @@ import Image from 'next/image';
 import type { siteCopy } from '@/lib/site-copy';
 import styles from './feature-section.module.css';
 
-const featureKinds = ['display', 'link', 'speed', 'controller'] as const;
+const featureKinds = ['display', 'upscaling', 'link', 'speed', 'controller', 'storage', 'dump'] as const;
 type FeatureKind = typeof featureKinds[number];
 
 function Dpad({ x, y }: { x: number; y: number }) {
@@ -21,6 +21,16 @@ function Handheld({ x, y, color = 'var(--feature-shell)' }: { x: number; y: numb
   </g>;
 }
 
+function MicroSD({ x, y, color = 'var(--feature-wine)' }: { x: number; y: number; color?: string }) {
+  return <g transform={`translate(${x} ${y})`}>
+    <path d="M20 0h52q8 0 8 8v98q0 8-8 8H8q-8 0-8-8V20z" fill={color} stroke="#a98c91" strokeWidth="1.5"/>
+    <path d="M22 7h7v23h-7zm12 0h7v23h-7zm12 0h7v23h-7zm12 0h7v23h-7z" fill="#c6bc91"/>
+    <rect x="12" y="42" width="56" height="57" rx="4" fill="#321f28"/>
+    <path d="M29 56h15l10 10v21H29z" stroke="#d3b8bd" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="M44 56v10h10M35 74h13m-13 6h9" stroke="#d3b8bd" strokeWidth="1.5"/>
+  </g>;
+}
+
 function FeatureIllustration({ kind }: { kind: FeatureKind }) {
   return <svg viewBox="0 0 320 190" className={styles.art} aria-hidden="true" focusable="false" fill="none">
     {kind === 'display' && <>
@@ -33,6 +43,33 @@ function FeatureIllustration({ kind }: { kind: FeatureKind }) {
       <path d="M146 70h4v5h-4zm12 0h4v5h-4z" fill="#27362a"/>
       <path d="M65 40h19m-19 0v19m190-19h-19m19 0v19M65 130h19m-19 0v-19m190 19h-19m19 0v-19" stroke="#c1c9b6" strokeWidth="1" opacity=".7"/>
       <circle cx="260" cy="147" r="2" fill="var(--accent)"/>
+    </>}
+    {kind === 'upscaling' && <>
+      <rect x="26" y="65" width="66" height="66" rx="3" fill="#1c251e" stroke="#7d8974" strokeWidth="1.5"/>
+      <path d="M39 115V83h8v8h8v8h8v8h8v8z" fill="#b9c8a8"/>
+      <path d="M106 98h40m-10-9 10 9-10 9" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="166" y="35" width="130" height="130" rx="5" fill="#1c251e" stroke="#a1ad93" strokeWidth="1.5"/>
+      <path d="M192 135V71h16v16h16v16h16v16h16v16z" fill="#b9c8a8"/>
+      <path d="M192 55v96m16-96v96m16-96v96m16-96v96m16-96v96m-80-80h96m-96 16h96m-96 16h96m-96 16h96m-96 16h96" stroke="#6d805f" strokeWidth=".7" opacity=".55"/>
+      <path d="M163 50V29h21m96 0h21v21m0 100v21h-21m-96 0h-21v-21" stroke="var(--feature-wine)" strokeWidth="2"/>
+    </>}
+    {kind === 'storage' && <>
+      <ellipse cx="163" cy="169" rx="82" ry="7" fill="#000" opacity=".25"/>
+      <g transform="rotate(-13 124 99)"><MicroSD x={81} y={37} color="#51594a"/></g>
+      <g transform="rotate(9 190 91)"><MicroSD x={149} y={26}/></g>
+      <path d="M239 45h15m-7-7v14M66 134h9" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round"/>
+    </>}
+    {kind === 'dump' && <>
+      <g transform="translate(26 30)">
+        <path d="M10 0h71v9h13v116H0V9h10z" fill="var(--feature-shell)" stroke="#d2d2c7" strokeWidth="1.5"/>
+        <path d="M10 22h74M10 29h74M10 36h74" stroke="#878c7f"/>
+        <rect x="11" y="48" width="72" height="57" rx="3" fill="var(--feature-wine)"/>
+        <path d="M24 93l13-21 13 14 11-25 12 32z" fill="#b17b89"/>
+        <path d="M42 114h10l-5 5z" fill="#72786b"/>
+      </g>
+      <path d="M136 92h53m-10-10 10 10-10 10" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M137 113h4m8 0h4m8 0h4m8 0h4" stroke="#8b947c" strokeWidth="3"/>
+      <MicroSD x={211} y={38}/>
     </>}
     {kind === 'link' && <>
       <path d="M93 33V20q0-9 10-9h113q10 0 10 9v13" stroke="#6e7667" strokeWidth="3"/>
@@ -88,13 +125,16 @@ export function FeatureSection({ copy, story }: { copy: typeof siteCopy.en.specs
       <p className={`mono ${styles.eyebrow}`}>{copy.eyebrow}</p>
     </div>
     <div className={styles.grid}>
-      {copy.rows.slice(2).map(([title, description], index) => <article className={styles.card} key={featureKinds[index]}>
-        <div className={styles.visual}>
-          <span className={`mono ${styles.number}`} aria-hidden="true">0{index + 1}</span>
-          <FeatureIllustration kind={featureKinds[index]}/>
-        </div>
-        <div className={styles.copy}><h4>{title}</h4><p>{description}</p></div>
-      </article>)}
+      {featureKinds.map((kind, index) => {
+        const [title, description] = copy.features[kind];
+        return <article className={styles.card} key={kind} data-feature={kind}>
+          <div className={styles.visual}>
+            <span className={`mono ${styles.number}`} aria-hidden="true">0{index + 1}</span>
+            <FeatureIllustration kind={kind}/>
+          </div>
+          <div className={styles.copy}><h4>{title}</h4><p>{description}</p></div>
+        </article>;
+      })}
     </div>
     <p className={styles.note}>{copy.note}</p>
   </section>;
