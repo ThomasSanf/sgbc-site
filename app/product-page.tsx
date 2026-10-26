@@ -2,9 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { ArrowDown, ArrowUpRight, ArrowUp, Plus, RotateCcw } from 'lucide-react';
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { WishlistButton } from '@/components/wishlist-button';
 import { FeatureSection } from '@/components/feature-section';
@@ -12,6 +11,7 @@ import type { ConsoleView } from './console-scene';
 import { languageStorageKey, siteCopy, type Locale } from '@/lib/site-copy';
 import { salesPolicy } from '@/lib/sales-policy';
 import { VisitorPrivacy } from '@/components/visitor-tracker';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 const ConsoleScene = dynamic(() => import('./console-scene'), { ssr: false });
 function LazyScene({ view, resetKey, locale }: { view: ConsoleView; resetKey: number; locale: Locale }) {
@@ -27,26 +27,16 @@ function LazyScene({ view, resetKey, locale }: { view: ConsoleView; resetKey: nu
   return <div className="lazy-scene" ref={host}>{ready && <ConsoleScene view={view} resetKey={resetKey} locale={locale} dark />}</div>;
 }
 
-export default function ProductPage({ locale = 'en' }: { locale?: Locale }) {
-  const router = useRouter();
+export default function ProductPage({ locale = 'en', allowFrench = false }: { locale?: Locale; allowFrench?: boolean }) {
   const [detailView, setDetailView] = useState<ConsoleView>('hero');
   const [detailReset, setDetailReset] = useState(0);
   const copy = siteCopy[locale];
   const views = copy.views;
 
-  const nextLocale: Locale = locale === 'en' ? 'zh-TW' : 'en';
-  const nextHome = nextLocale === 'en' ? '/' : '/zh-TW/';
-
   useEffect(() => {
     document.documentElement.lang = locale;
     try { localStorage.setItem(languageStorageKey, locale); } catch { /* The URL remains the language source when storage is unavailable. */ }
   }, [locale]);
-
-  function switchLanguage(event: MouseEvent<HTMLAnchorElement>) {
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    event.preventDefault();
-    router.push(nextHome + window.location.hash, { scroll: false });
-  }
 
   return <div lang={locale}>
     <a className="skip-link" href="#main">{copy.skip}</a>
@@ -54,7 +44,7 @@ export default function ProductPage({ locale = 'en' }: { locale?: Locale }) {
       <a className="wordmark" href="#console" aria-label={copy.home}>sgbc<span>™</span></a>
       <nav aria-label={copy.nav.label}><a href="#console">{copy.nav.console} <sup>01</sup></a><a href="#specs">{copy.nav.specs} <sup>02</sup></a><a href="#design">{copy.nav.design} <sup>03</sup></a></nav>
       <div className="header-actions">
-        <Link className="language-toggle" href={nextHome} onClick={switchLanguage} lang={nextLocale} hrefLang={nextLocale} aria-label={locale === 'en' ? '切換至繁體中文（台灣）' : 'Switch to English'}>{locale === 'en' ? '中' : 'EN'}</Link>
+        <LanguageSwitcher locale={locale} allowFrench={allowFrench}/>
         <WishlistButton className="header-preorder" locale={locale}/>
       </div>
     </header>

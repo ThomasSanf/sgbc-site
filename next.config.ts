@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: { '/api/store/order-receipt': ['./assets/fonts/NotoSansTC-Regular.otf'] },
   async redirects() {
     // Move browser pages to the custom domain; keep existing payment callbacks reachable.
-    return ['/', '/zh-TW', '/admin/:path*', '/sales-policy/:path*', '/checkout/:path*'].map(source => ({
+    return ['/', '/zh-TW', '/fr/:path*', '/admin/:path*', '/sales-policy/:path*', '/checkout/:path*'].map(source => ({
       source, has: [{ type: 'host' as const, value: 'sgbc-site.vercel.app' }],
       destination: `https://www.sgbc.tw${source}`, permanent: false,
     }));

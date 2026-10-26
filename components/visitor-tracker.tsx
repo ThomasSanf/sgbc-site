@@ -64,21 +64,42 @@ export function VisitorTracker() {
   return null;
 }
 
+const privacyCopy = {
+  en: {
+    title: 'Privacy choices',
+    description: 'We count unique visitors using a random ID stored in this browser for up to 180 days. Our server retains its hashed value, visit dates, and the approximate country supplied by our hosting provider based on the IP address for the last 30 days. Visitor records are not linked to orders, and raw IP addresses are not stored for analytics. You can turn this counting off.',
+    turnOff: 'Turn off visitor counting', turnOn: 'Turn on visitor counting', disabled: 'Visitor counting is disabled',
+    browser: 'Your browser’s privacy preference is respected.',
+  },
+  'zh-TW': {
+    title: '隱私選項',
+    description: '我們使用儲存在此瀏覽器的隨機識別碼統計不重複訪客。識別碼最長保留 180 天；伺服器保留最近 30 天的雜湊識別碼、造訪日期，以及由網站代管服務根據 IP 位址推估的國家，不將訪客紀錄連結至訂單，也不儲存原始 IP 位址。你可以關閉這項統計。',
+    turnOff: '關閉訪客統計', turnOn: '開啟訪客統計', disabled: '訪客統計已停用',
+    browser: '已遵循瀏覽器的隱私設定。',
+  },
+  fr: {
+    title: 'Préférences de confidentialité',
+    description: 'Nous comptons les visiteurs uniques à l’aide d’un identifiant aléatoire conservé dans ce navigateur pendant 180 jours au maximum. Notre serveur conserve sa valeur hachée, les dates de visite et le pays approximatif fourni par notre hébergeur à partir de l’adresse IP pour les 30 derniers jours. Les données de visite ne sont pas liées aux commandes et les adresses IP brutes ne sont pas conservées à des fins statistiques. Vous pouvez désactiver ce comptage.',
+    turnOff: 'Désactiver le comptage des visiteurs', turnOn: 'Activer le comptage des visiteurs', disabled: 'Le comptage des visiteurs est désactivé',
+    browser: 'La préférence de confidentialité de votre navigateur est respectée.',
+  },
+} as const;
+
 export function VisitorPrivacy({ locale }: { locale: Locale }) {
   const state = useSyncExternalStore(subscribe, preference, (): Preference => 'unavailable');
-  const zh = locale === 'zh-TW';
+  const copy = privacyCopy[locale];
   return <details className="visitor-privacy">
-    <summary className="disclosure-summary"><ChevronRight size={16} aria-hidden="true"/>{zh ? '隱私選項' : 'Privacy choices'}</summary>
+    <summary className="disclosure-summary"><ChevronRight size={16} aria-hidden="true"/>{copy.title}</summary>
     <div>
-      <p>{zh ? '我們使用儲存在此瀏覽器的隨機識別碼統計不重複訪客。識別碼最長保留 180 天；伺服器保留最近 30 天的雜湊識別碼、造訪日期，以及由網站代管服務根據 IP 位址推估的國家，不將訪客紀錄連結至訂單，也不儲存原始 IP 位址。你可以關閉這項統計。' : 'We count unique visitors using a random ID stored in this browser for up to 180 days. Our server retains its hashed value, visit dates, and the approximate country supplied by our hosting provider based on the IP address for the last 30 days. Visitor records are not linked to orders, and raw IP addresses are not stored for analytics. You can turn this counting off.'}</p>
+      <p>{copy.description}</p>
       <button type="button" disabled={state === 'browser' || state === 'unavailable'} onClick={() => {
         try {
           localStorage.setItem(VISITOR_OPTOUT_KEY, state === 'on' ? '1' : '0');
           if (state === 'on') localStorage.removeItem(VISITOR_ID_KEY);
           window.dispatchEvent(new Event(VISITOR_PREFERENCE_EVENT));
         } catch { /* Blocked storage also disables collection. */ }
-      }}>{state === 'on' ? zh ? '關閉訪客統計' : 'Turn off visitor counting' : state === 'off' ? zh ? '開啟訪客統計' : 'Turn on visitor counting' : zh ? '訪客統計已停用' : 'Visitor counting is disabled'}</button>
-      {state === 'browser' && <small>{zh ? '已遵循瀏覽器的隱私設定。' : 'Your browser’s privacy preference is respected.'}</small>}
+      }}>{state === 'on' ? copy.turnOff : state === 'off' ? copy.turnOn : copy.disabled}</button>
+      {state === 'browser' && <small>{copy.browser}</small>}
     </div>
   </details>;
 }

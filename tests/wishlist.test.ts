@@ -22,15 +22,15 @@ before(async () => { await migrate(db, { migrationsFolder: './drizzle' }); });
 after(() => db.$client.close());
 
 void test('wishlist validates email, locale, length and unexpected fields', () => {
-  for (const value of [{ email: 'invalid', locale: 'en' }, { email: 'x@example.test', locale: 'fr' }, { email: 'a'.repeat(255) + '@example.test', locale: 'en' }, { email: 'x@example.test', locale: 'en', admin: true }]) assert.equal(wishlistInput.safeParse(value).success, false);
+  for (const value of [{ email: 'invalid', locale: 'en' }, { email: 'x@example.test', locale: 'de' }, { email: 'a'.repeat(255) + '@example.test', locale: 'en' }, { email: 'x@example.test', locale: 'en', admin: true }]) assert.equal(wishlistInput.safeParse(value).success, false);
 });
 void test('joining normalizes and deduplicates emails without altering orders or stock', async () => {
   const initialOrders = await db.select().from(orders), initialProducts = await db.select().from(products);
-  const first = await joinWishlist(db, { email: '  Person@Example.test  ', locale: 'zh-TW' });
+  const first = await joinWishlist(db, { email: '  Person@Example.test  ', locale: 'fr' });
   const second = await joinWishlist(db, { email: 'person@example.test', locale: 'en' });
   assert.deepEqual(first, second);
   const entries = await db.select().from(wishlist);
-  assert.equal(entries.length, 1); assert.equal(entries[0].email, 'person@example.test'); assert.equal(entries[0].locale, 'zh-TW');
+  assert.equal(entries.length, 1); assert.equal(entries[0].email, 'person@example.test'); assert.equal(entries[0].locale, 'fr');
   assert.equal(entries[0].consentVersion, '2026-10-26');
   assert.equal((await db.select().from(auditEvents)).filter(row => row.action === 'wishlist.joined').length, 1);
   assert.deepEqual(await db.select().from(orders), initialOrders); assert.deepEqual(await db.select().from(products), initialProducts);

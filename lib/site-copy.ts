@@ -1,6 +1,6 @@
 import type { ConsoleView } from '@/app/console-scene';
 
-export type Locale = 'en' | 'zh-TW';
+export type Locale = 'en' | 'zh-TW' | 'fr';
 export const languageStorageKey = 'sgbc-language';
 
 const en = {
@@ -170,4 +170,88 @@ const zhTW: typeof en = {
   },
 };
 
-export const siteCopy = { en, 'zh-TW': zhTW };
+const fr: typeof en = {
+  meta: {
+    title: 'SGBC | Console FPGA pour Game Boy, Game Boy Color et GBA',
+    description: 'Découvrez SGBC, une console FPGA en développement pour vos cartouches Game Boy, Game Boy Color et Game Boy Advance, avec sortie HDMI 1080p et mise à l’échelle entière.',
+  },
+  skip: 'Aller au contenu',
+  home: 'Accueil SGBC',
+  nav: { label: 'Navigation principale', console: 'Console', design: 'Design', specs: 'Fonctions' },
+  preorder: {
+    button: 'Précommander', eyebrow: 'SGBC / PREMIÈRE ÉDITION', title: 'Faites de la place', subtitle: 'aux classiques.',
+    description: 'Précommandez votre console SGBC. Payez par carte en toute sécurité avec ECPay.',
+    finish: 'Gris classique · Noir · Bordeaux', perUnit: 'par console',
+    shippingDate: 'Il s’agit d’une précommande. Aucune date d’expédition estimée n’a encore été annoncée.',
+    loading: 'Vérification des disponibilités…', loadFailed: 'Impossible de charger les disponibilités.', retry: 'Réessayer',
+    soldOut: 'Ce lot est entièrement réservé.', closedTitle: 'Les précommandes ouvriront bientôt.',
+    closedDescription: 'Le paiement n’est pas encore ouvert. Les frais de livraison seront affichés avant le paiement.',
+    name: 'Nom du destinataire', email: 'E-mail', phone: 'Téléphone', quantity: 'Quantité', city: 'Ville / comté',
+    postalCode: 'Code postal', address: 'Adresse de livraison', subtotal: 'Consoles', shipping: 'Livraison', total: 'Total',
+    country: 'Pays', countries: { TW: 'Taïwan', JP: 'Japon — Bientôt', SG: 'Singapour — Bientôt', FR: 'France — Bientôt' },
+    district: 'District / commune', selectCity: 'Choisir une ville / un comté', selectDistrict: 'Choisir un district / une commune',
+    acknowledgement: 'Je comprends qu’il s’agit d’une précommande payante et qu’aucune date d’expédition estimée n’a été annoncée.',
+    pay: 'Continuer vers le paiement par carte', connecting: 'Préparation du paiement…', privacy: 'ECPay traite vos données de carte en toute sécurité. Nous utilisons vos coordonnées pour gérer votre commande.',
+    stepsLabel: 'Étapes de la commande', detailsStep: 'Coordonnées de livraison', paymentStep: 'Paiement', paymentTitle: 'Paiement par carte', shipTo: 'LIVRER À', editDetails: 'Modifier les coordonnées',
+    paymentLoading: 'Chargement du formulaire de paiement sécurisé…', paymentLoadFailed: 'Le formulaire de paiement sécurisé n’a pas pu être chargé. Réessayez ou actualisez la page.',
+    paymentInvalid: 'Vérifiez les données de carte signalées dans le formulaire de paiement.', paymentEditFailed: 'Impossible de rouvrir vos coordonnées. Réessayez ; si le paiement a commencé, vérifiez d’abord sa confirmation.',
+    paymentExpired: 'Cette session de paiement a expiré. Cliquez sur « Modifier les coordonnées » pour rouvrir la commande avant de payer.',
+    paymentUncertain: 'Votre paiement est en cours de confirmation. Vérifiez la confirmation avant de passer une autre commande.',
+    processingPayment: 'Traitement du paiement…', payNow: 'Payer', viewConfirmation: 'Voir la confirmation',
+    embeddedPrivacy: 'Vos données de carte sont transmises directement à ECPay. Votre banque peut vous demander de valider le paiement sur une autre page.',
+    rateLimited: 'Patientez une minute avant de réessayer.', changed: 'Les disponibilités ou les prix ont changé. Vérifiez votre commande et réessayez.',
+    invalid: 'Vérifiez vos coordonnées et votre adresse de livraison.', failed: 'Impossible d’ouvrir le paiement. Réessayez avec les mêmes coordonnées.',
+    sandbox: 'Paiement de test · Aucun paiement réel ne sera effectué.',
+    testCard: 'Utilisez uniquement cette carte de test', testDetails: 'Expiration 12/30 · CVV 123 · Code 3D 1234. Ne saisissez pas de vraie carte bancaire.',
+    close: 'Retour à la console',
+  },
+  hero: {
+    eyebrow: 'MATÉRIEL INDÉPENDANT / SENSATIONS FAMILIÈRES', revision: 'CONSOLE FPGA — REV C',
+    title: 'L’âme d’hier.', subtitle: 'Le cœur d’aujourd’hui.',
+    intro: ['Vos cartouches. Votre grand écran.', 'Une console FPGA pour les jeux', ' qui ne vous ont jamais quittés.'],
+    explore: 'Découvrir les fonctions', label: 'LA CONSOLE', study: 'ÉTUDE DU BOÎTIER / 001',
+  },
+  story: {
+    eyebrow: 'LE PLAISIR DU RITUEL', title: 'Gardez les cartouches.', lead: 'Changez les ', accent: 'possibilités.',
+    alt: 'Trois cartouches Game Boy et Game Boy Color en suspension, dans des coques translucides incolore, bleue et bordeaux.',
+    description: 'Le clic d’une cartouche. Une manette que l’on connaît par cœur. SGBC met le matériel programmable au service d’une console pensée pour trois générations de classiques portables.',
+    systems: 'Familles de cartouches prévues',
+  },
+  design: {
+    eyebrow: '03 / L’OBJET', colors: 'GRIS CLASSIQUE. NOIR. BORDEAUX.',
+    title: 'Chaque angle.', subtitle: 'Chaque détail.', intro: 'Explorez l’étude du boîtier.', detail: 'De l’extérieur à l’intérieur.',
+    angles: 'Angle de vue de la console', study: 'ÉTUDE DU BOÎTIER / ASSEMBLAGE', drag: 'FAITES GLISSER POUR TOURNER', reset: 'Réinitialiser la vue détaillée',
+    gray: 'Gris', black: 'Noir', bordeaux: 'Bordeaux',
+  },
+  views: [
+    { id: 'hero', label: 'Vue d’ensemble', title: 'Une silhouette familière.\nUn caractère bien à elle.', description: 'Du gris chaud au-dessus. Du noir en dessous. Du bordeaux sur les détails que vous touchez. Un écrin compact pour les cartouches que vous avez gardées.' },
+    { id: 'top', label: 'Dessus', title: 'Le rituel\ncommence ici.', description: 'Un port cartouche vertical, des boutons d’alimentation et de réinitialisation dédiés, une surface épurée. Des choses simples, avec l’espace qu’elles méritent.' },
+    { id: 'rear', label: 'Connexions', title: 'Place au\ngrand écran.', description: 'Explorez les ouvertures HDMI et USB-C de cette étude du boîtier. La connexion d’une manette familière complète l’installation.' },
+    { id: 'inside', label: 'Vue en coupe', title: 'Soulevez\nle capot.', description: 'Découvrez une première version de l’assemblage du boîtier : support de cartouche, commandes et emplacement de la carte mère.' },
+  ],
+  specs: {
+    eyebrow: 'À VOUS DE JOUER', title: 'Format compact.', subtitle: 'Matériel authentique.', revision: 'REV C / EN DÉVELOPPEMENT',
+    features: {
+      display: ['Jouez sur grand écran', 'Branchez votre téléviseur ou votre moniteur à la sortie HDMI 1080p. Donnez à vos classiques portables toute la place qu’ils méritent.'],
+      upscaling: ['Des pixels toujours nets', 'Agrandissez l’image du jeu par multiples entiers. Cette mise à l’échelle conserve la netteté des pixels et les proportions d’origine.'],
+      link: ['Connexion par port Link', 'Reliez une console portable compatible avec le câble Link adapté pour jouer à plusieurs et faire des échanges dans les jeux qui le permettent.'],
+      speed: ['À votre rythme', 'Alternez entre vitesse normale et avance rapide pour traverser plus vite les passages que vous connaissez déjà.'],
+      controller: ['Des commandes familières', 'Branchez une manette SNES. Réglez l’affichage et la vitesse du jeu depuis le menu à l’écran.'],
+      storage: ['Votre collection sur microSD', 'Conservez votre bibliothèque de ROM sur une carte microSD et choisissez votre jeu depuis le menu à l’écran.'],
+      dump: ['De la cartouche à la microSD', 'Insérez votre cartouche et copiez sa ROM directement sur une carte microSD. Gardez une sauvegarde numérique des jeux de votre collection.'],
+      firmware: ['Mises à jour du firmware', 'Gardez votre SGBC à jour. Installez les nouvelles versions du firmware à leur sortie pour profiter des améliorations et des corrections au fil du temps.'],
+    },
+    note: 'SGBC est en développement. La compatibilité des jeux, la prise en charge des câbles Link et les fonctions définitives sont encore en cours de validation.',
+  },
+  closing: { eyebrow: 'UN NOUVEAU FOYER POUR VOS CLASSIQUES.', title: 'Toujours dans le jeu.', project: 'SGBC / UN PROJET INDÉPENDANT', tagline: 'POUR LES JEUX QUI RESTENT.' },
+  footer: { trademarks: 'Game Boy, Game Boy Color et Game Boy Advance sont des marques de Nintendo.', independent: 'SGBC est un projet indépendant, sans affiliation avec Nintendo.', top: 'RETOUR EN HAUT' },
+  viewer: {
+    hero: 'Console SGBC : faites défiler la page pour la faire tourner. Sur ordinateur, faites glisser la souris ou maintenez les touches fléchées ; relâchez pour revenir à la position initiale.',
+    console: 'Console SGBC interactive : faites glisser la souris ou un doigt, ou utilisez les touches fléchées pour la faire tourner.',
+    pcb: 'Carte mère SGBC Rev C IT6263 interactive : faites glisser la souris ou un doigt, ou utilisez les touches fléchées pour la faire tourner.',
+    alt: 'Console SGBC avec coque gris classique, base noire et commandes bordeaux uni.',
+    loading: 'Les détails prennent forme', errorTitle: 'Voici SGBC.', error: 'La vue 3D n’a pas pu être chargée. Vous pouvez découvrir les détails de la console ci-dessous.', retry: 'Réessayer',
+  },
+};
+
+export const siteCopy = { en, 'zh-TW': zhTW, fr };

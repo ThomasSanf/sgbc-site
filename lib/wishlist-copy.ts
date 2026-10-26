@@ -8,6 +8,15 @@ export const wishlistCopy = {
     error: 'We couldn’t save your email. Please try again.', limited: 'Too many attempts. Please wait a minute and try again.',
     close: 'Back to the console',
   },
+  fr: {
+    button: 'Liste d’envies', eyebrow: 'SGBC / LISTE D’ENVIES', title: 'Faites de la place', subtitle: 'aux classiques.',
+    description: 'Laissez votre adresse e-mail pour être informé de l’ouverture des commandes SGBC.',
+    email: 'Adresse e-mail', submit: 'Rejoindre la liste', submitting: 'Inscription…',
+    privacy: 'En vous inscrivant, vous acceptez de recevoir les e-mails de SGBC sur la disponibilité de la console. Aucun paiement n’est demandé et aucune console n’est réservée.',
+    successTitle: 'Vous êtes sur la liste.', success: 'Votre inscription est enregistrée. Nous vous écrirons dès qu’il y aura du nouveau sur l’ouverture des commandes SGBC.',
+    error: 'Impossible d’enregistrer votre adresse e-mail. Veuillez réessayer.', limited: 'Trop de tentatives. Patientez une minute avant de réessayer.',
+    close: 'Retour à la console',
+  },
   'zh-TW': {
     button: '願望清單', eyebrow: 'SGBC / 願望清單', title: '為經典，', subtitle: '留個位置。',
     description: '留下電子郵件，SGBC 開放訂購時搶先收到通知。',

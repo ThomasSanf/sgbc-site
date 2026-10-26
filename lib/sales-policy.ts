@@ -37,4 +37,23 @@ export const salesPolicy = {
       { title: '消費者造成的損壞', paragraphs: ['因不當使用、交付後的意外損壞或改裝所造成的損壞，不屬於製造瑕疵。任何付費維修均須事先取得消費者同意。此規定不排除與上述行為無關的瑕疵責任，也不限制消費者的法定權利。'] },
     ],
   },
+  fr: {
+    title: 'Conditions de vente',
+    introduction: 'Retours, annulations et livraison des consoles SGBC.',
+    updated: 'En vigueur depuis le 25 octobre 2026',
+    back: 'Retour à SGBC', language: 'English', read: 'Lire les conditions de vente',
+    full: 'Consulter les conditions complètes (nouvel onglet)', accept: 'J’ai lu et j’accepte les conditions de vente.',
+    required: 'Veuillez lire et accepter les conditions de vente avant de procéder au paiement.',
+    rights: 'Ces conditions ne limitent pas vos droits impératifs au titre des lois applicables en matière de protection des consommateurs.',
+    sections: [
+      { title: 'Contrôle qualité', paragraphs: ['Chaque console SGBC est inspectée et soumise à des tests de fonctionnement individuellement avant son expédition.'] },
+      { title: 'Retours et annulations', paragraphs: [
+        'SGBC ne propose pas de retours ou d’échanges pour simple changement d’avis au-delà de ceux exigés par la législation applicable. Pour les achats en ligne éligibles livrés à Taïwan, les clients peuvent se rétracter dans le délai légal de sept jours en retournant les produits ou en adressant une notification écrite, y compris par e-mail. Aucun frais d’annulation, de traitement ou de retour ne s’applique à l’exercice valide du droit légal de rétractation.',
+        'Veuillez retourner la console avec les accessoires et la documentation fournis. L’ouverture de l’emballage pour procéder aux vérifications nécessaires ne vous prive pas, à elle seule, de votre droit de rétractation.',
+      ] },
+      { title: 'Produits défectueux ou non conformes à la commande', paragraphs: ['Si votre console arrive défectueuse, incomplète ou différente de celle commandée, contactez SGBC en indiquant votre numéro de commande et en décrivant le problème. Nous examinerons le problème et apporterons la solution requise par la législation applicable. Les tests effectués avant l’expédition ne limitent pas ces droits.'] },
+      { title: 'Dommages ou perte pendant la livraison', paragraphs: ['Si votre colis arrive endommagé ou semble perdu, contactez rapidement SGBC. Veuillez conserver l’emballage et, si possible, fournir des photographies pour faciliter nos vérifications. SGBC assurera la coordination avec le transporteur et organisera une résolution appropriée. Les clients ne sont pas tenus d’obtenir une indemnisation du transporteur avant de faire valoir leurs droits auprès de SGBC.'] },
+      { title: 'Dommages causés par le client', paragraphs: ['Les dommages résultant d’une utilisation inappropriée, d’un accident survenu après la livraison ou de modifications ne constituent pas un défaut de fabrication. Toute réparation payante nécessitera l’accord du client. Cela n’exclut pas les défauts sans rapport avec ces causes ni les droits impératifs des consommateurs.'] },
+    ],
+  },
 } as const;

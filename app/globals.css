@@ -282,3 +282,16 @@ details[open]>.disclosure-summary>svg { transform:rotate(90deg); }
 .sales-policy-back { margin-top:40px; }
 @media (max-width:460px) { .sales-policy-header { padding:18px; } .sales-policy-document { padding:40px 22px 56px; } .sales-policy-introduction { font-size:16px; } .sales-policy-content p { font-size:15px; } }
 @media print { .sales-policy-page { background:white; color:black; } .sales-policy-page p { color:black; } .sales-policy-header,.sales-policy-back { display:none; } .sales-policy-document { padding:0; max-width:none; } .sales-policy-content section { break-inside:avoid; } }
+
+/* Country-specific language choices retain the compact mobile header. */
+.language-select { text-align:center; text-align-last:center; cursor:pointer; }
+.language-select option { background:#11130e; color:#efefe7; }
+.hero-copy h1:lang(fr) { font-size:clamp(50px,5.6vw,108px); }
+.hero-copy h1:lang(fr) span { white-space:normal; }
+@media (max-width:760px) {
+  .hero-copy h1:lang(fr) { font-size:clamp(38px,10vw,64px); }
+  .header-preorder:lang(fr) { padding-inline:12px; font-size:12px; }
+  .hero-actions:lang(fr) { flex-wrap:wrap; }
+  .view-tabs[data-slot='tabs-list']:lang(fr) { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; }
+  .view-tabs:lang(fr) [data-slot='tabs-trigger']:nth-child(odd) { border-left:1px solid var(--line); }
+}

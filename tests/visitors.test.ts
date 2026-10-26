@@ -95,11 +95,12 @@ void test('repeated public beacons count once and do not disclose analytics or r
     assert.match(response.headers.get('cache-control') ?? '', /no-store/);
   }
   assert.equal((await visitorStats(db)).today, 1);
-  for (const path of ['/zh-TW', '/zh-TW/', '/sales-policy/zh-TW/']) {
+  for (const path of ['/zh-TW', '/zh-TW/', '/sales-policy/zh-TW/', '/fr', '/fr/', '/sales-policy/fr/']) {
     assert.equal(isPublicPage(path), true);
     assert.equal((await POST(visit({ ...payload, path }))).status, 204);
   }
   assert.equal(isPublicPage('/zh-TW/admin/'), false);
+  assert.equal(isPublicPage('/fr/admin/'), false);
   assert.equal((await visitorStats(db)).today, 1);
 });
 
