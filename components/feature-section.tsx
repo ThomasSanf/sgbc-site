@@ -21,6 +21,42 @@ function Handheld({ x, y, color = 'var(--feature-shell)' }: { x: number; y: numb
   </g>;
 }
 
+function SgbcConsole({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
+  return <g transform={`translate(${x} ${y}) scale(${scale})`}>
+    <ellipse cx="120" cy="123" rx="112" ry="7" fill="#000" opacity=".25"/>
+    <path d="M0 44 78 81v34q0 8-9 4L10 90Q0 85 0 75z" fill="#222320" stroke="#46483f" strokeWidth="1.2"/>
+    <path d="m78 81 158-44v38q0 8-10 11L88 124q-10 3-10-9z" fill="#292a26" stroke="#46483f" strokeWidth="1.2"/>
+    <path d="M0 44 78 81v28L10 77Q0 73 0 64z" fill="#b4b4a8"/>
+    <path d="m78 81 158-44v27q0 8-10 11L88 113q-10 3-10-9z" fill="#c8c8bc"/>
+    <path d="M9 35 151 1q9-2 17 2l59 27q13 6 2 12L88 81q-10 3-18-1L8 51q-14-8 1-16Z" fill="#d0cfc3" stroke="#dfded3" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="m0 49 70 33q8 4 18 1l141-39" stroke="#e2e1d7" strokeWidth="1" opacity=".5"/>
+    <g transform="matrix(1 -.27 1 .47 37 29)">
+      <rect width="100" height="21" rx="3" fill="#5c2e3b"/>
+      <rect y="-3" width="100" height="21" rx="3" fill="var(--feature-wine)" stroke="#9b6170" strokeWidth="1.5"/>
+      <path d="M7 3h86v9H7z" fill="#302a2a"/>
+      <path d="M7 12h86v3H7z" fill="#b4aa9f"/>
+    </g>
+    <g transform="matrix(1 -.28 1 .47 152 49)" fill="var(--feature-wine)" stroke="#9b6170" strokeWidth="1.2">
+      <rect width="20" height="17" rx="2"/><rect x="29" width="20" height="17" rx="2"/>
+    </g>
+    <g transform="matrix(1 -.28 0 1 78 81)">
+      <rect x="22" y="7" width="67" height="25" rx="4" fill="var(--feature-wine)" stroke="#9b6170" strokeWidth="1.2"/>
+      <rect x="27" y="11" width="57" height="17" rx="2" fill="#747b7a"/>
+      <path d="M31 15h28v10H31zm32 0h17v10H63z" fill="#343c40"/>
+      <path d="M35 16v3m8-3v3m8-3v3m17-3v3m8-3v3" stroke="#d5cda9" strokeWidth="2"/>
+      <rect x="108" y="7" width="33" height="25" rx="4" fill="var(--feature-wine)" stroke="#9b6170" strokeWidth="1.2"/>
+      <path d="M117 17h3v-3h9v3h3v8h-15z" fill="#b9c0bd"/>
+      <path d="M120 18h9v4h-9z" fill="#303a3a"/>
+    </g>
+    <g transform="matrix(1 .48 0 1 17 56)">
+      <rect width="29" height="26" rx="3" fill="var(--feature-wine)" stroke="#a26d79" strokeWidth="1.2"/>
+      <path d="M5 6h19v14H5z" fill="#492c36"/><path d="M7 20h15" stroke="#b5838e"/>
+    </g>
+    <g transform="matrix(1 -.28 1 .47 75 58)"><text fontSize="8" fontFamily="Arial, sans-serif" fontWeight="700" letterSpacing="1" fill="#a6a69a">SGBC</text></g>
+    <ellipse cx="210" cy="39" rx="2.2" ry="1.3" fill="#d5e3b7"/><ellipse cx="216" cy="37" rx="2.2" ry="1.3" fill="#e8d6a5"/>
+  </g>;
+}
+
 function MicroSD({ x, y, color = 'var(--feature-wine)' }: { x: number; y: number; color?: string }) {
   return <g transform={`translate(${x} ${y})`}>
     <path d="M20 0h52q8 0 8 8v98q0 8-8 8H8q-8 0-8-8V20z" fill={color} stroke="#a98c91" strokeWidth="1.5"/>
@@ -72,25 +108,18 @@ function FeatureIllustration({ kind }: { kind: FeatureKind }) {
       <MicroSD x={211} y={38}/>
     </>}
     {kind === 'firmware' && <>
-      <ellipse cx="160" cy="168" rx="107" ry="7" fill="#000" opacity=".25"/>
-      <path d="M60 110h200v40q0 12-12 12H72q-12 0-12-12z" fill="#272a25" stroke="#565c50" strokeWidth="1.5"/>
-      <path d="m78 83-18 27v27q0 10 12 10h176q12 0 12-10v-27l-18-27q-4-6-13-6H91q-9 0-13 6z" fill="var(--feature-shell)" stroke="var(--feature-edge)" strokeWidth="1.5"/>
-      <path d="M60 110h200" stroke="#7f8776" strokeWidth="1.5"/>
-      <path d="M89 92h64l4 9H85z" fill="var(--feature-wine)"/>
-      <rect x="81" y="120" width="57" height="16" rx="3" fill="var(--feature-wine)"/>
-      <path d="M90 128h9m8 0h9m8 0h5" stroke="#a3ad94" strokeWidth="3"/>
-      <rect x="188" y="93" width="13" height="7" rx="2" fill="var(--feature-wine)"/><rect x="208" y="93" width="13" height="7" rx="2" fill="var(--feature-wine)"/>
-      <circle cx="243" cy="126" r="3" fill="var(--accent)"/>
-      <path d="M119 64a43 43 0 1 1 77 0" stroke="#647058" strokeWidth="3" strokeLinecap="round"/>
-      <path d="m187 65 10 1 3-10" stroke="#a7b594" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M160 65V24m-13 13 13-13 13 13" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+      <SgbcConsole x={50} y={64} scale={.92}/>
+      <g transform="translate(0 3)"><path d="M132 56a35 35 0 1 1 58 0" stroke="#647058" strokeWidth="3" strokeLinecap="round"/>
+      <path d="m181 56 10 2 3-10" stroke="#a7b594" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M161 56V19m-12 12 12-12 12 12" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></g>
     </>}
     {kind === 'link' && <>
-      <path d="M93 33V20q0-9 10-9h113q10 0 10 9v13" stroke="#6e7667" strokeWidth="3"/>
-      <path d="M124 99h72m-10-7 10 7-10 7m-52-14-10 7 10 7" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <Handheld x={60} y={33}/><Handheld x={193} y={33} color="#959c88"/>
-      <path d="M87 30h12m121 0h12" stroke="#c0c3b6" strokeWidth="5"/>
-      <circle cx="159" cy="11" r="4" fill="var(--accent)"/>
+      <Handheld x={18} y={28}/>
+      <SgbcConsole x={118} y={60} scale={.76}/>
+      <path d="M85 78h10q11 0 11 11v76q0 12 12 12h143q12 0 12-12v-51" stroke="#7e8971" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="80" y="73" width="9" height="10" rx="2" fill="#454d40" stroke="#a6ad98" strokeWidth="1.2"/>
+      <path d="m269 108 8-2v10l-8 2z" fill="#444c42" stroke="#a6ad98" strokeWidth="1.2" strokeLinejoin="round"/>
+      <path d="M160 177h44m-7-6 7 6-7 6m-30-12-7 6 7 6" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </>}
     {kind === 'speed' && <>
       <path d="M82 142a91 91 0 1 1 156 0" stroke="#30352d" strokeWidth="12" strokeLinecap="round"/>
