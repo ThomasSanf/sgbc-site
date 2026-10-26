@@ -2,7 +2,7 @@ import Image from 'next/image';
 import type { siteCopy } from '@/lib/site-copy';
 import styles from './feature-section.module.css';
 
-const featureKinds = ['display', 'upscaling', 'link', 'speed', 'controller', 'storage', 'dump'] as const;
+const featureKinds = ['display', 'upscaling', 'link', 'speed', 'controller', 'storage', 'dump', 'firmware'] as const;
 type FeatureKind = typeof featureKinds[number];
 
 function Dpad({ x, y }: { x: number; y: number }) {
@@ -70,6 +70,20 @@ function FeatureIllustration({ kind }: { kind: FeatureKind }) {
       <path d="M136 92h53m-10-10 10 10-10 10" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M137 113h4m8 0h4m8 0h4m8 0h4" stroke="#8b947c" strokeWidth="3"/>
       <MicroSD x={211} y={38}/>
+    </>}
+    {kind === 'firmware' && <>
+      <ellipse cx="160" cy="168" rx="107" ry="7" fill="#000" opacity=".25"/>
+      <path d="M60 110h200v40q0 12-12 12H72q-12 0-12-12z" fill="#272a25" stroke="#565c50" strokeWidth="1.5"/>
+      <path d="m78 83-18 27v27q0 10 12 10h176q12 0 12-10v-27l-18-27q-4-6-13-6H91q-9 0-13 6z" fill="var(--feature-shell)" stroke="var(--feature-edge)" strokeWidth="1.5"/>
+      <path d="M60 110h200" stroke="#7f8776" strokeWidth="1.5"/>
+      <path d="M89 92h64l4 9H85z" fill="var(--feature-wine)"/>
+      <rect x="81" y="120" width="57" height="16" rx="3" fill="var(--feature-wine)"/>
+      <path d="M90 128h9m8 0h9m8 0h5" stroke="#a3ad94" strokeWidth="3"/>
+      <rect x="188" y="93" width="13" height="7" rx="2" fill="var(--feature-wine)"/><rect x="208" y="93" width="13" height="7" rx="2" fill="var(--feature-wine)"/>
+      <circle cx="243" cy="126" r="3" fill="var(--accent)"/>
+      <path d="M119 64a43 43 0 1 1 77 0" stroke="#647058" strokeWidth="3" strokeLinecap="round"/>
+      <path d="m187 65 10 1 3-10" stroke="#a7b594" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M160 65V24m-13 13 13-13 13 13" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
     </>}
     {kind === 'link' && <>
       <path d="M93 33V20q0-9 10-9h113q10 0 10 9v13" stroke="#6e7667" strokeWidth="3"/>
