@@ -50,6 +50,12 @@ test('authenticated admin can read data, and responses are never cached', async 
   assert.equal(response.status, 200); assert.match(response.headers.get('cache-control') ?? '', /no-store/);
   assert.equal((await response.json()).orderCount, 0);
 });
+test('wishlist emails are restricted to approved admin sessions', async () => {
+  for (const cookie of ['', 'better-auth.session_token=forged']) assert.equal((await GET(req('/api/admin/wishlist/', 'GET', undefined, { cookie }), ctx('wishlist'))).status, 401);
+  const response = await GET(req('/api/admin/wishlist/'), ctx('wishlist'));
+  assert.equal(response.status, 200); assert.match(response.headers.get('cache-control') ?? '', /no-store/);
+  assert.deepEqual(await response.json(), { rows: [], total: 0 });
+});
 
 test('visitor totals are admin-only and signed-in admin storefront visits are excluded', async () => {
   assert.equal((await GET(req('/api/admin/visitors/', 'GET', undefined, { cookie: '' }), ctx('visitors'))).status, 401);

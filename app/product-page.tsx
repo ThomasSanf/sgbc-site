@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ArrowDown, ArrowUpRight, ArrowUp, Plus, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { PreorderButton } from '@/components/preorder-button';
+import { WishlistButton } from '@/components/wishlist-button';
 import type { ConsoleView } from './console-scene';
 import { languageStorageKey, siteCopy, type Locale } from '@/lib/site-copy';
 import { salesPolicy } from '@/lib/sales-policy';
@@ -59,7 +59,7 @@ export default function ProductPage() {
       <nav aria-label={copy.nav.label}><a href="#console">{copy.nav.console} <sup>01</sup></a><a href="#design">{copy.nav.design} <sup>02</sup></a><a href="#specs">{copy.nav.specs} <sup>03</sup></a></nav>
       <div className="header-actions">
         <button type="button" className="language-toggle" onClick={switchLanguage} lang={locale === 'en' ? 'zh-TW' : 'en'} aria-label={locale === 'en' ? '切換至繁體中文（台灣）' : 'Switch to English'}>{locale === 'en' ? '中' : 'EN'}</button>
-        <PreorderButton className="header-preorder" locale={locale}/>
+        <WishlistButton className="header-preorder" locale={locale}/>
       </div>
     </header>
     <main id="main">
@@ -70,7 +70,7 @@ export default function ProductPage() {
             <h1 id="hero-title">{copy.hero.title}<br/><span>{copy.hero.subtitle}</span></h1>
             <div className="hero-intro"><p>{copy.hero.intro[0]}<br/>{copy.hero.intro[1]}<br className="desktop-only"/>{copy.hero.intro[2]}</p></div>
             <div className="hero-actions">
-              <PreorderButton locale={locale}/>
+              <WishlistButton locale={locale}/>
               <a className="text-link" href="#specs">{copy.hero.explore} <ArrowDown size={18}/></a>
             </div>
           </div>

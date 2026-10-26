@@ -31,6 +31,9 @@ void test('ECPay migration preserves populated legacy orders, stock and settings
     await client.execute("INSERT INTO visitor_days (day,visitor_hash) VALUES ('2026-10-25','legacy-hash')");
     for (const statement of readFileSync('drizzle/0004_visitor_countries.sql', 'utf8').split('--> statement-breakpoint')) await client.execute(statement);
     assert.deepEqual((await client.execute('SELECT * FROM visitor_days')).rows[0], { day: '2026-10-25', visitor_hash: 'legacy-hash', country: null });
+    for (const statement of readFileSync('drizzle/0005_cold_masked_marvel.sql', 'utf8').split('--> statement-breakpoint')) await client.execute(statement);
+    assert.equal((await client.execute('SELECT * FROM wishlist')).rows.length, 0);
+    assert.deepEqual((await client.execute('SELECT * FROM visitor_days')).rows[0], { day: '2026-10-25', visitor_hash: 'legacy-hash', country: null });
     assert.deepEqual((await client.execute('SELECT * FROM orders')).rows[0], embedded);
     assert.equal((await client.execute('SELECT reserved FROM products')).rows[0].reserved, 2);
   } finally { client.close(); }

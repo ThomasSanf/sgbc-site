@@ -223,6 +223,11 @@ h2>span { color:var(--muted); }
 .embedded-payment>.preorder-privacy { display:flex; align-items:flex-start; gap:8px; color:var(--muted); font-size:11px; line-height:1.6; }
 .embedded-payment>.preorder-privacy svg { flex-shrink:0; }
 .preorder-submit:disabled { opacity:.45; cursor:not-allowed; }
+.wishlist-form { display:grid; gap:20px; }
+.wishlist-privacy,.wishlist-success p { font-size:14px; color:var(--muted); line-height:1.7; }
+.wishlist-success { margin-top:28px; padding:24px; border:1px solid var(--line); }
+.wishlist-success>svg { color:var(--accent); margin-bottom:16px; }
+.wishlist-success h3 { font-size:24px; margin-bottom:10px; }
 /* Scope documented ECPay classes; let the SDK control its validation, visibility and height. */
 #ECPayPayment { width:100%; font-family:Arial,Helvetica,sans-serif; }
 #ECPayPayment .ecpay-pay-list-wrap { border-radius:0; background:transparent; margin:0; padding:0; }

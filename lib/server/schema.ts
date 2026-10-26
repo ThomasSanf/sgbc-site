@@ -41,6 +41,11 @@ export const preorders = sqliteTable('preorders', {
   status: text('status', { enum: ['new', 'contacted', 'cancelled'] }).notNull().default('new'),
   notes: text('notes').notNull().default(''), createdAt: integer('created_at').notNull(), updatedAt: integer('updated_at').notNull(),
 }, t => [index('preorder_created_idx').on(t.createdAt), check('preorder_quantity_valid', sql`${t.quantity} > 0`)]);
+export const wishlist = sqliteTable('wishlist', {
+  id: text('id').primaryKey(), email: text('email').notNull().unique(),
+  locale: text('locale', { enum: ['en', 'zh-TW'] }).notNull(),
+  consentVersion: text('consent_version').notNull(), createdAt: integer('created_at').notNull(),
+}, t => [index('wishlist_created_idx').on(t.createdAt)]);
 export const orders = sqliteTable('orders', {
   id: text('id').primaryKey(), requestKey: text('request_key').notNull().unique(),
   productId: text('product_id').notNull().references(() => products.id), productName: text('product_name').notNull(), sku: text('sku').notNull(),

@@ -1,4 +1,5 @@
 import { publicSandboxMode } from './sandbox';
+import { STOREFRONT_MODE } from '../storefront-mode';
 
 export function adminEmails() {
   return (process.env.ADMIN_EMAILS ?? '').split(',').map(value => value.trim().toLowerCase()).filter(Boolean);
@@ -33,5 +34,5 @@ export function ecpayConfigured() {
 }
 export function paymentsConfigured() { return paymentProvider() === 'ecpay' ? ecpayConfigured() : stripeConfigured(); }
 export function integrationStatus() {
-  return { google: authConfigured(), stripe: stripeConfigured(), payments: paymentsConfigured(), provider: paymentProvider(), environment: ecpayEnvironment(), publicSandbox: publicSandboxMode(), hostedDatabase: !process.env.DATABASE_URL?.startsWith('file:'), adminEmails: adminEmails() };
+  return { google: authConfigured(), stripe: stripeConfigured(), payments: paymentsConfigured(), provider: paymentProvider(), environment: ecpayEnvironment(), publicSandbox: publicSandboxMode(), hostedDatabase: !process.env.DATABASE_URL?.startsWith('file:'), adminEmails: adminEmails(), storefrontMode: STOREFRONT_MODE, origin: appOrigin() };
 }

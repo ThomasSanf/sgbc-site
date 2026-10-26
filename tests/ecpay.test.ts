@@ -43,7 +43,7 @@ before(async () => {
 });
 after(() => db.$client.close());
 
-test('checkout API rejects missing, unchecked or outdated policy acceptance without reserving stock', async () => {
+test('payment service rejects missing, unchecked or outdated policy acceptance without reserving stock', async () => {
   const before = (await db.select().from(products).where(eq(products.id, productId)))[0].reserved;
   const orderCount = await db.$count(orders), auditCount = await db.$count(auditEvents);
   for (const consent of [
@@ -51,11 +51,7 @@ test('checkout API rejects missing, unchecked or outdated policy acceptance with
     { policyAccepted: false }, { policyAccepted: 'true' },
     { policyVersion: undefined }, { policyVersion: 'outdated-policy' },
   ]) {
-    const response = await checkout(new Request('http://127.0.0.1:3000/api/store/checkout/', {
-      method: 'POST', headers: { 'content-type': 'application/json', origin: 'http://127.0.0.1:3000' },
-      body: JSON.stringify({ ...payload(), ...consent }),
-    }), ctx('checkout'));
-    assert.equal(response.status, 400);
+    await assert.rejects(reserveEcpayCheckout(db, { ...payload(), ...consent }, config));
   }
   assert.equal((await db.select().from(products).where(eq(products.id, productId)))[0].reserved, before);
   assert.equal(await db.$count(orders), orderCount);
@@ -180,13 +176,13 @@ test('sandbox sales cannot inflate real revenue or be fulfilled', async () => {
   await assert.rejects(fulfillOrder(db, 'test', { id: order.id, trackingNumber: 'TEST-NO-SHIP' }));
   assert.equal((await db.select().from(orders).where(eq(orders.id, order.id)))[0].status, 'paid');
 });
-test('public checkout validates origins, requires acknowledgment, and returns a signed card form', async () => {
+test('public checkout validates origins and stays paused while collecting wishlist signups', async () => {
   const request = (body: unknown, origin = 'http://127.0.0.1:3000') => new Request('http://127.0.0.1:3000/api/store/checkout/', { method: 'POST', headers: { 'content-type': 'application/json', origin }, body: JSON.stringify(body) });
   assert.equal((await checkout(request(payload(), 'https://evil.example'), ctx('checkout'))).status, 403);
-  assert.equal((await checkout(request({ ...payload(), acknowledged: false }), ctx('checkout'))).status, 400);
-  const response = await checkout(request(payload()), ctx('checkout')); assert.equal(response.status, 200);
-  const data = await response.json(); assert.equal(data.provider, 'ecpay'); assert.equal(data.fields.ChoosePayment, 'Credit');
-  verifyEcpayFields(data.fields, config);
+  const before = await db.$count(orders);
+  assert.equal((await checkout(request({ ...payload(), acknowledged: false }), ctx('checkout'))).status, 409);
+  assert.equal((await checkout(request(payload()), ctx('checkout'))).status, 409);
+  assert.equal(await db.$count(orders), before);
 });
 test('Taiwan address data covers all administrative areas, including districts sharing postal codes', () => {
   assert.equal(taiwanCities.length, 22);
@@ -245,7 +241,7 @@ test('public sandbox forces test credentials and keeps catalog, inventory, setti
     assert.equal(paymentProvider(), 'ecpay'); assert.equal(ecpayEnvironment(), 'stage');
     assert.deepEqual(ecpayConfig(), publicEcpaySandbox);
     const data = await (await catalog(new Request('http://127.0.0.1:3000/api/store/catalog/'), ctx('catalog'))).json();
-    assert.equal(data.checkoutOpen, true); assert.equal(data.sandbox, true); assert.equal(data.shippingFeePerUnit, 8000);
+    assert.equal(data.checkoutOpen, false); assert.equal(data.mode, 'wishlist'); assert.equal(data.sandbox, true); assert.equal(data.shippingFeePerUnit, 8000);
     assert.deepEqual(data.products.map((p: { id: string }) => p.id), [SANDBOX_PRODUCT_ID]);
     await assert.rejects(reserveEcpayCheckout(db, payload(), publicEcpaySandbox));
     await assert.rejects(reserveEcpayCheckout(db, { ...payload(), productId: SANDBOX_PRODUCT_ID }, config));

@@ -1,6 +1,6 @@
 import { and, desc, eq, ne, inArray, like, or, sql } from 'drizzle-orm';
 import type { StoreDatabase } from './db';
-import { auditEvents, embeddedCheckouts, inventoryEvents, orders, preorders, products, settings, webhookEvents } from './schema';
+import { auditEvents, embeddedCheckouts, inventoryEvents, orders, preorders, products, settings, webhookEvents, wishlist } from './schema';
 import { checkoutInput, deleteSandboxOrdersInput, fulfillInput, inventoryInput, preorderUpdate, productInput, reservationInput, settingsInput, StoreError } from './validation';
 import { paymentProvider } from './config';
 import { publicSandboxMode, SANDBOX_PRODUCT_ID } from './sandbox';
@@ -163,16 +163,18 @@ export async function deleteSandboxOrders(db: StoreDatabase, actor: string, raw:
   });
 }
 export async function dashboardData(db: StoreDatabase) {
-  const [catalog, config, recentOrders, recentActivity, revenue, orderCount, reservationCount] = await Promise.all([
+  const [catalog, config, recentOrders, recentActivity, revenue, orderCount, reservationCount, wishlistCount] = await Promise.all([
     db.select().from(products).where(ne(products.id, SANDBOX_PRODUCT_ID)).orderBy(desc(products.createdAt)).limit(500), storeSettings(db),
     db.select().from(orders).orderBy(desc(orders.createdAt)).limit(8), db.select().from(auditEvents).orderBy(desc(auditEvents.createdAt)).limit(8),
     db.select({ currency: orders.currency, amount: sql<number>`coalesce(sum(${orders.total} - ${orders.refundedAmount}), 0)` }).from(orders).where(and(eq(orders.paymentEnvironment, 'live'), inArray(orders.status, ['paid', 'fulfilled', 'partially_refunded', 'refunded']))).groupBy(orders.currency),
     db.$count(orders, and(eq(orders.paymentEnvironment, 'live'), inArray(orders.status, ['paid', 'fulfilled', 'partially_refunded', 'refunded']))), db.$count(preorders, inArray(preorders.status, ['new', 'contacted'])),
+    db.$count(wishlist),
   ]);
-  return { products: catalog, settings: config, recentOrders, recentActivity, revenue, orderCount, reservationCount };
+  return { products: catalog, settings: config, recentOrders, recentActivity, revenue, orderCount, reservationCount, wishlistCount };
 }
 export async function listRecords(db: StoreDatabase, resource: string, query: string, page: number) {
   const offset = (page - 1) * 25, q = `%${query}%`;
+  if (resource === 'wishlist') { const filter = like(wishlist.email, q); return { rows: await db.select().from(wishlist).where(filter).orderBy(desc(wishlist.createdAt), desc(wishlist.id)).limit(25).offset(offset), total: await db.$count(wishlist, filter) }; }
   if (resource === 'preorders') { const filter = or(like(preorders.name, q), like(preorders.email, q), like(preorders.id, q)); return { rows: await db.select().from(preorders).where(filter).orderBy(desc(preorders.createdAt)).limit(25).offset(offset), total: await db.$count(preorders, filter) }; }
   if (resource === 'orders') { const filter = or(like(orders.name, q), like(orders.email, q), like(orders.id, q)); return { rows: await db.select().from(orders).where(filter).orderBy(desc(orders.createdAt)).limit(25).offset(offset), total: await db.$count(orders, filter) }; }
   if (resource === 'activity') { const filter = or(like(auditEvents.action, q), like(auditEvents.actor, q), like(auditEvents.detail, q)); return { rows: await db.select().from(auditEvents).where(filter).orderBy(desc(auditEvents.createdAt)).limit(25).offset(offset), total: await db.$count(auditEvents, filter) }; }
