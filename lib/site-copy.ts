@@ -207,7 +207,7 @@ const fr: typeof en = {
   },
   hero: {
     eyebrow: 'MATÉRIEL INDÉPENDANT / SENSATIONS FAMILIÈRES', revision: 'CONSOLE FPGA — REV C',
-    title: 'L’âme d’hier.', subtitle: 'Le cœur d’aujourd’hui.',
+    title: 'L’âme d’hier.', subtitle: 'Le matériel d’aujourd’hui.',
     intro: ['Vos cartouches. Votre grand écran.', 'Une console FPGA pour les jeux', ' qui ne vous ont jamais quittés.'],
     explore: 'Découvrir les fonctions', label: 'LA CONSOLE', study: 'ÉTUDE DU BOÎTIER / 001',
   },
