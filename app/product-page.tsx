@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowDown, ArrowUpRight, ArrowUp, Plus, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -57,7 +56,7 @@ export default function ProductPage() {
     <a className="skip-link" href="#main">{copy.skip}</a>
     <header className="site-header">
       <a className="wordmark" href="#console" aria-label={copy.home}>sgbc<span>™</span></a>
-      <nav aria-label={copy.nav.label}><a href="#console">{copy.nav.console} <sup>01</sup></a><a href="#design">{copy.nav.design} <sup>02</sup></a><a href="#specs">{copy.nav.specs} <sup>03</sup></a></nav>
+      <nav aria-label={copy.nav.label}><a href="#console">{copy.nav.console} <sup>01</sup></a><a href="#specs">{copy.nav.specs} <sup>02</sup></a><a href="#design">{copy.nav.design} <sup>03</sup></a></nav>
       <div className="header-actions">
         <button type="button" className="language-toggle" onClick={switchLanguage} lang={locale === 'en' ? 'zh-TW' : 'en'} aria-label={locale === 'en' ? '切換至繁體中文（台灣）' : 'Switch to English'}>{locale === 'en' ? '中' : 'EN'}</button>
         <WishlistButton className="header-preorder" locale={locale}/>
@@ -83,22 +82,7 @@ export default function ProductPage() {
           <span className="hero-number mono">(01—03)</span>
         </div>
       </section>
-      <section className="manifesto section-shell" aria-labelledby="story-title">
-        <div className="section-kicker mono"><span><span className="status-dot"/> {copy.story.eyebrow}</span><Plus size={20}/></div>
-        <h2 id="story-title">{copy.story.title}<br/>{copy.story.lead}<span>{copy.story.accent}</span></h2>
-        <figure className="cartridge-display">
-          <Image
-            src="/images/cartridge-lineup.webp"
-            alt={copy.story.alt}
-            width={1672}
-            height={941}
-            sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1156px) calc(100vw - 56px), 1100px"
-            loading="lazy"
-            draggable={false}
-          />
-        </figure>
-        <div className="manifesto-bottom"><p>{copy.story.description}</p><div className="system-list" aria-label={copy.story.systems}><span>GAME BOY<ArrowUpRight size={16} aria-hidden="true"/></span><span>GAME BOY COLOR<ArrowUpRight size={16} aria-hidden="true"/></span><span>GAME BOY ADVANCE<ArrowUpRight size={16} aria-hidden="true"/></span></div></div>
-      </section>
+      <FeatureSection copy={copy.specs} story={copy.story}/>
       <section className="design-section section-shell" id="design" aria-labelledby="design-title">
         <div className="section-kicker mono"><span>{copy.design.eyebrow}</span><span>{copy.design.colors}</span></div>
         <div className="section-heading"><h2 id="design-title">{copy.design.title}<br/><span>{copy.design.subtitle}</span></h2><p>{copy.design.intro}<br/>{copy.design.detail}</p></div>
@@ -107,7 +91,6 @@ export default function ProductPage() {
           <div className="design-grid"><div className="detail-stage"><LazyScene view={detailView} resetKey={detailReset} locale={locale}/><div className="viewer-bottom mono"><span><span className="desktop-hint">{copy.design.study}</span><span className="touch-hint">{copy.design.drag}</span></span><button className="reset-view" onClick={() => setDetailReset(n => n + 1)} aria-label={copy.design.reset}><RotateCcw size={18}/></button></div></div><div className="detail-copy">{views.map((v, i) => <TabsContent value={v.id} key={v.id}><span className="detail-number mono">[ 0{i + 1} ]</span><h3>{v.title}</h3><p>{v.description}</p></TabsContent>)}<div className="material-strip"><span><i className="shell-swatch"/>{copy.design.gray}</span><span><i className="black-swatch"/>{copy.design.black}</span><span><i className="bordeaux-swatch"/>{copy.design.bordeaux}</span></div></div></div>
         </Tabs>
       </section>
-      <FeatureSection copy={copy.specs}/>
       <section className="closing"><p className="mono">{copy.closing.eyebrow}</p><a href="#console" aria-label={copy.preorder.close}>{copy.closing.title}<ArrowUpRight aria-hidden="true"/></a><div className="closing-bottom mono"><span>{copy.closing.project}</span><span>{copy.closing.tagline}</span></div></section>
     </main>
     <footer className="site-footer"><a className="wordmark" href="#console" aria-label={copy.home}>sgbc<span>™</span></a><p>{copy.footer.trademarks}<br/>{copy.footer.independent}</p><Link className="footer-policy-link" href={`/sales-policy/${locale}/`}>{salesPolicy[locale].title}</Link><VisitorPrivacy locale={locale}/><a className="mono" href="#console">{copy.footer.top} <ArrowUp size={16}/></a></footer>

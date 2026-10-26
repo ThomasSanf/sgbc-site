@@ -51,7 +51,7 @@ const en = {
     systems: 'Intended cartridge families',
   },
   design: {
-    eyebrow: '02 / THE OBJECT', colors: 'CLASSIC GRAY. BLACK. BORDEAUX.',
+    eyebrow: '03 / THE OBJECT', colors: 'CLASSIC GRAY. BLACK. BORDEAUX.',
     title: 'Every angle.', subtitle: 'Every detail.', intro: 'A look at the enclosure study.', detail: 'From the outside, in.',
     angles: 'Console viewing angle', study: 'ENCLOSURE / ASSEMBLY STUDY', drag: 'DRAG TO ROTATE', reset: 'Reset detail view',
     gray: 'Gray', black: 'Black', bordeaux: 'Bordeaux',
@@ -63,7 +63,7 @@ const en = {
     { id: 'inside', label: 'Cutaway', title: 'Take the\nroof off.', description: 'Look through the earlier enclosure assembly: cartridge carrier, controls, and motherboard placement.' },
   ] as { id: ConsoleView; label: string; title: string; description: string }[],
   specs: {
-    eyebrow: '03 / WAYS TO PLAY', title: 'Small footprint.', subtitle: 'Real hardware.', revision: 'REV C / IN DEVELOPMENT',
+    eyebrow: 'WAYS TO PLAY', title: 'Small footprint.', subtitle: 'Real hardware.', revision: 'REV C / IN DEVELOPMENT',
     rows: [
       ['Three generations', 'Game Boy, Game Boy Color, and Game Boy Advance. A new home for your handheld classics.'],
       ['Original cartridges', 'Put the collection you kept back into play. Insert an original cartridge and rediscover an old favorite.'],
@@ -132,7 +132,7 @@ const zhTW: typeof en = {
     systems: '預計支援的卡帶系列',
   },
   design: {
-    eyebrow: '02 / 外觀設計', colors: '經典灰、黑、酒紅。',
+    eyebrow: '03 / 外觀設計', colors: '經典灰、黑、酒紅。',
     title: '每個角度。', subtitle: '每處細節。', intro: '探索外殼設計。', detail: '從外觀，到內部。',
     angles: '主機檢視角度', study: '外殼 / 組裝設計', drag: '拖曳以旋轉', reset: '重設檢視角度',
     gray: '灰色', black: '黑色', bordeaux: '酒紅色',
@@ -144,7 +144,7 @@ const zhTW: typeof en = {
     { id: 'inside', label: '剖面', title: '打開上蓋，\n看看裡面。', description: '查看早期外殼組裝模型中的卡帶承載座、控制元件與主機板配置。' },
   ],
   specs: {
-    eyebrow: '03 / 遊玩方式', title: '小巧機身。', subtitle: '真實硬體。', revision: 'REV C / 開發中',
+    eyebrow: '遊玩方式', title: '小巧機身。', subtitle: '真實硬體。', revision: 'REV C / 開發中',
     rows: [
       ['三個世代的經典', 'Game Boy、Game Boy Color 與 Game Boy Advance。為珍藏的掌上型遊戲，找到新的歸宿。'],
       ['原版卡帶', '讓收藏再次登場。插入原版卡帶，重溫熟悉的冒險。'],

@@ -1,7 +1,8 @@
+import Image from 'next/image';
 import type { siteCopy } from '@/lib/site-copy';
 import styles from './feature-section.module.css';
 
-const featureKinds = ['systems', 'cartridge', 'display', 'link', 'speed', 'controller'] as const;
+const featureKinds = ['display', 'link', 'speed', 'controller'] as const;
 type FeatureKind = typeof featureKinds[number];
 
 function Dpad({ x, y }: { x: number; y: number }) {
@@ -22,34 +23,6 @@ function Handheld({ x, y, color = 'var(--feature-shell)' }: { x: number; y: numb
 
 function FeatureIllustration({ kind }: { kind: FeatureKind }) {
   return <svg viewBox="0 0 320 190" className={styles.art} aria-hidden="true" focusable="false" fill="none">
-    {kind === 'systems' && <>
-      <ellipse cx="161" cy="166" rx="116" ry="7" fill="#000" opacity=".25"/>
-      <g transform="rotate(-9 90 100)"><Handheld x={40} y={24}/></g>
-      <g transform="rotate(5 161 91)"><Handheld x={126} y={15} color="#959c88"/></g>
-      <g transform="translate(200 64) rotate(11 46 40)">
-        <path d="M15 0h70q16 0 19 19l5 43q2 20-18 22H7q-19-2-16-22l5-43Q-1 0 15 0Z" fill="var(--feature-wine)" stroke="#a46b7c"/>
-        <rect x="22" y="18" width="56" height="46" rx="5" fill="#242522"/>
-        <rect x="28" y="24" width="44" height="29" rx="1" fill="#65705a"/>
-        <path d="M32 47h8v-7h8v-7h18" stroke="#b4bea3" strokeWidth="3"/>
-        <g color="#322129"><Dpad x={8} y={39}/><circle cx="89" cy="44" r="5" fill="currentColor"/><circle cx="99" cy="32" r="5" fill="currentColor"/></g>
-      </g>
-    </>}
-    {kind === 'cartridge' && <>
-      <ellipse cx="163" cy="170" rx="90" ry="6" fill="#000" opacity=".25"/>
-      <g transform="translate(67 20) rotate(-13 56 69)">
-        <path d="M9 0h80v9h15v118H0V9h9z" fill="#383a35" stroke="#72766b" strokeWidth="1.5"/>
-        <path d="M10 23h84M10 30h84M10 37h84" stroke="#65695e"/>
-        <rect x="11" y="48" width="82" height="60" rx="3" fill="#1e201d" stroke="#62695b"/>
-      </g>
-      <g transform="translate(139 32) rotate(9 54 63)">
-        <path d="M10 0h79v9h15v118H0V9h10z" fill="var(--feature-shell)" stroke="#d2d2c7" strokeWidth="1.5"/>
-        <path d="M10 21h84M10 28h84M10 35h84" stroke="#878c7f"/>
-        <rect x="11" y="47" width="82" height="61" rx="3" fill="var(--feature-wine)"/>
-        <path d="M21 96l18-24 13 14 18-27 14 37z" fill="#a66b7c"/>
-        <circle cx="35" cy="64" r="6" fill="#d3adaf"/>
-        <path d="M47 116h10l-5 5z" fill="#72786b"/>
-      </g>
-    </>}
     {kind === 'display' && <>
       <path d="M145 150v15h-27m57-15v15h27M112 168h96" stroke="#929689" strokeWidth="3" strokeLinecap="round"/>
       <rect x="42" y="18" width="236" height="134" rx="7" fill="#252723" stroke="#9c9f94" strokeWidth="1.5"/>
@@ -90,19 +63,37 @@ function FeatureIllustration({ kind }: { kind: FeatureKind }) {
   </svg>;
 }
 
-export function FeatureSection({ copy }: { copy: typeof siteCopy.en.specs }) {
-  return <section className={`section-shell ${styles.section}`} id="specs" aria-labelledby="specs-title">
+export function FeatureSection({ copy, story }: { copy: typeof siteCopy.en.specs; story: typeof siteCopy.en.story }) {
+  return <section className={`section-shell ${styles.section}`} id="specs" aria-labelledby="story-title">
+    <div className={styles.kicker}>
+      <p className={`mono ${styles.eyebrow}`}><span className="status-dot"/>02 / {story.eyebrow}</p>
+      <p className={`mono ${styles.revision}`}>{copy.revision}</p>
+    </div>
+    <div className={styles.intro}>
+      <div className={styles.story}>
+        <h2 id="story-title">{story.title}<br/>{story.lead}<span>{story.accent}</span></h2>
+        <p className={styles.description}>{story.description}</p>
+        <ul className={styles.systems} aria-label={story.systems}>
+          <li>GAME BOY</li><li>GAME BOY COLOR</li><li>GAME BOY ADVANCE</li>
+        </ul>
+      </div>
+      <figure className={styles.cartridges}>
+        <Image src="/images/cartridge-lineup.webp" alt={story.alt} width={1672} height={941}
+          sizes="(max-width: 760px) calc(100vw - 36px), (max-width: 1800px) 55vw, 940px"
+          loading="lazy" draggable={false}/>
+      </figure>
+    </div>
     <div className={styles.heading}>
-      <div><p className={`mono ${styles.eyebrow}`}>{copy.eyebrow}</p><h2 id="specs-title">{copy.title}<br/><span>{copy.subtitle}</span></h2></div>
-      <p className={`mono ${styles.revision}`}><span className="status-dot"/>{copy.revision}</p>
+      <h3 id="specs-title">{copy.title} <span>{copy.subtitle}</span></h3>
+      <p className={`mono ${styles.eyebrow}`}>{copy.eyebrow}</p>
     </div>
     <div className={styles.grid}>
-      {copy.rows.map(([title, description], index) => <article className={styles.card} key={featureKinds[index]}>
+      {copy.rows.slice(2).map(([title, description], index) => <article className={styles.card} key={featureKinds[index]}>
         <div className={styles.visual}>
           <span className={`mono ${styles.number}`} aria-hidden="true">0{index + 1}</span>
           <FeatureIllustration kind={featureKinds[index]}/>
         </div>
-        <div className={styles.copy}><h3>{title}</h3><p>{description}</p></div>
+        <div className={styles.copy}><h4>{title}</h4><p>{description}</p></div>
       </article>)}
     </div>
     <p className={styles.note}>{copy.note}</p>
