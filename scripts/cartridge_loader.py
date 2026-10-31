@@ -5,6 +5,7 @@ import json
 import cadquery as cq
 import numpy as np
 import trimesh
+from cad_surface_mesh import surface_mesh
 
 HERE = Path(__file__).resolve().parents[1]
 OUT = HERE / 'outputs/cartridge-fit/hardware-c2'
@@ -62,10 +63,7 @@ def build(case, shells, assembly):
 
 
 def export_part(assembly,name,shape,color):
-    path = OUT/f'{name}.stl'
-    cq.exporters.export(shape,str(path),tolerance=.035,angularTolerance=.1)
-    mesh = trimesh.load_mesh(path,process=True)
-    assert mesh.is_watertight, name
+    mesh = surface_mesh(shape, tolerance=.035, angular_tolerance=.1)
     mesh.visual = trimesh.visual.TextureVisuals(material=trimesh.visual.material.PBRMaterial(
         baseColorFactor=color,metallicFactor=.08,roughnessFactor=.53))
     mesh.apply_transform(GLTF)

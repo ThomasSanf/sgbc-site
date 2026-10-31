@@ -26,7 +26,6 @@ footer{position:absolute;left:56px;right:56px;bottom:40px;border-top:1px solid #
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
-import {toCreasedNormals} from 'three/addons/utils/BufferGeometryUtils.js';
 const host=document.querySelector('#model'), status=document.querySelector('#status');
 try {
 const scene=new THREE.Scene();
@@ -44,7 +43,7 @@ const wine=new THREE.MeshPhysicalMaterial({color:'#592330',roughness:.38,metalne
 const wineParts=new Set(['reset_button','power_button','cartridge_lip','snes_bezel','link_insert','link_bezel','microSD_access_insert']);
 const shellParts=new Set(['top_shell','controls_lid_supports_cutaway','cartridge_cradle_cutaway','cartridge_socket_retainer']);
 const model=(await new GLTFLoader().loadAsync('/model.glb')).scene;
-model.traverse(mesh=>{if(!(mesh instanceof THREE.Mesh))return;const surface=wineParts.has(mesh.name)||shellParts.has(mesh.name)||mesh.name==='bottom_shell'||mesh.name.startsWith('foot_');if(surface&&!mesh.geometry.getAttribute('normal'))mesh.geometry=toCreasedNormals(mesh.geometry,Math.PI/4);if(shellParts.has(mesh.name))mesh.material=shell;else if(mesh.name==='bottom_shell'||mesh.name.startsWith('foot_'))mesh.material=black;else if(wineParts.has(mesh.name))mesh.material=wine;mesh.visible=!['controls_lid_supports_cutaway','cartridge_cradle_cutaway','FPGA_package_envelope'].includes(mesh.name);mesh.castShadow=true;mesh.receiveShadow=true;});
+model.traverse(mesh=>{if(!(mesh instanceof THREE.Mesh))return;if(shellParts.has(mesh.name))mesh.material=shell;else if(mesh.name==='bottom_shell'||mesh.name.startsWith('foot_'))mesh.material=black;else if(wineParts.has(mesh.name))mesh.material=wine;mesh.visible=!['controls_lid_supports_cutaway','cartridge_cradle_cutaway','FPGA_package_envelope'].includes(mesh.name);mesh.castShadow=true;mesh.receiveShadow=true;});
 const original=new THREE.Box3().setFromObject(model), center=original.getCenter(new THREE.Vector3()), scale=4.85/original.getSize(new THREE.Vector3()).x;
 model.scale.multiplyScalar(scale);model.position.sub(center.multiplyScalar(scale));scene.add(model);
 const box=new THREE.Box3().setFromObject(model),camera=new THREE.PerspectiveCamera(31,670/440,.05,100),direction=new THREE.Vector3(-5.8,4.8,8.2).normalize();

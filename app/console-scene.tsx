@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { bordeauxParts, prepareFinishGeometry } from '@/lib/console-materials';
+import { bordeauxParts } from '@/lib/console-materials';
 import { setCutawayVisibility } from '@/lib/console-assembly';
 import consoleMetadata from '@/public/models/rear-port-fit.json';
 import pcbMetadata from '@/public/models/pcb-revision.json';
@@ -256,7 +256,6 @@ export default function ConsoleScene({ view, resetKey = 0, dark = false, model =
         loadedModel = gltf.scene;
         loadedModel.traverse(object => {
           if (!(object instanceof THREE.Mesh)) return;
-          if (model === 'console') prepareFinishGeometry(object);
           const old = Array.isArray(object.material) ? object.material : [object.material];
           old.forEach(m => materials.add(m));
           if (model === 'console' && (object.name === 'top_shell' || object.name === 'controls_lid_supports_cutaway' || object.name === 'cartridge_cradle_cutaway' || object.name === 'cartridge_socket_retainer')) object.material = shell;

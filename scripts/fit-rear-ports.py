@@ -14,6 +14,7 @@ import numpy as np
 from scipy.spatial import ConvexHull
 import trimesh
 import cartridge_loader
+from cad_surface_mesh import surface_mesh
 
 SITE = Path(__file__).resolve().parents[1]
 CAD = SITE.parent / 'gb-fpga-core/hardware/revC/enclosure'
@@ -117,10 +118,7 @@ def main():
     for name, shape in shells.items():
         assert shape.val().isValid(), name
         assert len(shape.solids().vals()) == 1, name
-        path = OUT / f'{name}.stl'
-        cq.exporters.export(shape, str(path), tolerance=.06, angularTolerance=.12)
-        mesh = trimesh.load_mesh(path, process=True)
-        assert mesh.is_watertight, name
+        mesh = surface_mesh(shape)
         mesh.apply_transform(GLTF)
         _, geometry = assembly.graph[name]
         mesh.visual = assembly.geometry[geometry].visual.copy()
@@ -135,16 +133,27 @@ def main():
     support_region = case.block(60, 32, 14.49, 26, -26.5, 25.245)
     supports = shells['top_shell'].intersect(support_region)
     assert len(supports.solids().vals()) == 6, 'Four PCB posts and two retainer posts'
-    support_path = OUT / 'controls_lid_supports_cutaway.stl'
-    cq.exporters.export(supports, str(support_path), tolerance=.06, angularTolerance=.12)
-    mesh = trimesh.load_mesh(support_path, process=True)
-    assert mesh.is_watertight, 'Controls supports'
+    mesh = surface_mesh(supports)
     mesh.visual = trimesh.visual.TextureVisuals(material=trimesh.visual.material.PBRMaterial(
         name='controls_lid_supports_material', baseColorFactor=[152,152,143,255],
         metallicFactor=0, roughnessFactor=.49))
     mesh.apply_transform(GLTF)
     assembly.add_geometry(mesh, geom_name='controls_lid_supports_cutaway', node_name='controls_lid_supports_cutaway')
     checks.append('Cutaway retains all six actual lid mounting posts')
+
+    # The original case parts inherit the CAD-to-glTF node transform and are
+    # stored in millimetres. Replace only the mesh, preserving that transform.
+    case.build_trim_and_hardware()
+    trim = ['reset_button', 'power_button', 'cartridge_lip', 'snes_bezel',
+            'link_insert', 'link_bezel', 'microSD_access_insert',
+            'cartridge_socket_retainer', *(f'foot_{i}' for i in range(1, 5))]
+    for name in trim:
+        _, geometry = assembly.graph[name]
+        old = assembly.geometry[geometry]
+        mesh = surface_mesh(case.parts[name]['shape'])
+        assert np.allclose(mesh.bounds, old.bounds, atol=.02), name
+        mesh.visual = old.visual.copy()
+        assembly.geometry[geometry] = mesh
 
     # Check the entire close-fitting perimeter, including the old exposed-PCB
     # gap below each port. Sample inside the wall to avoid boundary tolerances.
@@ -197,7 +206,7 @@ def render(assembly, controls=False, cartridge=False):
         if not cartridge and node == 'cartridge_cradle_cutaway':
             continue
         transform, geometry = assembly.graph[node]
-        mesh = assembly.geometry[geometry].copy()
+        mesh = assembly.geometry[geometry].copy(include_cache=True)
         mesh.apply_transform(np.linalg.inv(GLTF) @ transform)
         points = vtk.vtkPoints()
         points.SetData(numpy_to_vtk(mesh.vertices.copy(), deep=True))
@@ -205,8 +214,13 @@ def render(assembly, controls=False, cartridge=False):
         packed = np.column_stack((np.full(len(mesh.faces), 3), mesh.faces)).astype(np.int64).ravel()
         cells.ImportLegacyFormat(numpy_to_vtkIdTypeArray(packed, deep=True))
         poly = vtk.vtkPolyData(); poly.SetPoints(points); poly.SetPolys(cells)
-        normals = vtk.vtkPolyDataNormals(); normals.SetInputData(poly); normals.SetFeatureAngle(45)
-        mapper = vtk.vtkPolyDataMapper(); mapper.SetInputConnection(normals.GetOutputPort())
+        mapper = vtk.vtkPolyDataMapper()
+        if 'vertex_normals' in mesh._cache:
+            poly.GetPointData().SetNormals(numpy_to_vtk(mesh.vertex_normals.copy(), deep=True))
+            mapper.SetInputData(poly)
+        else:
+            normals = vtk.vtkPolyDataNormals(); normals.SetInputData(poly); normals.SetFeatureAngle(45)
+            mapper.SetInputConnection(normals.GetOutputPort())
         actor = vtk.vtkActor(); actor.SetMapper(mapper)
         color = np.array(rgba(mesh)[:3])/255
         if node in ['top_shell', 'controls_lid_supports_cutaway', 'cartridge_cradle_cutaway', 'cartridge_socket_retainer']: color = np.array([152,152,143])/255
