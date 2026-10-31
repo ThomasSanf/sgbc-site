@@ -165,9 +165,6 @@ export function FeatureSection({ copy, story }: { copy: typeof siteCopy.en.specs
           <Image src="/images/sgbc-cartridge-lineup-2160.webp" alt={story.alt}
             width={2160} height={1215} loading="lazy" draggable={false}/>
         </picture>
-        <figcaption className={styles.photoCaption}>
-          <span>{story.collection}</span><span>{story.cartridgeCount}</span>
-        </figcaption>
       </figure>
     </div>
     <div className={styles.heading}>

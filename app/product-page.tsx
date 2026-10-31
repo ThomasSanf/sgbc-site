@@ -63,9 +63,8 @@ export default function ProductPage({ locale = 'en', allowFrench = false }: { lo
           <div className="hero-stage">
             <div className="stage-wordmark" aria-hidden="true">sgbc<span>™</span></div>
             <ConsoleScene view="hero" interaction="cursor" locale={locale} dark />
-            <div className="stage-corner mono"><Plus size={18}/><span>{copy.hero.label}<br/><span className="muted">{copy.hero.study}</span></span></div>
+            <div className="stage-corner mono"><Plus size={18}/><span>{copy.hero.label}</span></div>
           </div>
-          <span className="hero-number mono">(01—03)</span>
         </div>
       </section>
       <FeatureSection copy={copy.specs} story={copy.story}/>

@@ -15,9 +15,6 @@
 .cartridges { width:100%; max-width:880px; justify-self:end; margin:0; min-width:0; }
 .collectionStage { display:block; background:radial-gradient(ellipse closest-side at 40% 54%,rgb(71 85 110 / .30),transparent),radial-gradient(ellipse closest-side at 70% 55%,rgb(89 35 48 / .32),transparent); }
 .collectionStage img { display:block; width:100%; height:auto; }
-.photoCaption { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:12px 7% 0; padding-top:9px; border-top:1px solid var(--line); color:var(--muted); font:11px/1.5 'Courier New',monospace; letter-spacing:.035em; }
-.photoCaption span:first-child { color:var(--ink); }
-.photoCaption span:last-child { white-space:nowrap; }
 .heading { display:flex; align-items:baseline; justify-content:space-between; gap:24px; margin:50px 0 22px; padding-top:28px; border-top:1px solid var(--line); }
 .heading h3 { font-size:clamp(26px,2.5vw,38px); font-weight:600; letter-spacing:-.045em; line-height:1.2; margin:0; }
 .heading h3 span { color:var(--muted); }
