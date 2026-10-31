@@ -70,24 +70,19 @@ function MicroSD({ x, y, color = 'var(--feature-wine)' }: { x: number; y: number
 function FeatureIllustration({ kind }: { kind: FeatureKind }) {
   return <svg viewBox="0 0 320 190" className={styles.art} aria-hidden="true" focusable="false" fill="none">
     {kind === 'display' && <>
-      <path d="M145 150v15h-27m57-15v15h27M112 168h96" stroke="#929689" strokeWidth="3" strokeLinecap="round"/>
-      <rect x="42" y="18" width="236" height="134" rx="7" fill="#252723" stroke="#9c9f94" strokeWidth="1.5"/>
-      <rect x="50" y="26" width="220" height="117" rx="2" fill="#151d18"/>
-      <path d="M50 120h220v23H50z" fill="#334938"/>
-      <path d="M50 120v-16h30V88h30V72h30v48m40 0V88h30V72h30V56h30v64" fill="#4e6950"/>
-      <g fill="#d3dcc2"><path d="M139 59h24v8h8v24h-8v8h-24v-8h-8V67h8z"/><path d="M139 99h8v14h-8zm16 0h8v14h-8z"/></g>
-      <path d="M146 70h4v5h-4zm12 0h4v5h-4z" fill="#27362a"/>
-      <path d="M65 40h19m-19 0v19m190-19h-19m19 0v19M65 130h19m-19 0v-19m190 19h-19m19 0v-19" stroke="#c1c9b6" strokeWidth="1" opacity=".7"/>
-      <circle cx="260" cy="147" r="2" fill="var(--accent)"/>
+      <path d="M145 165v15h-27m57-15v15h27M112 183h96" stroke="#929689" strokeWidth="3" strokeLinecap="round"/>
+      <rect x="44" y="8" width="232" height="160" rx="7" fill="#252723" stroke="#9c9f94" strokeWidth="1.5"/>
+      <image href="/images/emerald-battle.png" x="52" y="16" width="216" height="144" imageRendering="pixelated"/>
+      <circle cx="262" cy="164" r="2" fill="var(--accent)"/>
     </>}
     {kind === 'upscaling' && <>
-      <rect x="26" y="65" width="66" height="66" rx="3" fill="#1c251e" stroke="#7d8974" strokeWidth="1.5"/>
-      <path d="M39 115V83h8v8h8v8h8v8h8v8z" fill="#b9c8a8"/>
-      <path d="M106 98h40m-10-9 10 9-10 9" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <rect x="166" y="35" width="130" height="130" rx="5" fill="#1c251e" stroke="#a1ad93" strokeWidth="1.5"/>
-      <path d="M192 135V71h16v16h16v16h16v16h16v16z" fill="#b9c8a8"/>
-      <path d="M192 55v96m16-96v96m16-96v96m16-96v96m16-96v96m-80-80h96m-96 16h96m-96 16h96m-96 16h96m-96 16h96" stroke="#6d805f" strokeWidth=".7" opacity=".55"/>
-      <path d="M163 50V29h21m96 0h21v21m0 100v21h-21m-96 0h-21v-21" stroke="var(--feature-wine)" strokeWidth="2"/>
+      <image href="/images/smw-question-block.png" x="37" y="71" width="36" height="36" imageRendering="pixelated"/>
+      <path d="M100 89h52m-7-7 7 7-7 7" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      <image href="/images/smw-question-block-grid.png" x="180" y="35" width="108" height="108" imageRendering="pixelated"/>
+      <path d="M170 34v-9h9m110 0h9v9m0 110v9h-9m-110 0h-9v-9" stroke="#677057"/>
+      <g fill="#b3b8a7" fontFamily="monospace" fontSize="10" textAnchor="middle">
+        <text x="55" y="176">1×</text><text x="234" y="176">3×</text>
+      </g>
     </>}
     {kind === 'storage' && <>
       <ellipse cx="163" cy="169" rx="82" ry="7" fill="#000" opacity=".25"/>
