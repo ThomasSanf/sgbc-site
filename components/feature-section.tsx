@@ -158,12 +158,12 @@ export function FeatureSection({ copy, story }: { copy: typeof siteCopy.en.specs
         </ul>
       </div>
       <figure className={styles.cartridges}>
-        <picture className={styles.photoPrint}>
+        <picture className={styles.collectionStage}>
           <source type="image/webp"
-            srcSet="/images/sgbc-cartridge-collection-840.webp 840w, /images/sgbc-cartridge-collection-1680.webp 1680w"
-            sizes="(max-width: 760px) min(580px, calc(100vw - 36px)), min(660px, 52vw)"/>
-          <Image src="/images/sgbc-cartridge-collection-1680.webp" alt={story.alt}
-            width={1680} height={1440} loading="lazy" draggable={false}/>
+            srcSet="/images/sgbc-cartridge-lineup-960.webp 960w, /images/sgbc-cartridge-lineup-2160.webp 2160w"
+            sizes="(max-width: 760px) min(580px, calc(100vw - 36px)), min(880px, 52vw)"/>
+          <Image src="/images/sgbc-cartridge-lineup-2160.webp" alt={story.alt}
+            width={2160} height={1215} loading="lazy" draggable={false}/>
         </picture>
         <figcaption className={styles.photoCaption}>
           <span>{story.collection}</span><span>{story.cartridgeCount}</span>

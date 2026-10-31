@@ -47,7 +47,7 @@ const en = {
   story: {
     eyebrow: 'BUILT AROUND THE RITUAL', title: 'Keep the cartridges.', lead: 'Change the ', accent: 'possibilities.',
     collection: 'From the SGBC collection', cartridgeCount: '05 cartridges',
-    alt: 'Five Pokémon cartridges on a tabletop: Green and Crystal on the left, with Emerald, Sapphire, and Ruby on the right.',
+    alt: 'Pokémon Green and translucent Crystal cartridges beside a staggered stack of Emerald, Sapphire, and Ruby cartridges.',
     description: 'The click of a cartridge. A controller you know by heart. SGBC brings programmable hardware to a console designed around three generations of handheld classics.',
     systems: 'Intended cartridge families',
   },
@@ -131,7 +131,7 @@ const zhTW: typeof en = {
   story: {
     eyebrow: '為熟悉的遊戲儀式而生', title: '留下卡帶。', lead: '玩出', accent: '全新可能。',
     collection: 'SGBC 的卡匣收藏', cartridgeCount: '5 張卡匣',
-    alt: '桌上擺著五張寶可夢卡匣：左側是綠版和水晶版，右側是綠寶石版、藍寶石版和紅寶石版。',
+    alt: '左側是寶可夢綠版和半透明的水晶版卡匣，右側依序疊放著綠寶石版、藍寶石版與紅寶石版。',
     description: '插入卡帶的喀噠聲，握在手中再熟悉不過的控制器。SGBC 以可程式化硬體，為三個世代的掌上型遊戲經典打造專屬主機。',
     systems: '預計支援的卡帶系列',
   },
@@ -216,7 +216,7 @@ const fr: typeof en = {
   story: {
     eyebrow: 'LE PLAISIR DU RITUEL', title: 'Gardez les cartouches.', lead: 'Changez les ', accent: 'possibilités.',
     collection: 'Dans la collection SGBC', cartridgeCount: '05 cartouches',
-    alt: 'Cinq cartouches Pokémon sur une table : Vert et Cristal à gauche, Émeraude, Saphir et Rubis à droite.',
+    alt: 'Les cartouches Pokémon Vert et Cristal à gauche. À droite, Émeraude, Saphir et Rubis sont superposées en éventail.',
     description: 'Le clic d’une cartouche. Une manette que l’on connaît par cœur. SGBC met le matériel programmable au service d’une console pensée pour trois générations de classiques portables.',
     systems: 'Familles de cartouches prévues',
   },
