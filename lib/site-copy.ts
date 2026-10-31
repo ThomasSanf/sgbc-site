@@ -46,7 +46,8 @@ const en = {
   },
   story: {
     eyebrow: 'BUILT AROUND THE RITUAL', title: 'Keep the cartridges.', lead: 'Change the ', accent: 'possibilities.',
-    alt: 'Three floating Game Boy and Game Boy Color cartridges with translucent clear, blue, and Bordeaux shells.',
+    collection: 'From the SGBC collection', cartridgeCount: '05 cartridges',
+    alt: 'Five Pokémon cartridges on a tabletop: Green and Crystal on the left, with Emerald, Sapphire, and Ruby on the right.',
     description: 'The click of a cartridge. A controller you know by heart. SGBC brings programmable hardware to a console designed around three generations of handheld classics.',
     systems: 'Intended cartridge families',
   },
@@ -129,7 +130,8 @@ const zhTW: typeof en = {
   },
   story: {
     eyebrow: '為熟悉的遊戲儀式而生', title: '留下卡帶。', lead: '玩出', accent: '全新可能。',
-    alt: '三片懸浮的 Game Boy 與 Game Boy Color 卡帶，分別採用透明、藍色與酒紅色半透明外殼。',
+    collection: 'SGBC 的卡匣收藏', cartridgeCount: '5 張卡匣',
+    alt: '桌上擺著五張寶可夢卡匣：左側是綠版和水晶版，右側是綠寶石版、藍寶石版和紅寶石版。',
     description: '插入卡帶的喀噠聲，握在手中再熟悉不過的控制器。SGBC 以可程式化硬體，為三個世代的掌上型遊戲經典打造專屬主機。',
     systems: '預計支援的卡帶系列',
   },
@@ -213,7 +215,8 @@ const fr: typeof en = {
   },
   story: {
     eyebrow: 'LE PLAISIR DU RITUEL', title: 'Gardez les cartouches.', lead: 'Changez les ', accent: 'possibilités.',
-    alt: 'Trois cartouches Game Boy et Game Boy Color en suspension, dans des coques translucides incolore, bleue et bordeaux.',
+    collection: 'Dans la collection SGBC', cartridgeCount: '05 cartouches',
+    alt: 'Cinq cartouches Pokémon sur une table : Vert et Cristal à gauche, Émeraude, Saphir et Rubis à droite.',
     description: 'Le clic d’une cartouche. Une manette que l’on connaît par cœur. SGBC met le matériel programmable au service d’une console pensée pour trois générations de classiques portables.',
     systems: 'Familles de cartouches prévues',
   },
